@@ -1,72 +1,58 @@
-const gunler = ["Pazartesi","Salı","Çarşamba","Perşembe","Cuma","Cumartesi","Pazar"];
-
-const saatler = [
-  "06:30–16:00","06:30–16:00","06:30–16:00","06:30–16:00",
-  "09:00–18:00",
-  "12:00–22:00",
-  "16:00–00:00","16:00–00:00","16:00–00:00",
-  "00:00–07:00","00:00–07:00",
-  "İZİN","İZİN","İZİN",
-  "DIŞ YAYIN","DIŞ YAYIN","DIŞ YAYIN"
-];
-
-const birimler = [
-  "Teknik Yönetmen",
-  "Ses Operatörü",
-  "Playout Operatörü",
-  "KJ Operatörü",
-  "Ingest Operatörü",
-  "Uplink"
-];
-
-// Personel listesi (senin verdiğin şekilde)
-const personeller = [ 
-// Teknik Yönetmen 
- { isim:"YUNUS EMRE YAYLA", birim:"Teknik Yönetmen", gece:true },
- { isim:"HASAN CAN SAĞLAM", birim:"Teknik Yönetmen", gece:true },
- { isim:"MEHMET BERKMAN", birim:"Teknik Yönetmen", gece:true },
- { isim:"EKREM FİDAN", birim:"Teknik Yönetmen", gece:true },
- { isim:"CAN ŞENTUNALI", birim:"Teknik Yönetmen", gece:true },
- { isim:"BARIŞ İNCE", birim:"Teknik Yönetmen", gece:true },
- // Ses Operatörü 
- { isim:"ZAFER AKAR", birim:"Ses Operatörü", gece:false },
- { isim:"ENES KALE", birim:"Ses Operatörü", gece:false },
- { isim:"ANIL RİŞVAN", birim:"Ses Operatörü", gece:false },
- { isim:"ERSAN TİLBE", birim:"Ses Operatörü", gece:false },
- { isim:"ULVİ MUTLUBAŞ", birim:"Ses Operatörü", gece:false },
- { isim:"OSMAN DİNÇER", birim:"Ses Operatörü", gece:false },
- { isim:"DOĞUŞ MALGIL", birim:"Ses Operatörü", gece:false },
- { isim:"ERDOĞAN KÜÇÜKKAYA", birim:"Ses Operatörü", gece:false },
- // Playout
- { isim:"SENA MİNARECİ", birim:"Playout Operatörü", gece:true },
- { isim:"MEHMET TUNÇ", birim:"Playout Operatörü", gece:true },
- { isim:"KADİR ÇAÇAN", birim:"Playout Operatörü", gece:true },
- { isim:"ÖMER FARUK ÖZBEY", birim:"Playout Operatörü", gece:true },
- { isim:"İBRAHİM SERİNSÖZ", birim:"Playout Operatörü", gece:true },
- { isim:"YUSUF ALPKILIÇ", birim:"Playout Operatörü", gece:true },
- { isim:"MUSTAFA ERCÜMENT KILIÇ", birim:"Playout Operatörü", gece:true },
- { isim:"NEHİR KAYGUSUZ", birim:"Playout Operatörü", gece:true },
- // KJ
- { isim:"YUSUF İSLAM TORUN", birim:"KJ Operatörü", gece:false },
- { isim:"OĞUZHAN YALAZAN", birim:"KJ Operatörü", gece:false },
- { isim:"UĞUR AKBABA", birim:"KJ Operatörü", gece:false },
- { isim:"SENA BAYDAR", birim:"KJ Operatörü", gece:false },
- { isim:"CEMREHAN SUBAŞI", birim:"KJ Operatörü", gece:false },
- { isim:"YEŞİM KİREÇ", birim:"KJ Operatörü", gece:false },
- { isim:"PINAR ÖZENÇ", birim:"KJ Operatörü", gece:true },
- // Ingest
- { isim:"RAMAZAN KOÇAK", birim:"Ingest Operatörü", gece:true },
- { isim:"DEMET CENGİZ", birim:"Ingest Operatörü", gece:true },
- { isim:"ERCAN PALABIYIK", birim:"Ingest Operatörü", gece:true },
- // Uplink
- { isim:"Selin", birim:"Uplink", gece:true },
- { isim:"Derya", birim:"Uplink", gece:true }
- ];
-
-function uygunPersonel(birim, saat) {
-  if (saat === "İZİN" || saat === "DIŞ YAYIN") return saat;
+function uygunPersonelTeknikYonetmen(saat, gunIndex) {
   const geceMi = saat === "00:00–07:00";
-  const uygunlar = personeller.filter(p => p.birim === birim && (!geceMi || p.gece));
+  const sabahMi = saat === "06:30–16:00";
+  const aksamMi = saat === "16:00–00:00";
+
+  let uygunlar = personeller.filter(p => p.birim === "Teknik Yönetmen" && (!geceMi || p.gece));
+
+  if (uygunlar.length === 0) return "İZİN";
+
+  // Pazartesi–Cuma sabah vardiyası → 2 kişi
+  if (sabahMi && gunIndex < 5) {
+    if (uygunlar.length < 2) return uygunlar.map(u => u.isim).join(", ");
+    const secilenler = [];
+    while (secilenler.length < 2) {
+      const secilen = uygunlar[Math.floor(Math.random() * uygunlar.length)];
+      if (!secilenler.includes(secilen.isim)) secilenler.push(secilen.isim);
+    }
+    return secilenler.join(", ");
+  }
+
+  // Akşam vardiyası → bazen tek, bazen 2 kişi
+  if (aksamMi) {
+    const kacKisi = Math.random() < 0.5 ? 1 : 2;
+    if (uygunlar.length < kacKisi) return uygunlar.map(u => u.isim).join(", ");
+    const secilenler = [];
+    while (secilenler.length < kacKisi) {
+      const secilen = uygunlar[Math.floor(Math.random() * uygunlar.length)];
+      if (!secilenler.includes(secilen.isim)) secilenler.push(secilen.isim);
+    }
+    return secilenler.join(", ");
+  }
+
+  // Gece vardiyası → tek kişi, maksimum 2 gece
+  if (geceMi) {
+    // Gece sayacı tutalım
+    if (!uygunPersonelTeknikYonetmen.geceSayaci) uygunPersonelTeknikYonetmen.geceSayaci = {};
+    uygunlar = uygunlar.filter(p => (uygunPersonelTeknikYonetmen.geceSayaci[p.isim] || 0) < 2);
+    if (uygunlar.length === 0) return "İZİN";
+    const secilen = uygunlar[Math.floor(Math.random() * uygunlar.length)];
+    uygunPersonelTeknikYonetmen.geceSayaci[secilen.isim] = (uygunPersonelTeknikYonetmen.geceSayaci[secilen.isim] || 0) + 1;
+    return secilen.isim;
+  }
+
+  // Diğer saatlerde → tek kişi
+  const secilen = uygunlar[Math.floor(Math.random() * uygunlar.length)];
+  return secilen.isim;
+}
+
+function uygunPersonel(birim, saat, gunIndex) {
+  if (saat === "İZİN" || saat === "DIŞ YAYIN") return saat;
+  if (birim === "Teknik Yönetmen") {
+    return uygunPersonelTeknikYonetmen(saat, gunIndex);
+  }
+  const geceMi = saat === "00:00–07:00";
+  let uygunlar = personeller.filter(p => p.birim === birim && (!geceMi || p.gece));
   if (uygunlar.length === 0) return "İZİN";
   const secilen = uygunlar[Math.floor(Math.random() * uygunlar.length)];
   return secilen.isim;
@@ -87,28 +73,19 @@ function tabloyuOlustur() {
     table.appendChild(thead);
 
     const tbody = document.createElement("tbody");
-    saatler.forEach(saat => {
+    saatler.forEach((saat, sIndex) => {
       const tr = document.createElement("tr");
       const tdSaat = document.createElement("td");
       tdSaat.textContent = saat;
       tr.appendChild(tdSaat);
 
-      gunler.forEach(gun => {
+      gunler.forEach((gun, gIndex) => {
         const td = document.createElement("td");
         td.classList.add("editable");
-        td.textContent = uygunPersonel(birim, saat);
+        td.textContent = uygunPersonel(birim, saat, gIndex);
         td.addEventListener("click", () => elleDegistir(td));
         tr.appendChild(td);
       });
-
-      // Renk sınıfları
-      if (saat.startsWith("06:30")) tr.classList.add("saat-0630");
-      else if (saat.startsWith("09:00")) tr.classList.add("saat-0900");
-      else if (saat.startsWith("12:00")) tr.classList.add("saat-1200");
-      else if (saat.startsWith("16:00")) tr.classList.add("saat-1600");
-      else if (saat.startsWith("00:00")) tr.classList.add("saat-0000");
-      else if (saat === "İZİN") tr.classList.add("izin");
-      else if (saat === "DIŞ YAYIN") tr.classList.add("disyayin");
 
       tbody.appendChild(tr);
     });
@@ -117,20 +94,3 @@ function tabloyuOlustur() {
     container.appendChild(table);
   });
 }
-
-function elleDegistir(td) {
-  const yeni = prompt("Yeni isim girin:", td.textContent);
-  if (yeni) td.textContent = yeni;
-}
-
-document.querySelector("#excelBtn").addEventListener("click", () => {
-  const tables = document.querySelectorAll("#tablolar table");
-  const wb = XLSX.utils.book_new();
-  tables.forEach((table, i) => {
-    const ws = XLSX.utils.table_to_sheet(table);
-    XLSX.utils.book_append_sheet(wb, ws, birimler[i]);
-  });
-  XLSX.writeFile(wb, "vardiya-listesi.xlsx");
-});
-
-tabloyuOlustur();
