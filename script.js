@@ -1,6 +1,6 @@
 /**
- * PRO-Vardiya v16.1 | v14.5 Core
- * Haftalık 6 gün ve üzeri çalışma uyarısı eklendi.
+ * PRO-Vardiya v16.3 | v14.5 Core
+ * Personel Mesai Günü ve Gece Kontrolü Sabitlendi.
  */
 
 const birimSiralamasi = [
@@ -60,8 +60,8 @@ let personeller = [
     { id: 47, isim: "BÜKRE YAVUZ", birim: "360TV MCR OPERATÖRÜ" }
 ];
 
-const ekPersoneller = JSON.parse(localStorage.getItem("ekPersoneller")) || [];
-personeller = [...personeller, ...ekPersoneller];
+let ekPersoneller = JSON.parse(localStorage.getItem("ekPersoneller")) || [];
+let tumPersoneller = [...personeller, ...ekPersoneller];
 
 let mevcutPazartesi = getMonday(new Date());
 let haftalikProgram = {};
@@ -72,6 +72,7 @@ function getMonday(d) {
     return new Date(d.setDate(diff));
 }
 
+// Admin İşlemleri
 function toggleTheme() { document.body.classList.toggle("dark-mode"); }
 function toggleAdminPanel() {
     document.getElementById("adminPanel").classList.toggle("hidden");
@@ -83,15 +84,14 @@ function personelEkle() {
     const isim = document.getElementById("yeniIsim").value.toUpperCase();
     const birim = document.getElementById("birimSec").value;
     if(!isim) return;
-    const yeni = { id: Date.now(), isim, birim };
-    ekPersoneller.push(yeni); personeller.push(yeni);
+    ekPersoneller.push({ id: Date.now(), isim, birim });
     localStorage.setItem("ekPersoneller", JSON.stringify(ekPersoneller));
-    checklistOlustur(); tabloyuOlustur();
+    location.reload(); 
 }
 
 function checklistOlustur() {
     const container = document.getElementById("personelChecklist");
-    const sirali = [...personeller].sort((a, b) => birimSiralamasi.indexOf(a.birim) - birimSiralamasi.indexOf(b.birim));
+    const sirali = [...tumPersoneller].sort((a, b) => birimSiralamasi.indexOf(a.birim) - birimSiralamasi.indexOf(b.birim));
     container.innerHTML = sirali.map(p => `
         <div class="check-item" onclick="toggleCheckbox('${p.id}')">
             <input type="checkbox" id="check_${p.id}" onchange="tabloyuOlustur()">
@@ -102,20 +102,21 @@ function checklistOlustur() {
 
 function toggleCheckbox(id) {
     const cb = document.getElementById('check_' + id);
-    cb.checked = !cb.checked; tabloyuOlustur();
+    cb.checked = !cb.checked;
+    tabloyuOlustur();
 }
 
 function tabloyuOlustur() {
     document.getElementById("tarihAraligi").innerText = `${mevcutPazartesi.toLocaleDateString('tr-TR')} Haftası`;
     haftalikProgram = {};
-    personeller.forEach(p => {
+    tumPersoneller.forEach(p => {
         const isSelected = document.getElementById(`check_${p.id}`)?.checked;
         haftalikProgram[p.isim] = isSelected ? Array(7).fill("İZİN") : Array(7).fill(null);
     });
 
+    // v14.5 Özel Kurallar
     if(haftalikProgram["BARIŞ İNCE"] && !haftalikProgram["BARIŞ İNCE"].includes("İZİN")) {
-        haftalikProgram["BARIŞ İNCE"][0] = "00:00–07:00";
-        haftalikProgram["BARIŞ İNCE"][1] = "00:00–07:00";
+        haftalikProgram["BARIŞ İNCE"][0] = "00:00–07:00"; haftalikProgram["BARIŞ İNCE"][1] = "00:00–07:00";
     }
     if(haftalikProgram["EKREM FİDAN"] && !haftalikProgram["EKREM FİDAN"].includes("İZİN")) {
         for(let i=2; i<7; i++) haftalikProgram["EKREM FİDAN"][i] = "00:00–07:00";
@@ -139,7 +140,7 @@ function renderTable() {
     let b = "";
     saatler.forEach(s => {
         b += `<tr><td>${s}</td>`;
-        for(let i=0; i<7; i++) { b += `<td>${hucreDoldur(i, s)}</td>`; }
+        for(let i=0; i<7; i++) b += `<td>${hucreDoldur(i, s)}</td>`;
         b += `</tr>`;
     });
     document.getElementById("tableBody").innerHTML = b;
@@ -171,8 +172,8 @@ function hucreDoldur(gun, saat) {
                 kap = (!isHS && saat === "09:00–18:00") ? 1 : 0;
             }
 
-            let adaylar = personeller.filter(p => p.birim === birim && !haftalikProgram[p.isim][gun]);
-            let suan = personeller.filter(p => p.birim === birim && haftalikProgram[p.isim][gun] === saat).length;
+            let adaylar = tumPersoneller.filter(p => p.birim === birim && !haftalikProgram[p.isim][gun]);
+            let suan = tumPersoneller.filter(p => p.birim === birim && haftalikProgram[p.isim][gun] === saat).length;
             for(let k=0; k < (kap-suan); k++) {
                 if(adaylar.length > 0) {
                     let p = adaylar.splice(Math.floor(Math.random() * adaylar.length), 1)[0];
@@ -182,13 +183,13 @@ function hucreDoldur(gun, saat) {
         });
     }
 
-    let finalListe = personeller.filter(p => haftalikProgram[p.isim][gun] === saat);
-    finalListe.sort((a, b) => birimSiralamasi.indexOf(a.birim) - birimSiralamasi.indexOf(b.birim));
-    return finalListe.map(p => `<div class="birim-card"><span class="birim-tag">${p.birim}</span><span class="p-isim">${p.isim}</span></div>`).join('');
+    let final = tumPersoneller.filter(p => haftalikProgram[p.isim][gun] === saat);
+    final.sort((a, b) => birimSiralamasi.indexOf(a.birim) - birimSiralamasi.indexOf(b.birim));
+    return final.map(p => `<div class="birim-card"><span class="birim-tag">${p.birim}</span><span class="p-isim">${p.isim}</span></div>`).join('');
 }
 
 function applyIngestRota() {
-    const ekip = personeller.filter(p => p.birim === "INGEST OPERATÖRÜ");
+    const ekip = tumPersoneller.filter(p => p.birim === "INGEST OPERATÖRÜ");
     const rota = ["06:30–16:00", "06:30–16:00", "16:00–00:00", "16:00–00:00", "İZİN", "İZİN"];
     ekip.forEach((p, idx) => {
         for(let i=0; i<7; i++) {
@@ -200,7 +201,7 @@ function applyIngestRota() {
 }
 
 function applyMCRRota(birim) {
-    const ekip = personeller.filter(p => p.birim === birim);
+    const ekip = tumPersoneller.filter(p => p.birim === birim);
     const rota = ["06:30–16:00", "06:30–16:00", "16:00–00:00", "16:00–00:00", "00:00–07:00", "00:00–07:00", "İZİN", "İZİN"];
     ekip.forEach((p, idx) => {
         for(let i=0; i<7; i++) {
@@ -211,22 +212,23 @@ function applyMCRRota(birim) {
     });
 }
 
-// GÜNCELLENEN ANALİZ FONKSİYONU
+// ANALİZ VE GECE KONTROLÜ
 function ozetGuncelle() {
-    let h = `<table class="stats-table"><thead><tr><th>Personel</th><th>Mesai Günü</th><th>Gece Vardiyası</th></tr></thead><tbody>`;
-    [...personeller].sort((a,b) => birimSiralamasi.indexOf(a.birim) - birimSiralamasi.indexOf(b.birim)).forEach(p => {
-        const mesaiSayisi = haftalikProgram[p.isim].filter(v => v && v !== "İZİN").length;
-        const geceSayisi = haftalikProgram[p.isim].filter(v => v === "00:00–07:00").length;
-        
-        // 6 Gün ve üzeri uyarısı
-        const mesaiStili = mesaiSayisi >= 6 ? 'class="uyari-mesai"' : '';
-        const uyariSimge = mesaiSayisi >= 6 ? '⚠️' : '';
+    let h = `<table class="stats-table"><thead><tr><th>Personel Adı</th><th>Birim</th><th>Haftalık Mesai</th><th>Gece Vardiyası</th></tr></thead><tbody>`;
+    [...tumPersoneller].sort((a,b) => birimSiralamasi.indexOf(a.birim) - birimSiralamasi.indexOf(b.birim)).forEach(p => {
+        const calisilanGunler = haftalikProgram[p.isim].filter(v => v && v !== "İZİN");
+        const gunSayisi = calisilanGunler.length;
+        const geceSayisi = calisilanGunler.filter(v => v === "00:00–07:00").length;
+
+        const uyariClass = gunSayisi >= 6 ? 'class="uyari-mesai"' : '';
+        const uyariSimge = gunSayisi >= 6 ? '⚠️' : '';
 
         h += `<tr>
-                <td><strong>${p.isim}</strong> <small>(${p.birim})</small></td>
-                <td><span ${mesaiStili}>${mesaiSayisi} Gün ${uyariSimge}</span></td>
-                <td>${geceSayisi} Gece</td>
-              </tr>`;
+            <td>${p.isim}</td>
+            <td><small>${p.birim}</small></td>
+            <td><span ${uyariClass}>${gunSayisi} Gün ${uyariSimge}</span></td>
+            <td>${geceSayisi > 0 ? '🌙 ' + geceSayisi : '0'}</td>
+        </tr>`;
     });
     document.getElementById("ozetTablo").innerHTML = h + "</tbody></table>";
 }
@@ -240,12 +242,12 @@ function whatsappMesajiOlustur() {
     gunler.forEach((g, i) => {
         m += `*${g.toUpperCase()}*\n`;
         saatler.forEach(s => {
-            let list = personeller.filter(p => haftalikProgram[p.isim][i] === s);
+            let list = tumPersoneller.filter(p => haftalikProgram[p.isim][i] === s);
             if(list.length > 0) m += `▫️ ${s}: ${list.map(x => x.isim).join(", ")}\n`;
         });
         m += `\n`;
     });
-    navigator.clipboard.writeText(m).then(() => alert("Kopyalandı!"));
+    navigator.clipboard.writeText(m).then(() => alert("WhatsApp mesajı kopyalandı!"));
 }
 
 window.onload = () => { checklistOlustur(); tabloyuOlustur(); };
