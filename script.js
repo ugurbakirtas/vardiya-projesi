@@ -1,5 +1,5 @@
 const gunler = ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"];
-const saatler = ["06:30–16:00", "09:00–18:00", "12:00–22:00", "16:00–00:00", "00:00–07:00", "İZİN", "DIŞ YAYIN"];
+const saatler = ["06:30–16:00", "09:00–18:00", "12:00–22:00", "16:00–00:00", "00:00–07:00", "DIŞ YAYIN"];
 const birimler = ["Teknik Yönetmen", "Ses Operatörü", "Playout Operatörü", "KJ Operatörü", "Ingest Operatörü", "Uplink"];
 
 const personeller = [
@@ -23,58 +23,116 @@ const personeller = [
   { isim: "Selin", birim: "Uplink", gece: true }
 ];
 
+let haftalikProgram = {}; 
 let geceSayaci = {};
 
-// Akıllı Atama Fonksiyonu
-function uygunPersonelGetir(birim, saat, gunIndex) {
-  const geceMi = saat === "00:00–07:00";
-  let liste = personeller.filter(p => p.birim === birim);
-  
-  if (geceMi) {
-    liste = liste.filter(p => p.gece && (geceSayaci[p.isim] || 0) < 2);
-    if (liste.length === 0) return "Atama Yok";
-    const secilen = liste[Math.floor(Math.random() * liste.length)];
-    geceSayaci[secilen.isim] = (geceSayaci[secilen.isim] || 0) + 1;
-    return secilen.isim;
+function programiSifirla() {
+  haftalikProgram = {};
+  geceSayaci = {};
+  personeller.forEach(p => {
+    const izinGunu = Math.floor(Math.random() * 7);
+    haftalikProgram[p.isim] = Array(7).fill(null);
+    haftalikProgram[p.isim][izinGunu] = "İZİN";
+  });
+}
+
+function uygunlukKontrol(personel, gunIdx, saat) {
+  const isim = personel.isim;
+  const program = haftalikProgram[isim];
+
+  if (program[gunIdx] !== null) return false;
+
+  if (gunIdx > 0 && saat === "06:30–16:00") {
+    const dunkuVardiya = program[gunIdx - 1];
+    if (dunkuVardiya === "16:00–00:00" || dunkuVardiya === "00:00–07:00") return false;
   }
 
-  // Rastgele Seçim
-  const secilen = liste[Math.floor(Math.random() * liste.length)];
-  return secilen ? secilen.isim : "-";
+  if (saat === "00:00–07:00") {
+    const gSayi = program.filter(v => v === "00:00–07:00").length;
+    if (gSayi >= 2 || !personel.gece) return false;
+  }
+
+  return true;
 }
 
 function tabloyuOlustur() {
+  programiSifirla();
   const container = document.getElementById("tablolar");
-  let html = `<table><thead><tr><th>Saat / Gün</th>`;
-  gunler.forEach(g => html += `<th>${g}</th>`);
-  html += `</tr></thead><tbody>`;
+  let html = `<table><thead><tr><th>Saat / Gün</th>${gunler.map(g => `<th>${g}</th>`).join('')}</tr></thead><tbody>`;
 
   saatler.forEach(saat => {
-    const sCls = saat.split('–')[0].replace(':', '');
+    const sCls = saat.split('–')[0].replace(':', '').replace('DIŞ YAYIN', 'disyayin');
     html += `<tr class="saat-${sCls}"><td><strong>${saat}</strong></td>`;
     
+    // YENİ KURAL: 12:00–22:00 ve DIŞ YAYIN otomatik atanmaz
+    const otomatikAtamaVarMi = (saat !== "12:00–22:00" && saat !== "DIŞ YAYIN");
+
     gunler.forEach((_, gIdx) => {
       let hucreContent = "";
       birimler.forEach(birim => {
-        const isim = uygunPersonelGetir(birim, saat, gIdx);
-        hucreContent += `<div class="birim-card">
-          <span class="birim-tag">${birim}</span>
-          <span class="p-isim">${isim}</span>
-        </div>`;
+        let isim = "-";
+        if (otomatikAtamaVarMi) {
+          let adaylar = personeller.filter(p => p.birim === birim && uygunlukKontrol(p, gIdx, saat));
+          if (adaylar.length > 0) {
+            const secilen = adaylar[Math.floor(Math.random() * adaylar.length)];
+            haftalikProgram[secilen.isim][gIdx] = saat;
+            isim = secilen.isim;
+          }
+        }
+        hucreContent += `<div class="birim-card"><span class="birim-tag">${birim}</span><span class="p-isim">${isim}</span></div>`;
       });
       html += `<td class="editable" contenteditable="true">${hucreContent}</td>`;
     });
     html += `</tr>`;
   });
 
-  html += `</tbody></table>`;
+  html += `<tr style="background:#eee"><td><strong>İZİNLİLER</strong></td>`;
+  gunler.forEach((_, gIdx) => {
+    const izinliler = personeller.filter(p => haftalikProgram[p.isim][gIdx] === "İZİN").map(p => p.isim).join('<br>');
+    html += `<td>${izinliler}</td>`;
+  });
+  html += `</tr></tbody></table>`;
+
   container.innerHTML = html;
+
+  document.querySelectorAll("td.editable").forEach(td => {
+    td.addEventListener("input", cakismaKontroluYap);
+  });
+  cakismaKontroluYap();
 }
 
-// Excel Fonksiyonu
+function cakismaKontroluYap() {
+  const tablo = document.querySelector("table");
+  for (let gIdx = 1; gIdx <= 7; gIdx++) {
+    const isimSayaci = {};
+    const satirlar = tablo.querySelectorAll("tbody tr");
+    satirlar.forEach(satir => {
+      const hucre = satir.cells[gIdx];
+      if(!hucre) return;
+      hucre.classList.remove("conflict");
+      const metinler = Array.from(hucre.querySelectorAll(".p-isim")).map(el => el.innerText.trim());
+      
+      metinler.forEach(m => {
+        if(m !== "-" && m !== "" && m !== "Atama Yok") {
+          isimSayaci[m] = (isimSayaci[m] || 0) + 1;
+        }
+      });
+    });
+
+    satirlar.forEach(satir => {
+      const hucre = satir.cells[gIdx];
+      if(!hucre) return;
+      const metinler = Array.from(hucre.querySelectorAll(".p-isim")).map(el => el.innerText.trim());
+      metinler.forEach(m => {
+        if(isimSayaci[m] > 1) hucre.classList.add("conflict");
+      });
+    });
+  }
+}
+
 document.getElementById("excelBtn").onclick = () => {
   const wb = XLSX.utils.table_to_book(document.querySelector("table"));
-  XLSX.writeFile(wb, "Haftalik_Vardiya.xlsx");
+  XLSX.writeFile(wb, "Teknik_Vardiya_Listesi.xlsx");
 };
 
 window.onload = tabloyuOlustur;
