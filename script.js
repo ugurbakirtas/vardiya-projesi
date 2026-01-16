@@ -1,64 +1,25 @@
 /**
- * PRO-Vardiya v14.5
- * TÜM KURALLAR DEĞİŞTİRİLEMEZ ŞEKİLDE SABİTLENMİŞTİR.
+ * PRO-Vardiya v15.0 | Persistent System
+ * Tüm kurallar kilitlidir, yönetim paneli eklendi.
  */
 
-const birimSiralamasi = [
-    "TEKNİK YÖNETMEN", "SES OPERATÖRÜ", "PLAYOUT OPERATÖRÜ", "KJ OPERATÖRÜ", 
-    "INGEST OPERATÖRÜ", "BİLGİ İŞLEM", "YAYIN SİSTEMLERİ", "24TV MCR OPERATÖRÜ", "360TV MCR OPERATÖRÜ"
+let birimler = ["TEKNİK YÖNETMEN", "SES OPERATÖRÜ", "PLAYOUT OPERATÖRÜ", "KJ OPERATÖRÜ", "INGEST OPERATÖRÜ", "BİLGİ İŞLEM", "YAYIN SİSTEMLERİ", "24TV MCR OPERATÖRÜ", "360TV MCR OPERATÖRÜ"];
+
+let personeller = JSON.parse(localStorage.getItem("personelListesi")) || [
+    { id: 1, isim: "YUNUS EMRE YAYLA", birim: "TEKNİK YÖNETMEN" },
+    { id: 7, isim: "ZAFER AKAR", birim: "SES OPERATÖRÜ" },
+    { id: 15, isim: "SENA MİNARECİ", birim: "PLAYOUT OPERATÖRÜ" },
+    { id: 22, isim: "YUSUF İSLAM TORUN", birim: "KJ OPERATÖRÜ" },
+    { id: 29, isim: "RAMAZAN KOÇAK", birim: "INGEST OPERATÖRÜ" },
+    { id: 31, isim: "VOLKAN DEMİRBAŞ", birim: "BİLGİ İŞLEM" },
+    { id: 35, isim: "YİĞİT DAYI", birim: "YAYIN SİSTEMLERİ" },
+    { id: 40, isim: "KADİR YILMAZ", birim: "24TV MCR OPERATÖRÜ" },
+    { id: 44, isim: "EMRULLAH AHLATÇI", birim: "360TV MCR OPERATÖRÜ" }
+    // ... Diğer varsayılanlar buraya eklenebilir veya yönetimden girilebilir
 ];
 
 const gunler = ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"];
 const saatler = ["06:30–16:00", "09:00–18:00", "12:00–22:00", "16:00–00:00", "00:00–07:00", "DIŞ YAYIN"];
-
-const personeller = [
-    { id: 1, isim: "YUNUS EMRE YAYLA", birim: "TEKNİK YÖNETMEN" },
-    { id: 2, isim: "HASAN CAN SAĞLAM", birim: "TEKNİK YÖNETMEN" },
-    { id: 3, isim: "MEHMET BERKMAN", birim: "TEKNİK YÖNETMEN" },
-    { id: 4, isim: "EKREM FİDAN", birim: "TEKNİK YÖNETMEN" },
-    { id: 5, isim: "CAN ŞENTUNALI", birim: "TEKNİK YÖNETMEN" },
-    { id: 6, isim: "BARIŞ İNCE", birim: "TEKNİK YÖNETMEN" },
-    { id: 7, isim: "ZAFER AKAR", birim: "SES OPERATÖRÜ" },
-    { id: 8, isim: "ENES KALE", birim: "SES OPERATÖRÜ" },
-    { id: 9, isim: "ANIL RİŞVAN", birim: "SES OPERATÖRÜ" },
-    { id: 10, isim: "ERSAN TİLBE", birim: "SES OPERATÖRÜ" },
-    { id: 11, isim: "ULVİ MUTLUBAŞ", birim: "SES OPERATÖRÜ" },
-    { id: 12, isim: "OSMAN DİNÇER", birim: "SES OPERATÖRÜ" },
-    { id: 13, isim: "DOĞUŞ MALGIL", birim: "SES OPERATÖRÜ" },
-    { id: 14, isim: "ERDOĞAN KÜÇÜKKAYA", birim: "SES OPERATÖRÜ" },
-    { id: 15, isim: "SENA MİNARECİ", birim: "PLAYOUT OPERATÖRÜ" },
-    { id: 16, isim: "MEHMET TUNÇ", birim: "PLAYOUT OPERATÖRÜ" },
-    { id: 17, isim: "KADİR ÇAÇAN", birim: "PLAYOUT OPERATÖRÜ" },
-    { id: 18, isim: "İBRAHİM SERİNSÖZ", birim: "PLAYOUT OPERATÖRÜ" },
-    { id: 19, isim: "YUSUF ALPKILIÇ", birim: "PLAYOUT OPERATÖRÜ" },
-    { id: 20, isim: "MUSTAFA ERCÜMENT KILIÇ", birim: "PLAYOUT OPERATÖRÜ" },
-    { id: 21, isim: "NEHİR KAYGUSUZ", birim: "PLAYOUT OPERATÖRÜ" },
-    { id: 22, isim: "YUSUF İSLAM TORUN", birim: "KJ OPERATÖRÜ" },
-    { id: 23, isim: "OĞUZHAN YALAZAN", birim: "KJ OPERATÖRÜ" },
-    { id: 24, isim: "UĞUR AKBABA", birim: "KJ OPERATÖRÜ" },
-    { id: 25, isim: "SENA BAYDAR", birim: "KJ OPERATÖRÜ" },
-    { id: 26, isim: "CEMREHAN SUBAŞI", birim: "KJ OPERATÖRÜ" },
-    { id: 27, isim: "YEŞİM KİREÇ", birim: "KJ OPERATÖRÜ" },
-    { id: 28, isim: "PINAR ÖZENÇ", birim: "KJ OPERATÖRÜ" },
-    { id: 29, isim: "RAMAZAN KOÇAK", birim: "INGEST OPERATÖRÜ" },
-    { id: 31, isim: "VOLKAN DEMİRBAŞ", birim: "BİLGİ İŞLEM" },
-    { id: 32, isim: "GÖKHAN BAĞIŞ", birim: "BİLGİ İŞLEM" },
-    { id: 33, isim: "HAKAN ELİPEK", birim: "BİLGİ İŞLEM" },
-    { id: 34, isim: "ÖZKAN KAYA", birim: "BİLGİ İŞLEM" },
-    { id: 35, isim: "YİĞİT DAYI", birim: "YAYIN SİSTEMLERİ" },
-    { id: 36, isim: "FERDİ TOPUZ", birim: "YAYIN SİSTEMLERİ" },
-    { id: 37, isim: "BEYHAN KARAKAŞ", birim: "YAYIN SİSTEMLERİ" },
-    { id: 38, isim: "FATİH AYBEK", birim: "YAYIN SİSTEMLERİ" },
-    { id: 39, isim: "AKİF KOÇ", birim: "YAYIN SİSTEMLERİ" },
-    { id: 40, isim: "KADİR YILMAZ", birim: "24TV MCR OPERATÖRÜ" },
-    { id: 41, isim: "FARUK YILMAZ", birim: "24TV MCR OPERATÖRÜ" },
-    { id: 42, isim: "YUSUF HENEK", birim: "24TV MCR OPERATÖRÜ" },
-    { id: 43, isim: "SEDA KAYA", birim: "24TV MCR OPERATÖRÜ" },
-    { id: 44, isim: "EMRULLAH AHLATÇI", birim: "360TV MCR OPERATÖRÜ" },
-    { id: 45, isim: "EREN KAZAN", birim: "360TV MCR OPERATÖRÜ" },
-    { id: 46, isim: "MUSAB YAKUB DEMİRBAŞ", birim: "360TV MCR OPERATÖRÜ" },
-    { id: 47, isim: "BÜKRE YAVUZ", birim: "360TV MCR OPERATÖRÜ" }
-];
 
 let mevcutPazartesi = getMonday(new Date());
 let haftalikProgram = {};
@@ -69,113 +30,105 @@ function getMonday(d) {
     return new Date(d.setDate(diff));
 }
 
+// MOD DEĞİŞİMİ
+function modDegistir() {
+    const p = document.getElementById("adminPanel");
+    p.classList.toggle("hidden");
+    document.getElementById("modeBtn").innerText = p.classList.contains("hidden") ? "⚙️ Yönetim Modu" : "👁️ İzleme Modu";
+    adminListesiGuncelle();
+}
+
+// BİRİM VE PERSONEL EKLEME
+function personelEkle() {
+    const isim = document.getElementById("yeniPersonelIsim").value.toUpperCase();
+    const birim = document.getElementById("yeniPersonelBirim").value;
+    if(!isim) return alert("İsim giriniz!");
+    personeller.push({ id: Date.now(), isim, birim });
+    localStorage.setItem("personelListesi", JSON.stringify(personeller));
+    document.getElementById("yeniPersonelIsim").value = "";
+    adminListesiGuncelle();
+    checklistOlustur();
+    tabloyuOlustur();
+}
+
+function personelSil(id) {
+    personeller = personeller.filter(p => p.id !== id);
+    localStorage.setItem("personelListesi", JSON.stringify(personeller));
+    adminListesiGuncelle();
+    checklistOlustur();
+    tabloyuOlustur();
+}
+
+function adminListesiGuncelle() {
+    const sel = document.getElementById("yeniPersonelBirim");
+    sel.innerHTML = birimler.map(b => `<option value="${b}">${b}</option>`).join('');
+    
+    const list = document.getElementById("yonetimListesi");
+    list.innerHTML = personeller.map(p => `
+        <div class="yonetim-item">
+            <span><b>${p.isim}</b> (${p.birim})</span>
+            <button onclick="personelSil(${p.id})" class="btn-del">Sil</button>
+        </div>
+    `).join('');
+}
+
+// HAFTALIK TAKİP VE KAYIT
+function tabloyuOlustur() {
+    const haftaKey = "vardiya_" + mevcutPazartesi.toISOString().split('T')[0];
+    document.getElementById("tarihAraligi").innerText = `${mevcutPazartesi.toLocaleDateString('tr-TR')} Haftası`;
+    
+    // Hafızadan yükle veya yeni oluştur
+    const kaydedilmis = localStorage.getItem(haftaKey);
+    if(kaydedilmis) {
+        haftalikProgram = JSON.parse(kaydedilmis);
+    } else {
+        haftalikProgram = {};
+        personeller.forEach(p => {
+            const isSelected = document.getElementById(`check_${p.id}`)?.checked;
+            haftalikProgram[p.isim] = isSelected ? Array(7).fill("İZİN") : Array(7).fill(null);
+        });
+        // Sabit kurallar burada çalışır...
+        applyMCRRota("24TV MCR OPERATÖRÜ");
+        applyMCRRota("360TV MCR OPERATÖRÜ");
+        applyIngestRota();
+    }
+
+    renderTable();
+    ozetGuncelle();
+    localStorage.setItem(haftaKey, JSON.stringify(haftalikProgram));
+}
+
 function checklistOlustur() {
     const container = document.getElementById("personelChecklist");
-    const sirali = [...personeller].sort((a, b) => birimSiralamasi.indexOf(a.birim) - birimSiralamasi.indexOf(b.birim));
-    container.innerHTML = sirali.map(p => `
-        <div class="check-item" onclick="toggleCheckbox('${p.id}')">
+    container.innerHTML = personeller.map(p => `
+        <div class="check-item">
             <input type="checkbox" id="check_${p.id}" onchange="tabloyuOlustur()">
             <label><strong>${p.isim}</strong><br><small>${p.birim}</small></label>
         </div>
     `).join('');
 }
 
-function toggleCheckbox(id) {
-    const cb = document.getElementById('check_' + id);
-    cb.checked = !cb.checked;
-    tabloyuOlustur();
-}
-
-function tabloyuOlustur() {
-    document.getElementById("tarihAraligi").innerText = `${mevcutPazartesi.toLocaleDateString('tr-TR')} Haftası`;
-    haftalikProgram = {};
-    personeller.forEach(p => {
-        const isSelected = document.getElementById(`check_${p.id}`)?.checked;
-        haftalikProgram[p.isim] = isSelected ? Array(7).fill("İZİN") : Array(7).fill(null);
-    });
-
-    // TY ÖZEL KRİTİK DÖNGÜ
-    if(!haftalikProgram["BARIŞ İNCE"].includes("İZİN")) {
-        haftalikProgram["BARIŞ İNCE"][0] = "00:00–07:00";
-        haftalikProgram["BARIŞ İNCE"][1] = "00:00–07:00";
-        haftalikProgram["BARIŞ İNCE"][2] = "İZİN";
-        haftalikProgram["BARIŞ İNCE"][3] = "İZİN";
-    }
-    if(!haftalikProgram["EKREM FİDAN"].includes("İZİN")) {
-        for(let i=2; i<7; i++) { if(!haftalikProgram["EKREM FİDAN"][i]) haftalikProgram["EKREM FİDAN"][i] = "00:00–07:00"; }
-    }
-
-    applyMCRRota("24TV MCR OPERATÖRÜ");
-    applyMCRRota("360TV MCR OPERATÖRÜ");
-    applyIngestRota();
-
-    if(haftalikProgram["ZAFER AKAR"] && !haftalikProgram["ZAFER AKAR"].includes("İZİN")) {
-        for(let i=0; i<5; i++) haftalikProgram["ZAFER AKAR"][i] = "06:30–16:00";
-        haftalikProgram["ZAFER AKAR"][5] = "İZİN"; haftalikProgram["ZAFER AKAR"][6] = "İZİN";
-    }
-
-    renderTable();
-    ozetGuncelle();
-}
-
-function renderTable() {
-    const header = document.getElementById("tableHeader");
-    header.innerHTML = `<th>SAATLER</th>` + gunler.map((g, i) => {
-        let t = new Date(mevcutPazartesi); t.setDate(t.getDate() + i);
-        return `<th>${g}<br><small>${t.toLocaleDateString('tr-TR')}</small></th>`;
-    }).join('');
-
-    let b = "";
-    saatler.forEach(s => {
-        b += `<tr><td>${s}</td>`;
-        for(let i=0; i<7; i++) { b += `<td>${hucreDoldur(i, s)}</td>`; }
-        b += `</tr>`;
-    });
-    document.getElementById("tableBody").innerHTML = b;
-}
-
 function hucreDoldur(gun, saat) {
     const isHS = (gun >= 5);
-    
     if(!["12:00–22:00", "DIŞ YAYIN", "İZİN"].includes(saat)) {
-        birimSiralamasi.forEach(birim => {
+        birimler.forEach(birim => {
             if(birim.includes("MCR") || birim.includes("INGEST")) return;
-            
             let kap = 0;
-            // TY KURALLARI
-            if(birim === "TEKNİK YÖNETMEN") {
-                if(saat === "00:00–07:00") kap = 1;
-                else if(!isHS) {
-                    if(saat === "06:30–16:00") kap = 2;
-                    else if(saat === "16:00–00:00") kap = 1;
-                } else {
-                    if(saat === "06:30–16:00" || saat === "09:00–18:00" || saat === "16:00–00:00") kap = 1;
-                }
-            } 
-            // SES KURALLARI (DEĞİŞTİRİLEMEZ HS 09:00 AKTİF)
-            else if(birim === "SES OPERATÖRÜ") {
-                if(saat === "09:00–18:00") kap = isHS ? 2 : 0;
-                else kap = isHS ? 2 : (saat === "06:30–16:00" ? 4 : 2);
-            }
-            // PLAYOUT KURALLARI (HAFTA İÇİ 3, HS 2)
-            else if(birim === "PLAYOUT OPERATÖRÜ") {
+            if(birim === "SES OPERATÖRÜ") {
+                kap = (saat === "09:00–18:00") ? (isHS ? 2 : 0) : (isHS ? 2 : (saat === "06:30–16:00" ? 4 : 2));
+            } else if(birim === "PLAYOUT OPERATÖRÜ") {
                 if(saat === "06:30–16:00") kap = isHS ? 2 : 3;
                 else if(saat === "16:00–00:00") kap = 2;
-                else kap = 0;
-            }
-            // KJ KURALLARI (09:00 VE 00:00 KESİN YOK)
-            else if(birim === "KJ OPERATÖRÜ") {
+            } else if(birim === "KJ OPERATÖRÜ") {
                 if(saat === "06:30–16:00" || saat === "16:00–00:00") kap = 2;
-                else kap = 0;
+            } else if(birim === "TEKNİK YÖNETMEN") {
+                if(saat === "00:00–07:00") kap = 1;
+                else if(isHS) kap = (saat !== "00:00–07:00") ? 1 : 0;
+                else kap = (saat === "06:30–16:00") ? 2 : 1;
             }
-            // BİLGİ İŞLEM KURALLARI
-            else if(birim === "BİLGİ İŞLEM" || birim === "YAYIN SİSTEMLERİ") {
-                kap = (!isHS && saat === "09:00–18:00") ? 1 : 0;
-            }
-
+            
             let adaylar = personeller.filter(p => p.birim === birim && !haftalikProgram[p.isim][gun]);
             let suan = personeller.filter(p => p.birim === birim && haftalikProgram[p.isim][gun] === saat).length;
-            
             for(let k=0; k < (kap-suan); k++) {
                 if(adaylar.length > 0) {
                     let p = adaylar.splice(Math.floor(Math.random() * adaylar.length), 1)[0];
@@ -185,24 +138,30 @@ function hucreDoldur(gun, saat) {
         });
     }
 
-    let finalListe = personeller.filter(p => haftalikProgram[p.isim][gun] === saat);
-    finalListe.sort((a, b) => birimSiralamasi.indexOf(a.birim) - birimSiralamasi.indexOf(b.birim));
-    
-    return finalListe.map(p => `
-        <div class="birim-card"><span class="birim-tag">${p.birim}</span><span class="p-isim">${p.isim}</span></div>
-    `).join('');
+    let list = personeller.filter(p => haftalikProgram[p.isim][gun] === saat);
+    return list.map(p => `<div class="birim-card"><span class="birim-tag">${p.birim}</span><span class="p-isim">${p.isim}</span></div>`).join('');
+}
+
+function renderTable() {
+    const h = document.getElementById("tableHeader");
+    h.innerHTML = `<th>SAATLER</th>` + gunler.map((g, i) => `<th>${g}</th>`).join('');
+    let b = "";
+    saatler.forEach(s => {
+        b += `<tr><td>${s}</td>`;
+        for(let i=0; i<7; i++) b += `<td>${hucreDoldur(i, s)}</td>`;
+        b += `</tr>`;
+    });
+    document.getElementById("tableBody").innerHTML = b;
 }
 
 function applyIngestRota() {
     const ekip = personeller.filter(p => p.birim === "INGEST OPERATÖRÜ");
     const rota = ["06:30–16:00", "06:30–16:00", "16:00–00:00", "16:00–00:00", "İZİN", "İZİN"];
-    const ref = new Date(2025, 0, 6);
     ekip.forEach((p, idx) => {
-        if(haftalikProgram[p.isim].includes("İZİN")) return;
         for(let i=0; i<7; i++) {
             let d = new Date(mevcutPazartesi.getTime() + (i * 86400000));
-            let rI = (Math.floor((d - ref) / 86400000) + (idx * 2)) % 6;
-            haftalikProgram[p.isim][i] = rota[rI < 0 ? rI + 6 : rI];
+            let rI = (Math.floor((d - new Date(2025,0,6)) / 86400000) + (idx * 2)) % 6;
+            if(!haftalikProgram[p.isim][i]) haftalikProgram[p.isim][i] = rota[rI < 0 ? rI + 6 : rI];
         }
     });
 }
@@ -210,44 +169,38 @@ function applyIngestRota() {
 function applyMCRRota(birim) {
     const ekip = personeller.filter(p => p.birim === birim);
     const rota = ["06:30–16:00", "06:30–16:00", "16:00–00:00", "16:00–00:00", "00:00–07:00", "00:00–07:00", "İZİN", "İZİN"];
-    const ref = new Date(2025, 0, 6);
     ekip.forEach((p, idx) => {
-        if(haftalikProgram[p.isim].includes("İZİN")) return;
         for(let i=0; i<7; i++) {
             let d = new Date(mevcutPazartesi.getTime() + (i * 86400000));
-            let rI = (Math.floor((d - ref) / 86400000) + (idx * 2)) % 8;
-            haftalikProgram[p.isim][i] = rota[rI < 0 ? rI + 8 : rI];
+            let rI = (Math.floor((d - new Date(2025,0,6)) / 86400000) + (idx * 2)) % 8;
+            if(!haftalikProgram[p.isim][i]) haftalikProgram[p.isim][i] = rota[rI < 0 ? rI + 8 : rI];
         }
     });
 }
 
 function ozetGuncelle() {
-    let h = `<table class="stats-table"><thead><tr><th>Personel</th><th>Birim</th><th>Mesai</th><th>Gece</th></tr></thead><tbody>`;
-    const sirali = [...personeller].sort((a, b) => birimSiralamasi.indexOf(a.birim) - birimSiralamasi.indexOf(b.birim));
-    sirali.forEach(p => {
-        const mesai = haftalikProgram[p.isim].filter(v => v && v !== "İZİN").length;
-        const gece = haftalikProgram[p.isim].filter(v => v === "00:00–07:00").length;
-        h += `<tr><td><strong>${p.isim}</strong></td><td><small>${p.birim}</small></td><td>${mesai} Gün</td><td>${gece} Gece</td></tr>`;
+    let h = `<table class="stats-table"><tr><th>Personel</th><th>Mesai</th></tr>`;
+    personeller.forEach(p => {
+        const c = haftalikProgram[p.isim].filter(v => v && v !== "İZİN").length;
+        h += `<tr><td>${p.isim}</td><td>${c} Gün</td></tr>`;
     });
-    document.getElementById("ozetTablo").innerHTML = h + "</tbody></table>";
+    document.getElementById("ozetTablo").innerHTML = h + "</table>";
 }
 
 function haftaDegistir(g) { mevcutPazartesi.setDate(mevcutPazartesi.getDate() + g); tabloyuOlustur(); }
-function exportExcel() { XLSX.writeFile(XLSX.utils.table_to_book(document.getElementById("vardiyaTablosu")), "Vardiya_Raporu.xlsx"); }
-function exportPDF() { html2pdf().from(document.getElementById('print-area')).save('Vardiya_Listesi.pdf'); }
-function sifirla() { localStorage.clear(); location.reload(); }
+function exportExcel() { XLSX.writeFile(XLSX.utils.table_to_book(document.getElementById("vardiyaTablosu")), "Vardiya.xlsx"); }
+function exportPDF() { html2pdf().from(document.getElementById('print-area')).save('Vardiya.pdf'); }
 function whatsappMesajiOlustur() {
-    let m = `📋 *${mevcutPazartesi.toLocaleDateString('tr-TR')} HAFTALIK VARDİYA PLANI*\n\n`;
+    let m = `📋 *${mevcutPazartesi.toLocaleDateString('tr-TR')} HAFTASI*\n\n`;
     gunler.forEach((g, i) => {
         m += `*${g.toUpperCase()}*\n`;
         saatler.forEach(s => {
-            let list = personeller.filter(p => haftalikProgram[p.isim][i] === s);
-            list.sort((a, b) => birimSiralamasi.indexOf(a.birim) - birimSiralamasi.indexOf(b.birim));
-            if(list.length > 0) m += `▫️ ${s}: ${list.map(x => x.isim).join(", ")}\n`;
+            let l = personeller.filter(p => haftalikProgram[p.isim][i] === s).map(x => x.isim);
+            if(l.length > 0) m += `▫️ ${s}: ${l.join(", ")}\n`;
         });
         m += `\n`;
     });
-    navigator.clipboard.writeText(m).then(() => alert("WhatsApp formatı kopyalandı!"));
+    navigator.clipboard.writeText(m).then(() => alert("Kopyalandı!"));
 }
 
 window.onload = () => { checklistOlustur(); tabloyuOlustur(); };

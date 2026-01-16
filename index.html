@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PRO-Vardiya v14.5 | Kural Kilitli</title>
+  <title>PRO-Vardiya v15.0 | Yönetim Paneli</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -12,23 +12,37 @@
   <div class="app-wrapper">
     <header class="no-print">
       <div class="logo-area">
-        <h1>TEKNİK VARDİYA <span>v14.5</span></h1>
+        <h1>TEKNİK VARDİYA <span>v15.0</span></h1>
         <p id="tarihAraligi">Yükleniyor...</p>
       </div>
       <div class="main-actions">
         <button onclick="haftaDegistir(-7)" class="btn-nav">« Geri</button>
-        <button onclick="tabloyuOlustur()" class="btn-primary main-btn pulse">OTOMATİK PLANLA</button>
+        <button onclick="tabloyuOlustur()" class="btn-primary main-btn">OTOMATİK PLANLA</button>
         <button onclick="haftaDegistir(7)" class="btn-nav">İleri »</button>
+      </div>
+      <div class="mode-actions">
+        <button onclick="modDegistir()" id="modeBtn" class="btn-mode">⚙️ Yönetim Modu</button>
       </div>
       <div class="export-actions">
         <button onclick="whatsappMesajiOlustur()" class="btn-wa">WhatsApp</button>
         <button onclick="exportExcel()" class="btn-success">Excel</button>
         <button onclick="exportPDF()" class="btn-danger">PDF</button>
-        <button onclick="sifirla()" class="btn-warning">Sıfırla</button>
       </div>
     </header>
 
-    <section class="admin-panel no-print">
+    <section id="adminPanel" class="admin-panel no-print hidden">
+      <div class="panel-box">
+        <h3>Birim ve Personel Yönetimi</h3>
+        <div class="admin-inputs">
+          <input type="text" id="yeniPersonelIsim" placeholder="Personel Adı Soyadı">
+          <select id="yeniPersonelBirim"></select>
+          <button onclick="personelEkle()" class="btn-success">Ekle</button>
+        </div>
+        <div id="yonetimListesi" class="yonetim-list"></div>
+      </div>
+    </section>
+
+    <section id="izinPanel" class="admin-panel no-print">
       <h3 class="panel-title">Haftalık İzinli Personel Seçimi</h3>
       <div id="personelChecklist" class="checklist-grid"></div>
     </section>
@@ -40,11 +54,7 @@
           <tbody id="tableBody"></tbody>
         </table>
       </div>
-      
-      <div class="stats-container">
-        <h2 class="stats-title">Personel Çalışma Analizi (Haftalık)</h2>
-        <div id="ozetTablo"></div>
-      </div>
+      <div id="ozetTablo"></div>
     </main>
   </div>
   <script src="script.js"></script>
