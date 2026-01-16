@@ -43,7 +43,7 @@ const personeller = [
     { isim: "Selin", birim: "Uplink" },
     { isim: "VOLKAN DEMİRBAŞ", birim: "24TV-360TV BİLGİ İŞLEM" },
     { isim: "GÖKHAN BAĞIŞ", birim: "24TV-360TV BİLGİ İŞLEM" },
-    { isim: "HAKAN ELİPEK", birim: "24TV-360TV BİLGİ İŞLEM" },
+    { isim: "HAKAN ELİPEK", birim: "24TV-360TV BİLGİ İşLEM" },
     { isim: "ÖZKAN KAYA", birim: "24TV-360TV BİLGİ İŞLEM" },
     { isim: "YİĞİT DAYI", birim: "24TV-360TV YAYIN SİSTEMLERİ" },
     { isim: "FERDİ TOPUZ", birim: "24TV-360TV YAYIN SİSTEMLERİ" },
@@ -85,29 +85,33 @@ function tabloyuOlustur() {
         haftalikProgram[p.isim] = isSelected ? Array(7).fill("İZİN") : Array(7).fill(null);
     });
 
-    // 1. MCR (8 Gün Rotasyon)
+    // --- ROTASYONEL BİRİMLER ---
+    
+    // MCR (2Sabah, 2Akşam, 2Gece, 2İzin)
     applyMCRRota("24TV MCR OPERATÖRÜ");
     applyMCRRota("360TV MCR OPERATÖRÜ");
 
-    // 2. INGEST OPERATÖRÜ (2 Sabah, 2 Akşam, 2 İzin + Pazartesi-HS Kısıtı)
+    // INGEST (2Sabah, 2Akşam, 2İzin + Pzt-HS Kısıtı)
     applyIngestRota();
 
-    // 3. Teknik Yönetmen Gece
+    // --- ÖZEL PERSONEL KURALLARI ---
+    
+    // Teknik Yönetmen Gece (Barış/Ekrem Dengesi)
     let bGec = 0; while(bGec < 2) {
         let r = Math.floor(Math.random() * 7);
         if(!haftalikProgram["BARIŞ İNCE"][r]) { haftalikProgram["BARIŞ İNCE"][r] = "00:00–07:00"; bGec++; }
     }
     for(let i=0; i<7; i++) { if(haftalikProgram["BARIŞ İNCE"][i] !== "00:00–07:00") haftalikProgram["EKREM FİDAN"][i] = "00:00–07:00"; }
 
-    // 4. Ses Zafer Akar
+    // Ses Zafer Akar (Sabit Hafta içi Sabah)
     for(let i=0; i<5; i++) haftalikProgram["ZAFER AKAR"][i] = "06:30–16:00";
     haftalikProgram["ZAFER AKAR"][5] = "İZİN"; haftalikProgram["ZAFER AKAR"][6] = "İZİN";
 
-    // 5. Playout & KJ (Hafta sonu kuralı dahil)
+    // Playout & KJ (Hafta sonu Sabah Tek Kişi Kuralı)
     const pS = setDegisken("Playout Operatörü");
     const kS = setDegisken("KJ Operatörü");
 
-    // Genel İzinler
+    // Genel İzin Atamaları (Diğer Birimler)
     personeller.forEach(p => {
         if(["BARIŞ İNCE", "ZAFER AKAR", pS, kS].includes(p.isim) || p.birim.includes("MCR") || p.birim.includes("INGEST")) return;
         let c = 0; while(c < 2) {
@@ -123,34 +127,34 @@ function tabloyuOlustur() {
 function applyIngestRota() {
     const ekip = personeller.filter(p => p.birim === "24TV - 360TV INGEST OPERATÖRÜ");
     const rota = ["06:30–16:00", "06:30–16:00", "16:00–00:00", "16:00–00:00", "İZİN", "İZİN"];
-    const ref = new Date(2025, 0, 6); // Sabit referans Pazartesi
-
+    const ref = new Date(2025, 0, 6);
     ekip.forEach((p, idx) => {
         for(let i=0; i<7; i++) {
             let d = new Date(mevcutPazartesi.getTime() + (i * 86400000));
             let f = Math.floor((d - ref) / 86400000);
-            let rI = (f + (idx * 2)) % 6;
-            if(rI < 0) rI += 6;
+            let rI = (f + (idx * 2)) % 6; if(rI < 0) rI += 6;
             haftalikProgram[p.isim][i] = rota[rI];
-            
-            // Pazartesi izinliyse Cmt-Paz izinli kuralı
-            if (i === 0 && rota[rI] === "İZİN") {
-                haftalikProgram[p.isim][5] = "İZİN";
-                haftalikProgram[p.isim][6] = "İZİN";
-            }
+            if (i === 0 && rota[rI] === "İZİN") { haftalikProgram[p.isim][5] = "İZİN"; haftalikProgram[p.isim][6] = "İZİN"; }
         }
     });
 }
 
 function applyMCRRota(birim) {
     const ekip = personeller.filter(p => p.birim === birim);
-    const rota = ["06:30–16:00", "06:30–16:00", "16:00–00:00", "16:00–00:00", "00:00–07:00", "00:00–07:00", "İZİN", "İZİN"];
-    const ref = new Date(2025, 0, 6);
+    // KURAL: 2 SABAH, 2 AKŞAM, 2 GECE, 2 İZİN (8 Günlük Döngü)
+    const rota = [
+        "06:30–16:00", "06:30–16:00", 
+        "16:00–00:00", "16:00–00:00", 
+        "00:00–07:00", "00:00–07:00", 
+        "İZİN", "İZİN"
+    ];
+    const ref = new Date(2025, 0, 6); // Pazartesi
     ekip.forEach((p, idx) => {
         for(let i=0; i<7; i++) {
             let d = new Date(mevcutPazartesi.getTime() + (i * 86400000));
             let f = Math.floor((d - ref) / 86400000);
-            let rI = (f + (idx * 2)) % 8; if(rI < 0) rI += 8;
+            let rI = (f + (idx * 2)) % 8; // Her personel 2 gün kaydırılarak döngüye sokulur
+            if(rI < 0) rI += 8;
             haftalikProgram[p.isim][i] = rota[rI];
         }
     });
