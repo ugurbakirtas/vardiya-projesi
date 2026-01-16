@@ -3,14 +3,14 @@
   --success: #16a34a;
   --danger: #dc2626;
   --accent: #7c3aed;
-  --bg: #f8fafc;
+  --bg: #f1f5f9;
 }
 
-body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg); margin: 0; padding: 20px; color: #1e293b; }
-.header-container, .admin-panel { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; text-align: center; }
+body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 15px; color: #1e293b; }
+.header-container, .admin-panel { background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 15px; text-align: center; }
 .controls { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; }
 
-button { border: none; padding: 10px 15px; border-radius: 8px; color: white; cursor: pointer; font-weight: 600; transition: 0.2s; font-size: 13px; }
+button { border: none; padding: 10px 14px; border-radius: 6px; color: white; cursor: pointer; font-weight: 600; font-size: 12px; transition: 0.2s; }
 .btn-primary { background: var(--primary); }
 .btn-success { background: var(--success); }
 .btn-danger { background: var(--danger); }
@@ -18,24 +18,24 @@ button { border: none; padding: 10px 15px; border-radius: 8px; color: white; cur
 .btn-secondary { background: #64748b; }
 .btn-warning { background: #f59e0b; }
 
-.checklist-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; margin-top: 15px; }
-.check-item { background: #f1f5f9; padding: 8px; border-radius: 6px; display: flex; align-items: center; gap: 8px; font-size: 11px; border: 1px solid #e2e8f0; text-align: left; }
+.checklist-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 6px; margin-top: 10px; }
+.check-item { background: #f8fafc; padding: 6px; border-radius: 4px; display: flex; align-items: center; gap: 6px; font-size: 10px; border: 1px solid #e2e8f0; text-align: left; }
 
-table { width: 100%; border-collapse: collapse; background: white; margin-top: 10px; table-layout: fixed; }
-th { background: #1e293b; color: white; padding: 10px; font-size: 11px; border: 1px solid #334155; }
-td { border: 1px solid #e2e8f0; padding: 4px; vertical-align: top; text-align: center; overflow: hidden; }
+table { width: 100%; border-collapse: collapse; background: white; table-layout: fixed; }
+th { background: #1e293b; color: white; padding: 8px; font-size: 10px; border: 1px solid #334155; }
+td { border: 1px solid #cbd5e1; padding: 3px; vertical-align: top; text-align: center; height: 50px; overflow: hidden; }
 
-.birim-card { background: #ffffff; border-left: 3px solid var(--primary); padding: 4px; margin-bottom: 3px; border-radius: 3px; text-align: left; box-shadow: 0 1px 2px rgba(0,0,0,0.05); border: 1px solid #edf2f7; }
-.birim-tag { font-size: 7.5px; color: #64748b; font-weight: bold; display: block; text-transform: uppercase; line-height: 1; margin-bottom: 2px; }
-.p-isim { font-weight: 700; color: #1e293b; font-size: 9.5px; white-space: nowrap; }
+.birim-card { background: #ffffff; border-left: 3px solid var(--primary); padding: 3px; margin-bottom: 2px; border-radius: 2px; text-align: left; border: 1px solid #f1f5f9; }
+.birim-tag { font-size: 7px; color: #64748b; font-weight: bold; display: block; text-transform: uppercase; line-height: 1; margin-bottom: 1px; }
+.p-isim { font-weight: 700; color: #1e293b; font-size: 9px; white-space: nowrap; }
 
-.conflict { background: #fee2e2 !important; border: 2px solid #ef4444 !important; }
-.ozet-konteyner { background: white; padding: 20px; border-radius: 12px; margin-top: 20px; }
-.badge-gece { background: var(--accent); color: white; padding: 2px 5px; border-radius: 8px; font-size: 9px; }
+.ozet-konteyner { background: white; padding: 15px; border-radius: 10px; margin-top: 15px; }
+.badge-gece { background: var(--accent); color: white; padding: 1px 4px; border-radius: 4px; font-size: 8px; }
 
 @media print {
   .no-print { display: none !important; }
-  body { padding: 0; }
-  table { font-size: 9px; }
-  .p-isim { font-size: 8px; }
+  body { padding: 0; background: white; }
+  table { font-size: 8px; }
+  .p-isim { font-size: 7.5px; }
+  td { height: auto; }
 }

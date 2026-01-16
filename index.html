@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TV Vardiya Otomasyon Sistemi v6.0</title>
+  <title>TV Teknik Vardiya Sistemi v7.0</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -12,9 +12,9 @@
   <div class="header-container no-print">
     <h2 id="tabloBaslik">Teknik Vardiya Planı</h2>
     <div class="controls">
-      <button id="prevWeek" class="btn-secondary"><< Önceki Hafta</button>
+      <button id="prevWeek" class="btn-secondary"><< Önceki</button>
       <button id="yeniListeBtn" class="btn-primary">Listeyi Hazırla</button>
-      <button id="sonrakiHaftaBtn" class="btn-accent">Haftayı Devret ve Planla >></button>
+      <button id="sonrakiHaftaBtn" class="btn-accent">Haftayı Devret >></button>
       <button id="excelBtn" class="btn-success">Excel</button>
       <button id="pdfBtn" class="btn-danger">PDF Al</button>
       <button id="temizleBtn" class="btn-warning">Sıfırla</button>
@@ -22,15 +22,15 @@
   </div>
 
   <div class="admin-panel no-print">
-    <h3>📋 Personel İzin/Rapor Yönetimi</h3>
-    <p style="font-size: 12px; color: #666;">Vardiyaya girmeyecek personelleri işaretleyip "Listeyi Hazırla"ya basın.</p>
+    <h3>📋 Personel İzin/Rapor Paneli</h3>
+    <p style="font-size: 12px; color: #666;">İzinli olanları seçip "Listeyi Hazırla"ya basın. Seçilenler vardiyaya yazılmaz.</p>
     <div id="personelChecklist" class="checklist-grid"></div>
   </div>
 
   <div id="print-area">
     <div id="tablolar"></div>
     <div class="ozet-konteyner">
-      <h3>Haftalık Personel Mesai Analizi</h3>
+      <h3>Haftalık Personel Mesai Özeti</h3>
       <div id="ozetTablo"></div>
     </div>
   </div>
