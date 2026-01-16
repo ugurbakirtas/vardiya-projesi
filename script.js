@@ -1,7 +1,6 @@
 /**
- * PRO-Vardiya v16.7 | v14.5 Core
- * KURAL: Gece vardiyasında SES OPERATÖRÜ OLMAZ.
- * YENİLİK: Dikey liste düzeni ve dinamik birimler.
+ * PRO-Vardiya v16.8 | v14.5 Core
+ * Tasarım Odaklı Güncelleme
  */
 
 let varsayilanBirimler = [
@@ -15,7 +14,8 @@ let birimSiralamasi = [...varsayilanBirimler, ...ekBirimler];
 const gunler = ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"];
 const saatler = ["06:30–16:00", "09:00–18:00", "12:00–22:00", "16:00–00:00", "00:00–07:00", "DIŞ YAYIN"];
 
-let personeller = [
+// Personel Listesi (Sabit)
+const sabitPersoneller = [
     { id: 1, isim: "YUNUS EMRE YAYLA", birim: "TEKNİK YÖNETMEN" },
     { id: 2, isim: "HASAN CAN SAĞLAM", birim: "TEKNİK YÖNETMEN" },
     { id: 3, isim: "MEHMET BERKMAN", birim: "TEKNİK YÖNETMEN" },
@@ -65,7 +65,7 @@ let personeller = [
 ];
 
 let ekPersoneller = JSON.parse(localStorage.getItem("ekPersoneller")) || [];
-let tumPersoneller = [...personeller, ...ekPersoneller];
+let tumPersoneller = [...sabitPersoneller, ...ekPersoneller];
 let mevcutPazartesi = getMonday(new Date());
 let haftalikProgram = {};
 
@@ -75,17 +75,18 @@ function getMonday(d) {
     return new Date(d.setDate(diff));
 }
 
-function toggleAdminPanel() {
-    document.getElementById("adminPanel").classList.toggle("hidden");
+// UI YÖNETİMİ
+function toggleTheme() { document.body.classList.toggle("dark-mode"); }
+function toggleAdminPanel() { 
+    document.getElementById("adminPanel").classList.toggle("hidden"); 
     document.getElementById("birimSec").innerHTML = birimSiralamasi.map(b => `<option value="${b}">${b}</option>`).join('');
 }
 
 function birimEkle() {
-    const bAd = document.getElementById("yeniBirim").value.toUpperCase().trim();
-    if(bAd && !birimSiralamasi.includes(bAd)) {
-        ekBirimler.push(bAd);
+    const val = document.getElementById("yeniBirim").value.toUpperCase().trim();
+    if(val && !birimSiralamasi.includes(val)) {
+        ekBirimler.push(val);
         localStorage.setItem("ekBirimler", JSON.stringify(ekBirimler));
-        birimSiralamasi = [...varsayilanBirimler, ...ekBirimler];
         location.reload();
     }
 }
@@ -100,16 +101,14 @@ function personelEkle() {
     }
 }
 
-// Checklist'i birim bazlı dikey liste olarak oluşturan fonksiyon
 function checklistOlustur() {
     const container = document.getElementById("personelChecklist");
     container.innerHTML = "";
-    
     birimSiralamasi.forEach(birim => {
-        const birimdekiPersoneller = tumPersoneller.filter(p => p.birim === birim);
-        if(birimdekiPersoneller.length > 0) {
+        const liste = tumPersoneller.filter(p => p.birim === birim);
+        if(liste.length > 0) {
             let html = `<div class="birim-grubu"><div class="birim-baslik">${birim}</div>`;
-            birimdekiPersoneller.forEach(p => {
+            liste.forEach(p => {
                 html += `
                     <div class="check-item" data-isim="${p.isim}" onclick="toggleCheckbox('${p.id}')">
                         <input type="checkbox" id="check_${p.id}" onchange="tabloyuOlustur()">
@@ -135,6 +134,7 @@ function checklistFiltrele() {
     });
 }
 
+// ANA ALGORİTMA (v14.5 CORE KURALLARI)
 function tabloyuOlustur() {
     document.getElementById("tarihAraligi").innerText = `${mevcutPazartesi.toLocaleDateString('tr-TR')} Haftası`;
     haftalikProgram = {};
@@ -143,7 +143,7 @@ function tabloyuOlustur() {
         haftalikProgram[p.isim] = isSelected ? Array(7).fill("İZİN") : Array(7).fill(null);
     });
 
-    // Barış & Ekrem v14.5 Sabit Gece Kuralları
+    // Barış & Ekrem v14.5 Özel Kurallar
     if(haftalikProgram["BARIŞ İNCE"] && !haftalikProgram["BARIŞ İNCE"].includes("İZİN")) {
         haftalikProgram["BARIŞ İNCE"][0] = "00:00–07:00"; haftalikProgram["BARIŞ İNCE"][1] = "00:00–07:00";
     }
@@ -179,9 +179,7 @@ function hucreDoldur(gun, saat) {
     if(!["12:00–22:00", "DIŞ YAYIN", "İZİN"].includes(saat)) {
         birimSiralamasi.forEach(birim => {
             if(birim.includes("MCR") || birim.includes("INGEST")) return;
-            
             let kap = 0;
-            // SES GECE ÇALIŞMAZ KURALI
             if(birim === "SES OPERATÖRÜ") {
                 if(saat === "00:00–07:00") kap = 0; 
                 else if(saat === "09:00–18:00") kap = isHS ? 2 : 0;
@@ -205,10 +203,8 @@ function hucreDoldur(gun, saat) {
                 if(saat === "09:00–18:00") kap = isHS ? 0 : 1;
             }
 
-            // ÇAKIŞMA KONTROLÜ
             let adaylar = tumPersoneller.filter(p => p.birim === birim && haftalikProgram[p.isim][gun] === null);
             let suan = tumPersoneller.filter(p => p.birim === birim && haftalikProgram[p.isim][gun] === saat).length;
-            
             for(let k=0; k < (kap-suan); k++) {
                 if(adaylar.length > 0) {
                     let p = adaylar.splice(Math.floor(Math.random() * adaylar.length), 1)[0];
@@ -253,16 +249,15 @@ function ozetGuncelle() {
         const calisilan = haftalikProgram[p.isim].filter(v => v && v !== "İZİN");
         const gun = calisilan.length;
         const uyari = gun >= 6 ? 'class="uyari-mesai"' : '';
-        h += `<tr><td>${p.isim}</td><td><small>${p.birim}</small></td><td><span ${uyari}>${gun} Gün</span></td><td>${calisilan.filter(v => v === "00:00–07:00").length}</td></tr>`;
+        h += `<tr><td>${p.isim}</td><td><small>${p.birim}</small></td><td><span ${uyari}>${gun} GÜN ${gun>=6?'⚠️':''}</span></td><td>${calisilan.filter(v => v === "00:00–07:00").length}</td></tr>`;
     });
     document.getElementById("ozetTablo").innerHTML = h + "</tbody></table>";
 }
 
 function haftaDegistir(g) { mevcutPazartesi.setDate(mevcutPazartesi.getDate() + g); tabloyuOlustur(); }
-function exportExcel() { XLSX.writeFile(XLSX.utils.table_to_book(document.getElementById("vardiyaTablosu")), "Vardiya.xlsx"); }
-function exportPDF() { html2pdf().from(document.getElementById('print-area')).save('Vardiya.pdf'); }
-function sifirla() { if(confirm("TÜM AYARLAR SIFIRLANACAK!")) { localStorage.clear(); location.reload(); } }
-function toggleTheme() { document.body.classList.toggle("dark-mode"); }
+function exportExcel() { XLSX.writeFile(XLSX.utils.table_to_book(document.getElementById("vardiyaTablosu")), "Teknik_Vardiya.xlsx"); }
+function exportPDF() { html2pdf().from(document.getElementById('print-area')).save('Vardiya_Raporu.pdf'); }
+function sifirla() { if(confirm("Tüm veriler silinecek! Emin misiniz?")) { localStorage.clear(); location.reload(); } }
 
 function whatsappMesajiOlustur() {
     let m = `📋 *${mevcutPazartesi.toLocaleDateString('tr-TR')} HAFTALIK VARDİYA PLANI*\n\n`;
@@ -274,7 +269,7 @@ function whatsappMesajiOlustur() {
         });
         m += `\n`;
     });
-    navigator.clipboard.writeText(m).then(() => alert("WhatsApp mesajı kopyalandı!"));
+    navigator.clipboard.writeText(m).then(() => alert("Kopyalandı!"));
 }
 
 window.onload = () => { checklistOlustur(); tabloyuOlustur(); };
