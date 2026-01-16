@@ -1,5 +1,16 @@
 const gunler = ["Pazartesi","Salı","Çarşamba","Perşembe","Cuma","Cumartesi","Pazar"];
-const saatler = ["08:00–16:00","16:00–00:00","00:00–08:00"];
+
+// Saat blokları senin istediğin şekilde
+const saatler = [
+  "06:30–16:00","06:30–16:00","06:30–16:00","06:30–16:00",
+  "09:00–18:00",
+  "12:00–22:00",
+  "16:00–00:00","16:00–00:00","16:00–00:00",
+  "00:00–07:00","00:00–07:00",
+  "İZİN","İZİN","İZİN",
+  "DIŞ YAYIN","DIŞ YAYIN","DIŞ YAYIN"
+];
+
 const birimler = [
   "Teknik Yönetmen",
   "Ses Operatörü",
@@ -24,58 +35,30 @@ const personeller = [
   { isim:"Derya", birim:"Uplink", gece:true }
 ];
 
-// Kullanım sayacı
-const kullanımlar = {};
-personeller.forEach(p => kullanımlar[p.isim] = { sabah:0, aksam:0, gece:0 });
-
-function uygunPersonel(birim, saat, gunIndex, oncekiSaat) {
-  const geceMi = (saat === "00:00–08:00");
-  const sabahMi = (saat === "08:00–16:00");
-  const aksamMi = (saat === "16:00–00:00");
-
+function uygunPersonel(birim, saat) {
+  if (saat === "İZİN" || saat === "DIŞ YAYIN") return saat;
+  const geceMi = (saat === "00:00–07:00");
   let uygunlar = personeller.filter(p => p.birim === birim && (!geceMi || p.gece));
-
-  if (oncekiSaat === "16:00–00:00" && saat === "00:00–08:00") {
-    uygunlar = uygunlar.filter(p => kullanımlar[p.isim].aksam === 0);
-  }
-
-  uygunlar = uygunlar.filter(p =>
-    (!sabahMi || kullanımlar[p.isim].sabah < 3) &&
-    (!aksamMi || kullanımlar[p.isim].aksam < 3)
-  );
-
   if (uygunlar.length === 0) return "İZİN";
-
-  uygunlar.sort((a,b) => {
-    const aToplam = kullanımlar[a.isim].sabah + kullanımlar[a.isim].aksam + kullanımlar[a.isim].gece;
-    const bToplam = kullanımlar[b.isim].sabah + kullanımlar[b.isim].aksam + kullanımlar[b.isim].gece;
-    return aToplam - bToplam;
-  });
-
-  const secilen = uygunlar[0];
-  if (sabahMi) kullanımlar[secilen.isim].sabah++;
-  if (aksamMi) kullanımlar[secilen.isim].aksam++;
-  if (geceMi) kullanımlar[secilen.isim].gece++;
+  const secilen = uygunlar[Math.floor(Math.random() * uygunlar.length)];
   return secilen.isim;
 }
 
 function tabloyuOlustur() {
   const tbody = document.querySelector("#vardiyaTablosu tbody");
-  saatler.forEach((saat, sIndex) => {
+  saatler.forEach((saat) => {
     const tr = document.createElement("tr");
     const tdSaat = document.createElement("td");
     tdSaat.textContent = saat;
     tr.appendChild(tdSaat);
 
-    gunler.forEach((gun, gIndex) => {
+    gunler.forEach((gun) => {
       const td = document.createElement("td");
       td.classList.add("editable");
-      const oncekiSaat = sIndex > 0 ? saatler[sIndex - 1] : null;
 
-      // Hücre içinde birim + personel alt alta
       let cellContent = "";
       birimler.forEach(birim => {
-        const isim = uygunPersonel(birim, saat, gIndex, oncekiSaat);
+        const isim = uygunPersonel(birim, saat);
         cellContent += `${birim}: ${isim}\n`;
       });
 
