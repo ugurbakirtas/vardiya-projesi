@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PRO-Vardiya v11.1 | Tam Sürüm</title>
+  <title>PRO-Vardiya v11.2 | Hiyerarşik Düzen</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -12,7 +12,7 @@
   <div class="app-wrapper">
     <header class="no-print">
       <div class="header-top">
-        <h1>TEKNİK VARDİYA <span>v11.1</span></h1>
+        <h1>TEKNİK VARDİYA <span>v11.2</span></h1>
         <button onclick="toggleDarkMode()" class="btn-theme" id="themeBtn">🌙 Koyu Mod</button>
       </div>
       <div class="nav-row">
@@ -21,7 +21,7 @@
           <button onclick="haftaDegistir(7)" class="btn-nav">İleri »</button>
       </div>
       <div class="action-row">
-          <button onclick="tabloyuOlustur()" class="btn-primary">⚡ Otomatik Planla</button>
+          <button onclick="tabloyuOlustur()" class="btn-primary">⚡ Planı Hiyerarşik Oluştur</button>
           <button onclick="togglePanel('personelPanel')" class="btn-admin">⚙️ Personel & Ayarlar</button>
       </div>
     </header>
@@ -59,7 +59,7 @@
     </section>
 
     <section class="checklist-section no-print">
-      <h3>İzinli Personeli İşaretle</h3>
+      <h3>İzinli Personeli İşaretle (Hiyerarşik)</h3>
       <div id="personelChecklist" class="checklist-grid"></div>
     </section>
 
@@ -73,7 +73,7 @@
       </div>
       
       <div class="stats-section">
-          <h3>Haftalık Analiz ve İstatistikler</h3>
+          <h3>Haftalık Analiz (Hiyerarşik Sıralı)</h3>
           <div id="ozetTablo"></div>
       </div>
     </main>
