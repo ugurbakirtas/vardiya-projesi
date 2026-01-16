@@ -18,53 +18,53 @@ const birimSiralamasi = [
 ];
 
 const personeller = [
-    { isim: "YUNUS EMRE YAYLA", birim: "Teknik Yönetmen" },
-    { isim: "HASAN CAN SAĞLAM", birim: "Teknik Yönetmen" },
-    { isim: "MEHMET BERKMAN", birim: "Teknik Yönetmen" },
-    { isim: "EKREM FİDAN", birim: "Teknik Yönetmen" },
-    { isim: "CAN ŞENTUNALI", birim: "Teknik Yönetmen" },
-    { isim: "BARIŞ İNCE", birim: "Teknik Yönetmen" },
-    { isim: "ZAFER AKAR", birim: "Ses Operatörü" },
-    { isim: "ENES KALE", birim: "Ses Operatörü" },
-    { isim: "ANIL RİŞVAN", birim: "Ses Operatörü" },
-    { isim: "ERSAN TİLBE", birim: "Ses Operatörü" },
-    { isim: "ULVİ MUTLUBAŞ", birim: "Ses Operatörü" },
-    { isim: "OSMAN DİNÇER", birim: "Ses Operatörü" },
-    { isim: "DOĞUŞ MALGIL", birim: "Ses Operatörü" },
-    { isim: "ERDOĞAN KÜÇÜKKAYA", birim: "Ses Operatörü" },
-    { isim: "SENA MİNARECİ", birim: "Playout Operatörü" },
-    { isim: "MEHMET TUNÇ", birim: "Playout Operatörü" },
-    { isim: "KADİR ÇAÇAN", birim: "Playout Operatörü" },
-    { isim: "İBRAHİM SERİNSÖZ", birim: "Playout Operatörü" },
-    { isim: "YUSUF ALPKILIÇ", birim: "Playout Operatörü" },
-    { isim: "MUSTAFA ERCÜMENT KILIÇ", birim: "Playout Operatörü" },
-    { isim: "NEHİR KAYGUSUZ", birim: "Playout Operatörü" },
-    { isim: "YUSUF İSLAM TORUN", birim: "KJ Operatörü" },
-    { isim: "OĞUZHAN YALAZAN", birim: "KJ Operatörü" },
-    { isim: "UĞUR AKBABA", birim: "KJ Operatörü" },
-    { isim: "SENA BAYDAR", birim: "KJ Operatörü" },
-    { isim: "CEMREHAN SUBAŞI", birim: "KJ Operatörü" },
-    { isim: "YEŞİM KİREÇ", birim: "KJ Operatörü" },
-    { isim: "PINAR ÖZENÇ", birim: "KJ Operatörü" },
-    { isim: "RAMAZAN KOÇAK", birim: "24TV - 360TV INGEST OPERATÖRÜ" },
-    { isim: "Selin", birim: "Uplink" },
-    { isim: "VOLKAN DEMİRBAŞ", birim: "24TV-360TV BİLGİ İŞLEM" },
-    { isim: "GÖKHAN BAĞIŞ", birim: "24TV-360TV BİLGİ İŞLEM" },
-    { isim: "HAKAN ELİPEK", birim: "24TV-360TV BİLGİ İşLEM" },
-    { isim: "ÖZKAN KAYA", birim: "24TV-360TV BİLGİ İŞLEM" },
-    { isim: "YİĞİT DAYI", birim: "24TV-360TV YAYIN SİSTEMLERİ" },
-    { isim: "FERDİ TOPUZ", birim: "24TV-360TV YAYIN SİSTEMLERİ" },
-    { isim: "BEYHAN KARAKAŞ", birim: "24TV-360TV YAYIN SİSTEMLERİ" },
-    { isim: "FATİH AYBEK", birim: "24TV-360TV YAYIN SİSTEMLERİ" },
-    { isim: "AKİF KOÇ", birim: "24TV-360TV YAYIN SİSTEMLERİ" },
-    { isim: "KADİR YILMAZ", birim: "24TV MCR OPERATÖRÜ" },
-    { isim: "FARUK YILMAZ", birim: "24TV MCR OPERATÖRÜ" },
-    { isim: "YUSUF HENEK", birim: "24TV MCR OPERATÖRÜ" },
-    { isim: "SEDA KAYA", birim: "24TV MCR OPERATÖRÜ" },
-    { isim: "EMRULLAH AHLATÇI", birim: "360TV MCR OPERATÖRÜ" },
-    { isim: "EREN KAZAN", birim: "360TV MCR OPERATÖRÜ" },
-    { isim: "MUSAB YAKUB DEMİRBAŞ", birim: "360TV MCR OPERATÖRÜ" },
-    { isim: "BÜKRE YAVUZ", birim: "360TV MCR OPERATÖRÜ" }
+    { id: 1, isim: "YUNUS EMRE YAYLA", birim: "Teknik Yönetmen" },
+    { id: 2, isim: "HASAN CAN SAĞLAM", birim: "Teknik Yönetmen" },
+    { id: 3, isim: "MEHMET BERKMAN", birim: "Teknik Yönetmen" },
+    { id: 4, isim: "EKREM FİDAN", birim: "Teknik Yönetmen" },
+    { id: 5, isim: "CAN ŞENTUNALI", birim: "Teknik Yönetmen" },
+    { id: 6, isim: "BARIŞ İNCE", birim: "Teknik Yönetmen" },
+    { id: 7, isim: "ZAFER AKAR", birim: "Ses Operatörü" },
+    { id: 8, isim: "ENES KALE", birim: "Ses Operatörü" },
+    { id: 9, isim: "ANIL RİŞVAN", birim: "Ses Operatörü" },
+    { id: 10, isim: "ERSAN TİLBE", birim: "Ses Operatörü" },
+    { id: 11, isim: "ULVİ MUTLUBAŞ", birim: "Ses Operatörü" },
+    { id: 12, isim: "OSMAN DİNÇER", birim: "Ses Operatörü" },
+    { id: 13, isim: "DOĞUŞ MALGIL", birim: "Ses Operatörü" },
+    { id: 14, isim: "ERDOĞAN KÜÇÜKKAYA", birim: "Ses Operatörü" },
+    { id: 15, isim: "SENA MİNARECİ", birim: "Playout Operatörü" },
+    { id: 16, isim: "MEHMET TUNÇ", birim: "Playout Operatörü" },
+    { id: 17, isim: "KADİR ÇAÇAN", birim: "Playout Operatörü" },
+    { id: 18, isim: "İBRAHİM SERİNSÖZ", birim: "Playout Operatörü" },
+    { id: 19, isim: "YUSUF ALPKILIÇ", birim: "Playout Operatörü" },
+    { id: 20, isim: "MUSTAFA ERCÜMENT KILIÇ", birim: "Playout Operatörü" },
+    { id: 21, isim: "NEHİR KAYGUSUZ", birim: "Playout Operatörü" },
+    { id: 22, isim: "YUSUF İSLAM TORUN", birim: "KJ Operatörü" },
+    { id: 23, isim: "OĞUZHAN YALAZAN", birim: "KJ Operatörü" },
+    { id: 24, isim: "UĞUR AKBABA", birim: "KJ Operatörü" },
+    { id: 25, isim: "SENA BAYDAR", birim: "KJ Operatörü" },
+    { id: 26, isim: "CEMREHAN SUBAŞI", birim: "KJ Operatörü" },
+    { id: 27, isim: "YEŞİM KİREÇ", birim: "KJ Operatörü" },
+    { id: 28, isim: "PINAR ÖZENÇ", birim: "KJ Operatörü" },
+    { id: 29, isim: "RAMAZAN KOÇAK", birim: "24TV - 360TV INGEST OPERATÖRÜ" },
+    { id: 30, isim: "Selin", birim: "Uplink" },
+    { id: 31, isim: "VOLKAN DEMİRBAŞ", birim: "24TV-360TV BİLGİ İŞLEM" },
+    { id: 32, isim: "GÖKHAN BAĞIŞ", birim: "24TV-360TV BİLGİ İŞLEM" },
+    { id: 33, isim: "HAKAN ELİPEK", birim: "24TV-360TV BİLGİ İşLEM" },
+    { id: 34, isim: "ÖZKAN KAYA", birim: "24TV-360TV BİLGİ İŞLEM" },
+    { id: 35, isim: "YİĞİT DAYI", birim: "24TV-360TV YAYIN SİSTEMLERİ" },
+    { id: 36, isim: "FERDİ TOPUZ", birim: "24TV-360TV YAYIN SİSTEMLERİ" },
+    { id: 37, isim: "BEYHAN KARAKAŞ", birim: "24TV-360TV YAYIN SİSTEMLERİ" },
+    { id: 38, isim: "FATİH AYBEK", birim: "24TV-360TV YAYIN SİSTEMLERİ" },
+    { id: 39, isim: "AKİF KOÇ", birim: "24TV-360TV YAYIN SİSTEMLERİ" },
+    { id: 40, isim: "KADİR YILMAZ", birim: "24TV MCR OPERATÖRÜ" },
+    { id: 41, isim: "FARUK YILMAZ", birim: "24TV MCR OPERATÖRÜ" },
+    { id: 42, isim: "YUSUF HENEK", birim: "24TV MCR OPERATÖRÜ" },
+    { id: 43, isim: "SEDA KAYA", birim: "24TV MCR OPERATÖRÜ" },
+    { id: 44, isim: "EMRULLAH AHLATÇI", birim: "360TV MCR OPERATÖRÜ" },
+    { id: 45, isim: "EREN KAZAN", birim: "360TV MCR OPERATÖRÜ" },
+    { id: 46, isim: "MUSAB YAKUB DEMİRBAŞ", birim: "360TV MCR OPERATÖRÜ" },
+    { id: 47, isim: "BÜKRE YAVUZ", birim: "360TV MCR OPERATÖRÜ" }
 ];
 
 function getMonday(d) {
@@ -77,9 +77,9 @@ function checklistOlustur() {
     const container = document.getElementById("personelChecklist");
     const sirali = [...personeller].sort((a, b) => birimSiralamasi.indexOf(a.birim) - birimSiralamasi.indexOf(b.birim));
     container.innerHTML = sirali.map(p => `
-        <div class="check-item">
-            <input type="checkbox" id="check_${p.isim.replace(/\s+/g, '_')}" onchange="tabloyuOlustur()">
-            <label><strong>${p.isim}</strong><br><small>${p.birim}</small></label>
+        <div class="check-item" onclick="document.getElementById('check_${p.id}').click(); event.stopPropagation();">
+            <input type="checkbox" id="check_${p.id}" onchange="tabloyuOlustur()" onclick="event.stopPropagation();">
+            <label onclick="event.stopPropagation();"><strong>${p.isim}</strong><br><small>${p.birim}</small></label>
         </div>
     `).join('');
 }
@@ -88,7 +88,8 @@ function tabloyuOlustur() {
     document.getElementById("tarihAraligi").innerText = `${mevcutPazartesi.toLocaleDateString('tr-TR')} Haftası Planı`;
     haftalikProgram = {};
     personeller.forEach(p => {
-        const isSelected = document.getElementById(`check_${p.isim.replace(/\s+/g, '_')}`)?.checked;
+        const isSelected = document.getElementById(`check_${p.id}`)?.checked;
+        // Checkbox seçiliyse personele tüm haftayı İZİN olarak ata
         haftalikProgram[p.isim] = isSelected ? Array(7).fill("İZİN") : Array(7).fill(null);
     });
 
@@ -96,20 +97,34 @@ function tabloyuOlustur() {
     applyMCRRota("360TV MCR OPERATÖRÜ");
     applyIngestRota();
 
-    let bGec = 0; while(bGec < 2) {
-        let r = Math.floor(Math.random() * 7);
-        if(!haftalikProgram["BARIŞ İNCE"][r]) { haftalikProgram["BARIŞ İNCE"][r] = "00:00–07:00"; bGec++; }
+    // Barış/Ekrem Gece Döngüsü (Eğer izinli değillerse)
+    if(haftalikProgram["BARIŞ İNCE"] && !haftalikProgram["BARIŞ İNCE"].includes("İZİN")) {
+        let bGec = 0; while(bGec < 2) {
+            let r = Math.floor(Math.random() * 7);
+            if(!haftalikProgram["BARIŞ İNCE"][r]) { haftalikProgram["BARIŞ İNCE"][r] = "00:00–07:00"; bGec++; }
+        }
     }
-    for(let i=0; i<7; i++) { if(haftalikProgram["BARIŞ İNCE"][i] !== "00:00–07:00") haftalikProgram["EKREM FİDAN"][i] = "00:00–07:00"; }
+    if(haftalikProgram["EKREM FİDAN"] && !haftalikProgram["EKREM FİDAN"].includes("İZİN")) {
+        for(let i=0; i<7; i++) { 
+            if(haftalikProgram["BARIŞ İNCE"] && haftalikProgram["BARIŞ İNCE"][i] !== "00:00–07:00") 
+                haftalikProgram["EKREM FİDAN"][i] = "00:00–07:00"; 
+        }
+    }
 
-    for(let i=0; i<5; i++) haftalikProgram["ZAFER AKAR"][i] = "06:30–16:00";
-    haftalikProgram["ZAFER AKAR"][5] = "İZİN"; haftalikProgram["ZAFER AKAR"][6] = "İZİN";
+    // Zafer Akar Sabit Plan (Eğer izinli değilse)
+    if(haftalikProgram["ZAFER AKAR"] && !haftalikProgram["ZAFER AKAR"].includes("İZİN")) {
+        for(let i=0; i<5; i++) haftalikProgram["ZAFER AKAR"][i] = "06:30–16:00";
+        haftalikProgram["ZAFER AKAR"][5] = "İZİN"; haftalikProgram["ZAFER AKAR"][6] = "İZİN";
+    }
 
     const pS = setDegisken("Playout Operatörü");
     const kS = setDegisken("KJ Operatörü");
 
+    // Genel İzin Atama (Önceden izinli işaretlenmeyenler için 2 gün rastgele izin)
     personeller.forEach(p => {
         if(["BARIŞ İNCE", "ZAFER AKAR", pS, kS].includes(p.isim) || p.birim.includes("MCR") || p.birim.includes("INGEST")) return;
+        if(haftalikProgram[p.isim].includes("İZİN")) return; // Manuel izinliyse dokunma
+        
         let c = 0; while(c < 2) {
             let r = Math.floor(Math.random() * 7);
             if(!haftalikProgram[p.isim][r]) { haftalikProgram[p.isim][r] = "İZİN"; c++; }
@@ -125,12 +140,12 @@ function applyIngestRota() {
     const rota = ["06:30–16:00", "06:30–16:00", "16:00–00:00", "16:00–00:00", "İZİN", "İZİN"];
     const ref = new Date(2025, 0, 6);
     ekip.forEach((p, idx) => {
+        if(haftalikProgram[p.isim].includes("İZİN")) return;
         for(let i=0; i<7; i++) {
             let d = new Date(mevcutPazartesi.getTime() + (i * 86400000));
             let f = Math.floor((d - ref) / 86400000);
             let rI = (f + (idx * 2)) % 6; if(rI < 0) rI += 6;
             haftalikProgram[p.isim][i] = rota[rI];
-            if (i === 0 && rota[rI] === "İZİN") { haftalikProgram[p.isim][5] = "İZİN"; haftalikProgram[p.isim][6] = "İZİN"; }
         }
     });
 }
@@ -140,6 +155,7 @@ function applyMCRRota(birim) {
     const rota = ["06:30–16:00", "06:30–16:00", "16:00–00:00", "16:00–00:00", "00:00–07:00", "00:00–07:00", "İZİN", "İZİN"];
     const ref = new Date(2025, 0, 6);
     ekip.forEach((p, idx) => {
+        if(haftalikProgram[p.isim].includes("İZİN")) return;
         for(let i=0; i<7; i++) {
             let d = new Date(mevcutPazartesi.getTime() + (i * 86400000));
             let f = Math.floor((d - ref) / 86400000);
@@ -150,7 +166,8 @@ function applyMCRRota(birim) {
 }
 
 function setDegisken(birim) {
-    const ekip = personeller.filter(p => p.birim === birim);
+    const ekip = personeller.filter(p => p.birim === birim && !haftalikProgram[p.isim].includes("İZİN"));
+    if(ekip.length === 0) return null;
     const s = ekip[Math.floor(Math.random() * ekip.length)].isim;
     for(let i=0; i<5; i++) haftalikProgram[s][i] = "09:00–18:00";
     haftalikProgram[s][5] = "İZİN"; haftalikProgram[s][6] = "İZİN";
@@ -188,7 +205,6 @@ function hucreDoldur(gun, saat) {
         }
     });
 
-    // MANUEL SATIRLAR: 12:00 VE DIŞ YAYIN otomatik doldurulmaz.
     if(saat === "12:00–22:00" || saat === "DIŞ YAYIN" || saat === "00:00–07:00" || saat === "İZİN") return res;
 
     birimSiralamasi.forEach(birim => {
@@ -207,7 +223,6 @@ function hucreDoldur(gun, saat) {
         }
         else if(birim === "Ses Operatörü") {
             if(isHS) {
-                // Hafta sonu: Sabah (2), Mesai (2), Akşam (2)
                 if(saat === "06:30–16:00") kap = 2;
                 else if(saat === "09:00–18:00") kap = 2;
                 else if(saat === "16:00–00:00") kap = 2;
