@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PRO-Vardiya v21.0 | Tam Kontrol</title>
+  <title>PRO-Vardiya v22.0 | Kapasite Yönetimi</title>
   <link rel="stylesheet" href="style.css">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -13,7 +13,7 @@
   <div class="app-wrapper">
     <header class="no-print main-header">
       <div class="logo-area">
-        <div class="badge">V21.0 PRO</div>
+        <div class="badge">V22.0</div>
         <h1>TEKNİK <span>VARDİYA</span></h1>
         <p id="tarihAraligi" class="date-display">Yükleniyor...</p>
       </div>
@@ -28,31 +28,26 @@
       </div>
     </header>
 
-    <section class="checklist-section no-print">
-      <div class="section-card">
-        <div class="section-header-compact">
-          <h3>Haftalık İzinli Personel Seçimi</h3>
-          <input type="text" id="personelAra" placeholder="🔍 Personel Ara..." onkeyup="checklistFiltrele()">
-        </div>
-        <div id="personelChecklist" class="checklist-horizontal-grid"></div>
-      </div>
-    </section>
-
     <div id="adminPanel" class="admin-overlay no-print hidden">
       <div class="admin-modal">
         <div class="admin-header">
-          <h2>Gelişmiş Algoritma ve Dinlenme Kuralları</h2>
+          <h2>Gelişmiş Algoritma Ayarları</h2>
           <button onclick="toggleAdminPanel()" class="btn-close">×</button>
         </div>
-        <div class="admin-body">
-          <div class="admin-tabs">
-            <button onclick="tabDegistir('kapasite')" class="tab-btn active">Kapasiteler</button>
-            <button onclick="tabDegistir('kurallar')" class="tab-btn">Manuel Kurallar</button>
-            <button onclick="tabDegistir('otomatik')" class="tab-btn">Akıllı Dinlenme</button>
-          </div>
+        <div class="admin-tabs">
+          <button onclick="tabDegistir('kapasite')" class="tab-btn active">Kapasiteler</button>
+          <button onclick="tabDegistir('kurallar')" class="tab-btn">Manuel Kurallar</button>
+          <button onclick="tabDegistir('otomatik')" class="tab-btn">Akıllı Dinlenme</button>
+        </div>
 
+        <div class="admin-body">
           <div id="tab-kapasite" class="tab-content">
-             <div id="kapasiteListesi"></div>
+             <div class="kapasite-info">
+               <span class="legend-box hi"></span> Hafta İçi Personel Sayısı | <span class="legend-box hs"></span> Hafta Sonu Personel Sayısı
+             </div>
+             <div class="cap-table-wrapper">
+                <div id="kapasiteListesi"></div>
+             </div>
           </div>
 
           <div id="tab-kurallar" class="tab-content hidden">
@@ -65,7 +60,7 @@
               </select>
               <select id="kuralSaat"></select>
               <select id="kuralTip"><option value="YASAK">Yasakla</option><option value="ZORUNLU">Sabitle</option></select>
-              <button onclick="kuralKaydet()" class="btn-rule">KURAL EKLE</button>
+              <button onclick="kuralKaydet()" class="btn-rule">EKLE</button>
             </div>
             <div id="aktifKurallarListesi" class="rules-grid"></div>
           </div>
@@ -74,34 +69,23 @@
             <div class="auto-rules-grid">
               <div class="auto-rule-card">
                 <input type="checkbox" id="rule_geceSonrasiIzin" onchange="autoRuleKaydet()">
-                <label for="rule_geceSonrasiIzin">
-                  <strong>Gece Vardiyası Dinlenmesi</strong>
-                  <span>Gece (00:00–07:00) çalışan kişi, ertesi gün otomatik yasaklı olur.</span>
-                </label>
+                <label for="rule_geceSonrasiIzin"><strong>Gece Dinlenmesi</strong><span>Ertesi gün yasaklanır.</span></label>
               </div>
               <div class="auto-rule-card">
                 <input type="checkbox" id="rule_pesPeseGece" onchange="autoRuleKaydet()">
-                <label for="rule_pesPeseGece">
-                  <strong>Üst Üste Gece Yasağı</strong>
-                  <span>Bir personel haftada en fazla 2 gece alabilir ve bunlar peş peşe olamaz.</span>
-                </label>
-              </div>
-              <div class="auto-rule-card">
-                <input type="checkbox" id="rule_maksimumGun" onchange="autoRuleKaydet()">
-                <label for="rule_maksimumGun">
-                  <strong>Haftalık Çalışma Sınırı</strong>
-                  <span>Bir personel haftada en fazla 5 gün çalışsın.</span>
-                </label>
+                <label for="rule_pesPeseGece"><strong>Gece Yasağı</strong><span>Max 2 gece ve peş peşe olamaz.</span></label>
               </div>
             </div>
-            <hr>
-            <button onclick="sifirla()" class="btn-reset">SİSTEMİ SIFIRLA</button>
+            <button onclick="sifirla()" class="btn-reset" style="margin-top:20px">SİSTEMİ SIFIRLA</button>
           </div>
         </div>
       </div>
     </div>
 
     <main class="content-area">
+      <section class="checklist-section no-print">
+        <div id="personelChecklist" class="checklist-horizontal-grid"></div>
+      </section>
       <div class="table-card" id="print-area">
         <div class="table-responsive">
           <table id="vardiyaTablosu">
@@ -109,12 +93,6 @@
             <tbody id="tableBody"></tbody>
           </table>
         </div>
-        <div id="ozetTablo" class="analysis-section"></div>
-      </div>
-      <div class="footer-buttons no-print">
-          <button onclick="whatsappMesajiOlustur()" class="wa-btn">WhatsApp'a Kopyala</button>
-          <button onclick="exportExcel()" class="ex-btn">Excel İndir</button>
-          <button onclick="exportPDF()" class="pdf-btn">PDF Kaydet</button>
       </div>
     </main>
   </div>
