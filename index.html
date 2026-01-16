@@ -2,30 +2,39 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <title>Dinamik Teknik Vardiya Sistemi</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Otomatik Teknik Vardiya Planlayıcı v4.0</title>
   <link rel="stylesheet" href="style.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
-  <h2 id="tabloBaslik">Teknik Personel Vardiya Takip Sistemi</h2>
-  
-  <div class="controls">
-    <button id="prevWeek" style="background:#6c757d"><< Önceki Hafta</button>
-    <button id="excelBtn">Excel İndir</button>
-    <button id="yeniListeBtn" style="background:#007bff">Rastgele Yeni Liste</button>
-    <button id="sonrakiHaftaBtn" style="background:#6f42c1">Sonraki Hafta (Devret) >></button>
-    <button id="temizleBtn" style="background:#dc3545">Hafızayı Temizle</button>
+  <div class="header-container no-print">
+    <h2 id="tabloBaslik">Teknik Vardiya Planı</h2>
+    <div class="controls">
+      <button id="prevWeek" class="btn-secondary"><< Önceki Hafta</button>
+      <button id="yeniListeBtn" class="btn-primary">Listeyi Hazırla</button>
+      <button id="sonrakiHaftaBtn" class="btn-accent">Haftayı Devret ve Planla >></button>
+      <button id="excelBtn" class="btn-success">Excel</button>
+      <button id="pdfBtn" class="btn-danger">PDF Al</button>
+      <button id="temizleBtn" class="btn-warning">Hafızayı Sıfırla</button>
+    </div>
   </div>
 
-  <div id="bilgiPaneli" style="margin: 10px; font-weight: bold; color: #2c3e50;"></div>
-  
-  <div id="tablolar"></div>
-
-  <div class="ozet-konteyner">
-    <h3>Haftalık Personel Mesai Özeti</h3>
-    <div id="ozetTablo"></div>
+  <div class="admin-panel no-print">
+    <h3>📋 Bu Hafta İzinli Olanları Seçin</h3>
+    <p style="font-size: 13px; color: #666;">İşaretlediğiniz personeller vardiyalara atanmayacak, doğrudan "İZİN" satırına eklenecektir.</p>
+    <div id="personelChecklist" class="checklist-grid"></div>
   </div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <div id="print-area">
+    <div id="tablolar"></div>
+    <div class="ozet-konteyner">
+      <h3>Haftalık Personel Mesai Analizi</h3>
+      <div id="ozetTablo"></div>
+    </div>
+  </div>
+
   <script src="script.js"></script>
 </body>
 </html>
