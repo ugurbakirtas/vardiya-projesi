@@ -88,26 +88,37 @@ function tabloyuOlustur() {
     applyMCRRota("360TV MCR OPERATÖRÜ");
     applyIngestRota();
 
-    // TY ÖZEL KURAL: BARIŞ VE EKREM GECE ROTASYONU
+    // TY ÖZEL GECE ROTASYONU
     const tyEkibi = personeller.filter(p => p.birim === "TEKNİK YÖNETMEN");
     const geceAdaylari = ["BARIŞ İNCE", "EKREM FİDAN"];
 
     for(let i=0; i<7; i++) {
         let doluMu = tyEkibi.some(p => haftalikProgram[p.isim][i] === "00:00–07:00");
         if(!doluMu) {
-            // Önce Barış veya Ekrem'den müsait olanı dene
             let ozelAdaylar = geceAdaylari.filter(isim => {
                 let p = personeller.find(x => x.isim === isim);
                 return p && !haftalikProgram[isim][i];
             });
-
             let secilenIsim = ozelAdaylar.length > 0 
                 ? ozelAdaylar[Math.floor(Math.random() * ozelAdaylar.length)]
                 : tyEkibi.find(p => !haftalikProgram[p.isim][i])?.isim;
-
             if(secilenIsim) haftalikProgram[secilenIsim][i] = "00:00–07:00";
         }
     }
+
+    // ZORUNLU İZİN KONTROLÜ (7 GÜN KURALI)
+    personeller.forEach(p => {
+        let calisilanGunler = 0;
+        for(let i=0; i<7; i++) {
+            if(haftalikProgram[p.isim][i] && haftalikProgram[p.isim][i] !== "İZİN") calisilanGunler++;
+            if(calisilanGunler >= 6) { // 6 gün dolduysa 7. günü boşa çıkar (eğer daha atanmamışsa) veya izin yaz
+                for(let j=i+1; j<7; j++) {
+                    if(!haftalikProgram[p.isim][j]) haftalikProgram[p.isim][j] = "İZİN";
+                }
+                break;
+            }
+        }
+    });
 
     renderTable();
     ozetGuncelle();
@@ -116,7 +127,6 @@ function tabloyuOlustur() {
 function hucreDoldur(gun, saat) {
     let res = "";
     const isHS = (gun >= 5);
-    
     let hucredekiler = hiyerarsikSirala(personeller.filter(p => haftalikProgram[p.isim][gun] === saat));
     hucredekiler.forEach(p => { res += cardOlustur(p); });
 
@@ -124,8 +134,6 @@ function hucreDoldur(gun, saat) {
 
     birimSiralamasi.forEach(birim => {
         if(birim.includes("MCR") || birim.includes("INGEST")) return;
-        
-        // HAFTASONU 09:00 KISITLAMASI
         if(isHS && saat === "09:00–18:00") {
             if(["KJ OPERATÖRÜ", "PLAYOUT OPERATÖRÜ", "BİLGİ İŞLEM", "YAYIN SİSTEMLERİ"].includes(birim)) return;
         }
@@ -144,6 +152,10 @@ function hucreDoldur(gun, saat) {
                 let pIndex = Math.floor(Math.random() * adaylar.length);
                 let p = adaylar[pIndex];
                 
+                // KONTROL: HAFTALIK ÇALIŞMA GÜNÜ 6'YI GEÇMESİN
+                let haftalikCalisma = haftalikProgram[p.isim].filter(x => x && x !== "İZİN").length;
+                if(haftalikCalisma >= 6) continue;
+
                 // 11 SAAT DİNLENME
                 let yorgunMu = false;
                 if(gun > 0 && saat === "06:30–16:00") {
@@ -164,11 +176,29 @@ function hucreDoldur(gun, saat) {
 }
 
 function cardOlustur(p) {
-    return `<div class="birim-card">
+    return `<div class="birim-card" draggable="true" ondragstart="drag(event, '${p.isim}')">
         <span class="birim-tag">${p.birim}</span>
         <span class="p-isim">${p.isim}</span>
         ${p.sabit ? '<span class="lock-icon">🔒</span>' : ''}
     </div>`;
+}
+
+function drag(ev, isim) { ev.dataTransfer.setData("isim", isim); }
+function allowDrop(ev) { ev.preventDefault(); }
+function drop(ev, gun, saat) {
+    ev.preventDefault();
+    let isim = ev.dataTransfer.getData("isim");
+    
+    // ÇAKIŞMA KONTROLÜ (Aynı gün başka vardiya var mı?)
+    let mevcutVardiya = haftalikProgram[isim][gun];
+    if(mevcutVardiya && mevcutVardiya !== "İZİN" && mevcutVardiya !== saat) {
+        alert(`UYARI: ${isim} zaten o gün ${mevcutVardiya} vardiyasında! Çakışma engellendi.`);
+        return;
+    }
+
+    haftalikProgram[isim][gun] = saat;
+    renderTable();
+    ozetGuncelle();
 }
 
 function renderTable() {
@@ -181,19 +211,19 @@ function renderTable() {
     }).join('');
 
     document.getElementById("tableBody").innerHTML = saatler.map(s => `
-        <tr><td>${s}</td>${[0,1,2,3,4,5,6].map(g => `<td>${hucreDoldur(g, s)}</td>`).join('')}</tr>
+        <tr><td>${s}</td>${[0,1,2,3,4,5,6].map(g => `<td ondrop="drop(event, ${g}, '${s}')" ondragover="allowDrop(event)">${hucreDoldur(g, s)}</td>`).join('')}</tr>
     `).join('');
 
     document.getElementById("tableFooter").innerHTML = `<tr><td class="note-cell">NOTLAR</td>${notlar.map(n => `<td class="note-cell">${n || ""}</td>`).join('')}</tr>`;
 }
 
-// ROTASYONLAR
+// ROTASYONLAR (MCR & INGEST)
 function applyMCRRota(birim) {
     const ekip = personeller.filter(p => p.birim === birim);
     const rota = ["06:30–16:00", "06:30–16:00", "16:00–00:00", "16:00–00:00", "00:00–07:00", "00:00–07:00", "İZİN", "İZİN"];
     const ref = new Date(2025, 0, 6);
     ekip.forEach((p, idx) => {
-        if(haftalikProgram[p.isim].includes("İZİN")) return;
+        if(document.getElementById(`check_${p.id}`)?.checked) return;
         for(let i=0; i<7; i++) {
             let d = new Date(mevcutPazartesi.getTime() + (i * 86400000));
             let rI = (Math.floor((d - ref) / 86400000) + (idx * 2)) % 8;
@@ -207,7 +237,7 @@ function applyIngestRota() {
     const rota = ["06:30–16:00", "06:30–16:00", "16:00–00:00", "16:00–00:00", "İZİN", "İZİN"];
     const ref = new Date(2025, 0, 6);
     ekip.forEach((p, idx) => {
-        if(haftalikProgram[p.isim].includes("İZİN")) return;
+        if(document.getElementById(`check_${p.id}`)?.checked) return;
         for(let i=0; i<7; i++) {
             let d = new Date(mevcutPazartesi.getTime() + (i * 86400000));
             let rI = (Math.floor((d - ref) / 86400000) + (idx * 2)) % 6;
@@ -217,12 +247,17 @@ function applyIngestRota() {
 }
 
 function ozetGuncelle() {
-    let h = `<table style="width:100%"><tr><th>Personel</th><th>Birim</th><th>Mesai</th><th>Gece</th><th>HS</th></tr>`;
+    let h = `<table style="width:100%"><tr><th>Personel</th><th>Birim</th><th>Mesai</th><th>Gece</th><th>HS</th><th>Durum</th></tr>`;
     hiyerarsikSirala(personeller).forEach(p => {
         const m = haftalikProgram[p.isim].filter(v => v && v !== "İZİN").length;
         const g = haftalikProgram[p.isim].filter(v => v === "00:00–07:00").length;
-        const hs = (haftalikProgram[p.isim][5] !== "İZİN" ? 1 : 0) + (haftalikProgram[p.isim][6] !== "İZİN" ? 1 : 0);
-        h += `<tr><td>${p.isim}</td><td>${p.birim}</td><td>${m}</td><td>${g}</td><td>${hs}</td></tr>`;
+        const hs = (haftalikProgram[p.isim][5] && haftalikProgram[p.isim][5] !== "İZİN" ? 1 : 0) + (haftalikProgram[p.isim][6] && haftalikProgram[p.isim][6] !== "İZİN" ? 1 : 0);
+        
+        let rowClass = m >= 6 ? 'class="uyari-row"' : '';
+        let durum = m >= 6 ? '⚠️ FAZLA MESAİ' : (m === 0 ? 'İzinli' : 'Normal');
+        if(m === 7) durum = '❌ DİNLENME YOK!';
+
+        h += `<tr ${rowClass}><td>${p.isim}</td><td>${p.birim}</td><td>${m}</td><td>${g}</td><td>${hs}</td><td>${durum}</td></tr>`;
     });
     document.getElementById("ozetTablo").innerHTML = h + `</table>`;
 }
@@ -240,7 +275,7 @@ function checklistOlustur() {
 function manageListOlustur() {
     document.getElementById("manageList").innerHTML = hiyerarsikSirala(personeller).map(p => `
         <div style="background:var(--bg); padding:5px; margin:2px; display:inline-block; border-radius:5px; border:1px solid #ccc;">
-            ${p.isim} ${p.sabit?'🔒':''} <span style="color:red; cursor:pointer;" onclick="personelSil(${p.id})">x</span>
+            ${p.isim} <span style="color:red; cursor:pointer;" onclick="personelSil(${p.id})">x</span>
         </div>
     `).join('');
 }
@@ -270,7 +305,7 @@ function exportExcel() { XLSX.writeFile(XLSX.utils.table_to_book(document.getEle
 function exportPDF() { html2pdf().from(document.getElementById('print-area')).save(); }
 
 function whatsappMesajiOlustur() {
-    let m = `📋 *${mevcutPazartesi.toLocaleDateString('tr-TR')} HAFTASI*\n\n`;
+    let m = `📋 *${mevcutPazartesi.toLocaleDateString('tr-TR')} HAFTASI VARDİYA PLANI*\n\n`;
     gunler.forEach((g, i) => {
         m += `*${g.toUpperCase()}*\n`;
         saatler.forEach(s => {
@@ -280,7 +315,7 @@ function whatsappMesajiOlustur() {
         });
         m += `\n`;
     });
-    navigator.clipboard.writeText(m).then(() => alert("WhatsApp kopyalandı!"));
+    navigator.clipboard.writeText(m).then(() => alert("Hiyerarşik ve Güvenli Liste WhatsApp için kopyalandı!"));
 }
 
 window.onload = () => { checklistOlustur(); manageListOlustur(); tabloyuOlustur(); };
