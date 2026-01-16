@@ -10,11 +10,10 @@ body { font-family: 'Inter', sans-serif; background: var(--bg); margin: 0; font-
 header { display: flex; justify-content: space-between; align-items: center; background: var(--primary); color: white; padding: 15px; border-radius: 12px; margin-bottom: 20px; }
 header h1 span { font-size: 10px; background: var(--blue); padding: 3px 8px; border-radius: 5px; margin-left: 10px; }
 
-/* TIKLAMA SORUNUNU ÇÖZEN PANEL */
 .admin-panel { margin-bottom: 20px; }
 .checklist-grid { 
     display: grid; 
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); 
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); 
     gap: 8px; 
     max-height: 200px; 
     overflow-y: auto; 
@@ -23,39 +22,34 @@ header h1 span { font-size: 10px; background: var(--blue); padding: 3px 8px; bor
     border: 2px solid var(--border); 
     border-radius: 10px;
     position: relative;
-    z-index: 10;
+    z-index: 50; /* Tıklama sorunu için yüksek değer */
 }
 
 .check-item { 
-    background: #f1f5f9; 
-    border: 1px solid #e2e8f0; 
-    padding: 8px; 
-    border-radius: 6px; 
-    display: flex; 
-    align-items: center; 
-    gap: 8px; 
-    cursor: pointer;
-    transition: 0.2s;
+    background: #f1f5f9; border: 1px solid #e2e8f0; padding: 10px; border-radius: 8px; 
+    display: flex; align-items: center; gap: 10px; cursor: pointer; transition: 0.2s;
 }
-.check-item:hover { background: #e2e8f0; }
-.check-item input { pointer-events: none; width: 16px; height: 16px; }
-.check-item label { flex-grow: 1; cursor: pointer; pointer-events: none; }
+.check-item:hover { background: #e2e8f0; border-color: var(--blue); }
+.check-item input { pointer-events: none; width: 18px; height: 18px; }
+.check-item label { flex-grow: 1; cursor: pointer; pointer-events: none; font-weight: 600; }
 
-.table-container { background: white; border-radius: 10px; border: 2px solid var(--primary); overflow: auto; margin-bottom: 20px; }
-table { width: 100%; border-collapse: collapse; min-width: 1250px; }
-th { background: var(--primary); color: white; padding: 10px; font-size: 11px; border-right: 1px solid #334155; }
+.table-container { background: white; border-radius: 10px; border: 2px solid var(--primary); overflow: auto; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+table { width: 100%; border-collapse: collapse; min-width: 1300px; }
+th { background: var(--primary); color: white; padding: 12px; font-size: 11px; border-right: 1px solid #334155; }
 td { border: 1px solid var(--border); padding: 6px; vertical-align: top; background: #fff; }
-td:first-child { background: #f8fafc; font-weight: 800; color: var(--primary); width: 100px; text-align: center; vertical-align: middle; border-right: 3px solid var(--primary); }
+td:first-child { background: #f8fafc; font-weight: 900; color: var(--primary); width: 110px; text-align: center; vertical-align: middle; border-right: 3px solid var(--primary); font-size: 12px; }
 
-.birim-card { border-left: 4px solid var(--blue); padding: 4px 6px; margin-bottom: 4px; background: #fefefe; border: 1px solid #e2e8f0; border-left-color: var(--blue); border-radius: 4px; }
-.birim-tag { font-size: 7px; font-weight: 900; color: var(--blue); display: block; text-transform: uppercase; }
-.p-isim { font-size: 10px; font-weight: 700; color: #1e293b; }
+/* Hücre içi personel kartları */
+.birim-card { border-left: 4px solid var(--blue); padding: 5px 8px; margin-bottom: 5px; background: #fff; border: 1px solid #e2e8f0; border-left-color: var(--blue); border-radius: 4px; box-shadow: 1px 1px 3px rgba(0,0,0,0.02); }
+.birim-tag { font-size: 8px; font-weight: 900; color: var(--blue); display: block; text-transform: uppercase; margin-bottom: 2px; }
+.p-isim { font-size: 10px; font-weight: 700; color: #1e293b; white-space: nowrap; }
 
 .stats-table { width: 100%; border-collapse: collapse; }
-.stats-table th, .stats-table td { padding: 8px; border-bottom: 1px solid #f1f5f9; text-align: left; }
+.stats-table th, .stats-table td { padding: 10px; border-bottom: 1px solid #f1f5f9; text-align: left; }
 
-button { cursor: pointer; border: none; padding: 8px 15px; border-radius: 6px; font-weight: 700; }
+button { cursor: pointer; border: none; padding: 8px 15px; border-radius: 6px; font-weight: 700; transition: 0.2s; }
 .btn-primary { background: var(--blue); color: white; }
+.btn-primary:hover { opacity: 0.9; transform: scale(1.02); }
 .btn-wa { background: #16a34a; color: white; }
 .pulse { animation: pulse 2s infinite; }
 @keyframes pulse { 0% { box-shadow: 0 0 0 0px rgba(29,78,216,0.4); } 70% { box-shadow: 0 0 0 10px rgba(29,78,216,0); } 100% { box-shadow: 0 0 0 0px rgba(29,78,216,0); } }

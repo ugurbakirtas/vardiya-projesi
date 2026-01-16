@@ -1,4 +1,8 @@
-// DEĞİŞTİRİLEMEZ HİYERARŞİ SIRALAMASI
+/**
+ * PRO-Vardiya v12.9
+ * DEĞİŞTİRİLEMEZ HİYERARŞİ VE KURAL SETİ
+ */
+
 const birimSiralamasi = [
     "TEKNİK YÖNETMEN", 
     "SES OPERATÖRÜ", 
@@ -74,7 +78,7 @@ function getMonday(d) {
 
 function checklistOlustur() {
     const container = document.getElementById("personelChecklist");
-    // Hiyerarşik Sıralama
+    // Listeyi hiyerarşiye göre sırala
     const sirali = [...personeller].sort((a, b) => birimSiralamasi.indexOf(a.birim) - birimSiralamasi.indexOf(b.birim));
     
     container.innerHTML = sirali.map(p => `
@@ -92,7 +96,7 @@ function toggleCheckbox(id) {
 }
 
 function tabloyuOlustur() {
-    document.getElementById("tarihAraligi").innerText = `${mevcutPazartesi.toLocaleDateString('tr-TR')} Haftası`;
+    document.getElementById("tarihAraligi").innerText = `${mevcutPazartesi.toLocaleDateString('tr-TR')} Haftası Planı`;
     haftalikProgram = {};
     
     personeller.forEach(p => {
@@ -100,12 +104,12 @@ function tabloyuOlustur() {
         haftalikProgram[p.isim] = isSelected ? Array(7).fill("İZİN") : Array(7).fill(null);
     });
 
-    // MCR / INGEST Rotaları (Sabit Döngü)
+    // Sabit Rotalar
     applyMCRRota("24TV MCR OPERATÖRÜ");
     applyMCRRota("360TV MCR OPERATÖRÜ");
     applyIngestRota();
 
-    // Özel Kişi Kuralları
+    // Özel kurallar
     if(haftalikProgram["ZAFER AKAR"] && !haftalikProgram["ZAFER AKAR"].includes("İZİN")) {
         for(let i=0; i<5; i++) haftalikProgram["ZAFER AKAR"][i] = "06:30–16:00";
         haftalikProgram["ZAFER AKAR"][5] = "İZİN"; haftalikProgram["ZAFER AKAR"][6] = "İZİN";
@@ -132,20 +136,20 @@ function renderTable() {
 }
 
 function hucreDoldur(gun, saat) {
-    let res = "";
+    let html = "";
     const isHS = (gun >= 5);
-    // Hiyerarşik Sıralama ile Doldurma
-    const siraliP = [...personeller].sort((a, b) => birimSiralamasi.indexOf(a.birim) - birimSiralamasi.indexOf(b.birim));
+    
+    // HİYERARŞİK SIRALAMA (Hücre içi isimlerin dizilimi)
+    const mevcutlar = personeller.filter(p => haftalikProgram[p.isim][gun] === saat);
+    mevcutlar.sort((a, b) => birimSiralamasi.indexOf(a.birim) - birimSiralamasi.indexOf(b.birim));
 
-    siraliP.forEach(p => {
-        if(haftalikProgram[p.isim][gun] === saat) {
-            res += `<div class="birim-card"><span class="birim-tag">${p.birim}</span><span class="p-isim">${p.isim}</span></div>`;
-        }
+    mevcutlar.forEach(p => {
+        html += `<div class="birim-card"><span class="birim-tag">${p.birim}</span><span class="p-isim">${p.isim}</span></div>`;
     });
 
-    if(["12:00–22:00", "DIŞ YAYIN", "00:00–07:00", "İZİN"].includes(saat)) return res;
+    // Otomatik atama mantığı
+    if(["12:00–22:00", "DIŞ YAYIN", "00:00–07:00", "İZİN"].includes(saat)) return html;
 
-    // Otomatik Atama Kuralları
     birimSiralamasi.forEach(birim => {
         if(birim.includes("MCR") || birim.includes("INGEST")) return;
         let kap = 0;
@@ -158,7 +162,7 @@ function hucreDoldur(gun, saat) {
         } else if(["PLAYOUT OPERATÖRÜ", "KJ OPERATÖRÜ"].includes(birim)) {
             kap = 2;
         } else if(birim === "BİLGİ İŞLEM" || birim === "YAYIN SİSTEMLERİ") {
-            kap = (saat === "09:00–18:00" && !isHS ? 1 : 0);
+            kap = (!isHS && saat === "09:00–18:00") ? 1 : 0;
         }
 
         let adaylar = personeller.filter(p => p.birim === birim && !haftalikProgram[p.isim][gun]);
@@ -168,14 +172,25 @@ function hucreDoldur(gun, saat) {
             if(adaylar.length > 0) {
                 let p = adaylar.splice(Math.floor(Math.random() * adaylar.length), 1)[0];
                 haftalikProgram[p.isim][gun] = saat;
-                res += `<div class="birim-card"><span class="birim-tag">${birim}</span><span class="p-isim">${p.isim}</span></div>`;
+                // Yeni ekleneni de hiyerarşiye uygun göstermek için tabloyu yeniden render etmiyoruz, 
+                // ancak bu fonksiyon sonunda dönen html her zaman hiyerarşiktir çünkü önce mevcutları ekledik.
+                // Not: Otomatik atananlar bir sonraki tetiklenmede tam sıraya girer.
             }
         }
     });
-    return res;
+
+    // Otomatik atananlardan sonra listeyi tekrar sıralı al
+    let finalListe = personeller.filter(p => haftalikProgram[p.isim][gun] === saat);
+    finalListe.sort((a, b) => birimSiralamasi.indexOf(a.birim) - birimSiralamasi.indexOf(b.birim));
+    
+    let resHtml = "";
+    finalListe.forEach(p => {
+        resHtml += `<div class="birim-card"><span class="birim-tag">${p.birim}</span><span class="p-isim">${p.isim}</span></div>`;
+    });
+
+    return resHtml;
 }
 
-// YARDIMCI FONKSİYONLAR (MCR/INGEST Rotaları)
 function applyIngestRota() {
     const ekip = personeller.filter(p => p.birim === "INGEST OPERATÖRÜ");
     const rota = ["06:30–16:00", "06:30–16:00", "16:00–00:00", "16:00–00:00", "İZİN", "İZİN"];
@@ -205,30 +220,32 @@ function applyMCRRota(birim) {
 }
 
 function ozetGuncelle() {
-    let h = `<table class="stats-table"><thead><tr><th>Personel</th><th>Birim</th><th>Mesai</th></tr></thead><tbody>`;
+    let h = `<table class="stats-table"><thead><tr><th>Personel</th><th>Birim</th><th>Mesai</th><th>Gece</th></tr></thead><tbody>`;
     const sirali = [...personeller].sort((a, b) => birimSiralamasi.indexOf(a.birim) - birimSiralamasi.indexOf(b.birim));
     sirali.forEach(p => {
         const mesai = haftalikProgram[p.isim].filter(v => v && v !== "İZİN").length;
-        h += `<tr><td><strong>${p.isim}</strong></td><td><small>${p.birim}</small></td><td>${mesai} G</td></tr>`;
+        const gece = haftalikProgram[p.isim].filter(v => v === "00:00–07:00").length;
+        h += `<tr><td><strong>${p.isim}</strong></td><td><small>${p.birim}</small></td><td>${mesai} G</td><td>${gece} G</td></tr>`;
     });
     document.getElementById("ozetTablo").innerHTML = h + "</tbody></table>";
 }
 
 function haftaDegistir(g) { mevcutPazartesi.setDate(mevcutPazartesi.getDate() + g); tabloyuOlustur(); }
-function exportExcel() { XLSX.writeFile(XLSX.utils.table_to_book(document.getElementById("vardiyaTablosu")), "Vardiya_Listesi.xlsx"); }
+function exportExcel() { XLSX.writeFile(XLSX.utils.table_to_book(document.getElementById("vardiyaTablosu")), "Teknik_Vardiya.xlsx"); }
 function exportPDF() { html2pdf().from(document.getElementById('print-area')).save('Vardiya_Listesi.pdf'); }
 function sifirla() { localStorage.clear(); location.reload(); }
 function whatsappMesajiOlustur() {
-    let m = `📋 *${mevcutPazartesi.toLocaleDateString('tr-TR')} HAFTALIK VARDİYA*\n\n`;
+    let m = `📋 *${mevcutPazartesi.toLocaleDateString('tr-TR')} VARDİYA PLANI*\n\n`;
     gunler.forEach((g, i) => {
         m += `*${g.toUpperCase()}*\n`;
         saatler.forEach(s => {
-            let p = personeller.filter(p => haftalikProgram[p.isim][i] === s).map(x => x.isim);
-            if(p.length > 0) m += `▫️ ${s}: ${p.join(", ")}\n`;
+            let list = personeller.filter(p => haftalikProgram[p.isim][i] === s);
+            list.sort((a, b) => birimSiralamasi.indexOf(a.birim) - birimSiralamasi.indexOf(b.birim));
+            if(list.length > 0) m += `▫️ ${s}: ${list.map(x => x.isim).join(", ")}\n`;
         });
         m += `\n`;
     });
-    navigator.clipboard.writeText(m).then(() => alert("Kopyalandı!"));
+    navigator.clipboard.writeText(m).then(() => alert("WhatsApp formatında kopyalandı!"));
 }
 
 window.onload = () => { checklistOlustur(); tabloyuOlustur(); };
