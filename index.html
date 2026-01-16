@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PRO-Vardiya v17.5 | Full Control</title>
+  <title>PRO-Vardiya v18.0 | Hafta İçi-Sonu Kontrol</title>
   <link rel="stylesheet" href="style.css">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -13,7 +13,7 @@
   <div class="app-wrapper">
     <header class="no-print main-header">
       <div class="logo-area">
-        <div class="badge">V17.5 PREMIUM</div>
+        <div class="badge">V18.0 DİNAMİK</div>
         <h1>TEKNİK <span>VARDİYA</span></h1>
         <p id="tarihAraligi" class="date-display">Yükleniyor...</p>
       </div>
@@ -24,7 +24,7 @@
       </div>
       <div class="utility-controls">
         <button onclick="toggleTheme()" class="btn-circle">🌓</button>
-        <button onclick="toggleAdminPanel()" class="btn-circle">⚙️ AYARLAR</button>
+        <button onclick="toggleAdminPanel()" class="btn-circle">⚙️ YÖNETİM</button>
       </div>
     </header>
 
@@ -32,7 +32,7 @@
       <div class="section-card">
         <div class="section-header-compact">
           <h3>İzinli Personel Seçimi</h3>
-          <input type="text" id="personelAra" placeholder="🔍 İsim Ara..." onkeyup="checklistFiltrele()">
+          <input type="text" id="personelAra" placeholder="🔍 Personel Ara..." onkeyup="checklistFiltrele()">
         </div>
         <div id="personelChecklist" class="checklist-horizontal-grid"></div>
       </div>
@@ -40,25 +40,26 @@
 
     <div id="adminPanel" class="admin-overlay no-print hidden">
       <div class="admin-modal">
-        <div class="admin-modal-header">
-          <h2>Sistem ve Kapasite Yönetimi</h2>
+        <div class="admin-header">
+          <h2>Vardiya Kapasite ve Personel Yönetimi</h2>
           <button onclick="toggleAdminPanel()" class="btn-close">×</button>
         </div>
-        <div class="admin-modal-body">
-          <div class="admin-grid-layout">
-            <div class="admin-sidebar">
-              <h4>Personel/Birim Ekle</h4>
+        <div class="admin-body">
+          <div class="admin-layout">
+            <div class="admin-side">
+              <h4>Personel / Birim</h4>
               <input type="text" id="yeniBirim" placeholder="Yeni Birim Adı">
               <button onclick="birimEkle()" class="btn-save">Birim Ekle</button>
               <hr>
-              <input type="text" id="yeniIsim" placeholder="Personel Ad Soyad">
+              <input type="text" id="yeniIsim" placeholder="İsim Soyad">
               <select id="birimSec"></select>
-              <button onclick="personelEkle()" class="btn-save">Personel Kaydet</button>
-              <button onclick="sifirla()" class="btn-danger-outline">Sistemi Sıfırla</button>
+              <button onclick="personelEkle()" class="btn-save">Kaydet</button>
+              <button onclick="sifirla()" class="btn-reset">Sıfırla</button>
             </div>
             <div class="admin-main">
-              <h4>Vardiya Başına Personel Sayıları</h4>
-              <div id="kapasiteAyarlari"></div>
+              <h4>Hafta İçi / Hafta Sonu Kapasiteleri</h4>
+              <p><small>* İlk kutu Hafta İçi, ikinci kutu (kırmızımsı) Hafta Sonu mevcudunu belirler. 0 yazılan vardiya silinir.</small></p>
+              <div id="kapasiteListesi"></div>
             </div>
           </div>
         </div>
@@ -73,14 +74,12 @@
             <tbody id="tableBody"></tbody>
           </table>
         </div>
-        <div class="analysis-section">
-          <div id="ozetTablo"></div>
-        </div>
+        <div id="ozetTablo" class="analysis-section"></div>
       </div>
-      <div class="footer-actions no-print">
-         <button onclick="whatsappMesajiOlustur()" class="btn-wa">WhatsApp'a Kopyala</button>
-         <button onclick="exportExcel()" class="btn-ex">Excel</button>
-         <button onclick="exportPDF()" class="btn-pdf">PDF</button>
+      <div class="footer-buttons no-print">
+          <button onclick="whatsappMesajiOlustur()" class="wa-btn">WhatsApp</button>
+          <button onclick="exportExcel()" class="ex-btn">Excel</button>
+          <button onclick="exportPDF()" class="pdf-btn">PDF</button>
       </div>
     </main>
   </div>
