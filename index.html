@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PRO-Vardiya v19.0 | Tam Denetim</title>
+  <title>PRO-Vardiya v20.0 | Kural Motoru</title>
   <link rel="stylesheet" href="style.css">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -13,7 +13,7 @@
   <div class="app-wrapper">
     <header class="no-print main-header">
       <div class="logo-area">
-        <div class="badge">V19.0</div>
+        <div class="badge">V20.0 SMART</div>
         <h1>TEKNİK <span>VARDİYA</span></h1>
         <p id="tarihAraligi" class="date-display">Yükleniyor...</p>
       </div>
@@ -28,42 +28,48 @@
       </div>
     </header>
 
-    <section class="checklist-section no-print">
-      <div class="section-card">
-        <div class="section-header-compact">
-          <h3>İzinli Personel Seçimi</h3>
-          <input type="text" id="personelAra" placeholder="🔍 Personel Ara..." onkeyup="checklistFiltrele()">
-        </div>
-        <div id="personelChecklist" class="checklist-horizontal-grid"></div>
-      </div>
-    </section>
-
     <div id="adminPanel" class="admin-overlay no-print hidden">
       <div class="admin-modal">
         <div class="admin-header">
-          <h2>Sistem Ayarları & Kapasite Yönetimi</h2>
+          <h2>Gelişmiş Algoritma ve Kural Yönetimi</h2>
           <button onclick="toggleAdminPanel()" class="btn-close">×</button>
         </div>
         <div class="admin-body">
-          <div class="admin-layout">
-            <div class="admin-side">
-              <h4>Hızlı İşlemler</h4>
-              <button onclick="birimEkle()" class="btn-save">Birim Ekle</button>
-              <button onclick="personelEkle()" class="btn-save">Personel Ekle</button>
-              <hr>
-              <button onclick="ozelKosulEkle()" class="btn-rule">➕ KOŞUL/KURAL EKLE</button>
-              <p style="font-size:9px; color:#666; margin-top:5px">Eklediğiniz koşullar plana not olarak eklenir.</p>
-              <hr>
-              <button onclick="sifirla()" class="btn-reset">SİSTEMİ SIFIRLA</button>
+          <div class="admin-tabs">
+            <button onclick="tabDegistir('kapasite')" class="tab-btn active">Kapasiteler</button>
+            <button onclick="tabDegistir('kurallar')" class="tab-btn">Algoritma Kuralları</button>
+            <button onclick="tabDegistir('personel')" class="tab-btn">Personel/Birim</button>
+          </div>
+
+          <div id="tab-kapasite" class="tab-content">
+             <h4>Vardiya Başına Personel Sayıları</h4>
+             <div id="kapasiteListesi"></div>
+          </div>
+
+          <div id="tab-kurallar" class="tab-content hidden">
+            <h4>Yeni Algoritma Kuralı Ekle</h4>
+            <div class="kural-form">
+              <select id="kuralPersonel"></select>
+              <select id="kuralGun">
+                <option value="Hepsi">Tüm Günler</option>
+                <option value="0">Pazartesi</option><option value="1">Salı</option><option value="2">Çarşamba</option>
+                <option value="3">Perşembe</option><option value="4">Cuma</option><option value="5">Cumartesi</option><option value="6">Pazar</option>
+              </select>
+              <select id="kuralSaat"></select>
+              <select id="kuralTip">
+                <option value="YASAK">Çalışamaz (Yasakla)</option>
+                <option value="ZORUNLU">Burada Çalışsın (Sabitle)</option>
+              </select>
+              <button onclick="kuralKaydet()" class="btn-rule">KURALI EKLE</button>
             </div>
-            <div class="admin-main">
-              <h4>Vardiya Kapasiteleri (Hafta İçi / Hafta Sonu)</h4>
-              <div id="kapasiteListesi"></div>
-              
-              <div class="active-rules-box">
-                <h4>Aktif Koşullar</h4>
-                <div id="aktifKosullar"></div>
-              </div>
+            <div id="aktifKurallarListesi" class="rules-grid"></div>
+          </div>
+
+          <div id="tab-personel" class="tab-content hidden">
+            <div class="admin-layout">
+               <button onclick="birimEkle()" class="btn-save">Yeni Birim Ekle</button>
+               <button onclick="personelEkle()" class="btn-save">Yeni Personel Ekle</button>
+               <button onclick="sifirla()" class="btn-reset">Sistemi Sıfırla</button>
             </div>
           </div>
         </div>
@@ -79,13 +85,11 @@
           </table>
         </div>
         <div id="ozetTablo" class="analysis-section"></div>
-        <div id="kosulNotlari" class="rules-footer"></div>
       </div>
-      
       <div class="footer-buttons no-print">
-          <button onclick="whatsappMesajiOlustur()" class="wa-btn">WhatsApp'a Kopyala</button>
-          <button onclick="exportExcel()" class="ex-btn">Excel İndir</button>
-          <button onclick="exportPDF()" class="pdf-btn">PDF Kaydet</button>
+          <button onclick="whatsappMesajiOlustur()" class="wa-btn">WhatsApp</button>
+          <button onclick="exportExcel()" class="ex-btn">Excel</button>
+          <button onclick="exportPDF()" class="pdf-btn">PDF</button>
       </div>
     </main>
   </div>
