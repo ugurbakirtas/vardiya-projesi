@@ -1,55 +1,60 @@
-// Hata yönetimli başlangıç
-let mevcutPazartesi;
-try {
-    mevcutPazartesi = getMonday(new Date());
-} catch (e) {
-    mevcutPazartesi = new Date();
-}
-
+let mevcutPazartesi = getMonday(new Date());
 let haftalikProgram = {};
 
 const gunler = ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"];
 const saatler = ["06:30–16:00", "09:00–18:00", "12:00–22:00", "16:00–00:00", "00:00–07:00", "DIŞ YAYIN"];
 
-const personeller = [
-    { isim: "VOLKAN DEMİRBAŞ", birim: "24TV-360TV BİLGİ İŞLEM", gece: false },
-    { isim: "GÖKHAN BAĞIŞ", birim: "24TV-360TV BİLGİ İŞLEM", gece: false },
-    { isim: "HAKAN ELİPEK", birim: "24TV-360TV BİLGİ İŞLEM", gece: false },
-    { isim: "ÖZKAN KAYA", birim: "24TV-360TV BİLGİ İŞLEM", gece: false },
-    { isim: "YİĞİT DAYI", birim: "24TV-360TV YAYIN SİSTEMLERİ", gece: true },
-    { isim: "FERDİ TOPUZ", birim: "24TV-360TV YAYIN SİSTEMLERİ", gece: true },
-    { isim: "BEYHAN KARAKAŞ", birim: "24TV-360TV YAYIN SİSTEMLERİ", gece: true },
-    { isim: "FATİH AYBEK", birim: "24TV-360TV YAYIN SİSTEMLERİ", gece: true },
-    { isim: "AKİF KOÇ", birim: "24TV-360TV YAYIN SİSTEMLERİ", gece: true },
-    { isim: "KADİR YILMAZ", birim: "24TV MCR OPERATÖRÜ", gece: true },
-    { isim: "FARUK YILMAZ", birim: "24TV MCR OPERATÖRÜ", gece: true },
-    { isim: "YUSUF HENEK", birim: "24TV MCR OPERATÖRÜ", gece: true },
-    { isim: "SEDA KAYA", birim: "24TV MCR OPERATÖRÜ", gece: true },
-    { isim: "EMRULLAH AHLATÇI", birim: "360TV MCR OPERATÖRÜ", gece: true },
-    { isim: "EREN KAZAN", birim: "360TV MCR OPERATÖRÜ", gece: true },
-    { isim: "MUSAB YAKUB DEMİRBAŞ", birim: "360TV MCR OPERATÖRÜ", gece: true },
-    { isim: "BÜKRE YAVUZ", birim: "360TV MCR OPERATÖRÜ", gece: true },
-    { isim: "YUNUS EMRE YAYLA", birim: "Teknik Yönetmen", gece: true },
-    { isim: "HASAN CAN SAĞLAM", birim: "Teknik Yönetmen", gece: true },
-    { isim: "MEHMET BERKMAN", birim: "Teknik Yönetmen", gece: true },
-    { isim: "EKREM FİDAN", birim: "Teknik Yönetmen", gece: true },
-    { isim: "CAN ŞENTUNALI", birim: "Teknik Yönetmen", gece: true },
-    { isim: "BARIŞ İNCE", birim: "Teknik Yönetmen", gece: true },
-    { isim: "ZAFER AKAR", birim: "Ses Operatörü", gece: false },
-    { isim: "ENES KALE", birim: "Ses Operatörü", gece: false },
-    { isim: "ANIL RİŞVAN", birim: "Ses Operatörü", gece: false },
-    { isim: "ERSAN TİLBE", birim: "Ses Operatörü", gece: false },
-    { isim: "ULVİ MUTLUBAŞ", birim: "Ses Operatörü", gece: false },
-    { isim: "OSMAN DİNÇER", birim: "Ses Operatörü", gece: false },
-    { isim: "DOĞUŞ MALGIL", birim: "Ses Operatörü", gece: false },
-    { isim: "ERDOĞAN KÜÇÜKKAYA", birim: "Ses Operatörü", gece: false },
-    { isim: "SENA MİNARECİ", birim: "Playout Operatörü", gece: true },
-    { isim: "YUSUF İSLAM TORUN", birim: "KJ Operatörü", gece: false },
-    { isim: "RAMAZAN KOÇAK", birim: "Ingest Operatörü", gece: true },
-    { isim: "Selin", birim: "Uplink", gece: true }
+// ÖZEL BİRİM SIRALAMASI
+const birimSiralamasi = [
+    "Teknik Yönetmen",
+    "Ses Operatörü",
+    "Playout Operatörü",
+    "KJ Operatörü",
+    "24TV - 360TV INGEST OPERATÖRÜ",
+    "Uplink",
+    "24TV-360TV BİLGİ İŞLEM",
+    "24TV-360TV YAYIN SİSTEMLERİ",
+    "24TV MCR OPERATÖRÜ",
+    "360TV MCR OPERATÖRÜ"
 ];
 
-const birimler = [...new Set(personeller.map(p => p.birim))];
+const personeller = [
+    { isim: "VOLKAN DEMİRBAŞ", birim: "24TV-360TV BİLGİ İŞLEM" },
+    { isim: "GÖKHAN BAĞIŞ", birim: "24TV-360TV BİLGİ İŞLEM" },
+    { isim: "HAKAN ELİPEK", birim: "24TV-360TV BİLGİ İşLEM" },
+    { isim: "ÖZKAN KAYA", birim: "24TV-360TV BİLGİ İŞLEM" },
+    { isim: "YİĞİT DAYI", birim: "24TV-360TV YAYIN SİSTEMLERİ" },
+    { isim: "FERDİ TOPUZ", birim: "24TV-360TV YAYIN SİSTEMLERİ" },
+    { isim: "BEYHAN KARAKAŞ", birim: "24TV-360TV YAYIN SİSTEMLERİ" },
+    { isim: "FATİH AYBEK", birim: "24TV-360TV YAYIN SİSTEMLERİ" },
+    { isim: "AKİF KOÇ", birim: "24TV-360TV YAYIN SİSTEMLERİ" },
+    { isim: "KADİR YILMAZ", birim: "24TV MCR OPERATÖRÜ" },
+    { isim: "FARUK YILMAZ", birim: "24TV MCR OPERATÖRÜ" },
+    { isim: "YUSUF HENEK", birim: "24TV MCR OPERATÖRÜ" },
+    { isim: "SEDA KAYA", birim: "24TV MCR OPERATÖRÜ" },
+    { isim: "EMRULLAH AHLATÇI", birim: "360TV MCR OPERATÖRÜ" },
+    { isim: "EREN KAZAN", birim: "360TV MCR OPERATÖRÜ" },
+    { isim: "MUSAB YAKUB DEMİRBAŞ", birim: "360TV MCR OPERATÖRÜ" },
+    { isim: "BÜKRE YAVUZ", birim: "360TV MCR OPERATÖRÜ" },
+    { isim: "YUNUS EMRE YAYLA", birim: "Teknik Yönetmen" },
+    { isim: "HASAN CAN SAĞLAM", birim: "Teknik Yönetmen" },
+    { isim: "MEHMET BERKMAN", birim: "Teknik Yönetmen" },
+    { isim: "EKREM FİDAN", birim: "Teknik Yönetmen" },
+    { isim: "CAN ŞENTUNALI", birim: "Teknik Yönetmen" },
+    { isim: "BARIŞ İNCE", birim: "Teknik Yönetmen" },
+    { isim: "ZAFER AKAR", birim: "Ses Operatörü" },
+    { isim: "ENES KALE", birim: "Ses Operatörü" },
+    { isim: "ANIL RİŞVAN", birim: "Ses Operatörü" },
+    { isim: "ERSAN TİLBE", birim: "Ses Operatörü" },
+    { isim: "ULVİ MUTLUBAŞ", birim: "Ses Operatörü" },
+    { isim: "OSMAN DİNÇER", birim: "Ses Operatörü" },
+    { isim: "DOĞUŞ MALGIL", birim: "Ses Operatörü" },
+    { isim: "ERDOĞAN KÜÇÜKKAYA", birim: "Ses Operatörü" },
+    { isim: "SENA MİNARECİ", birim: "Playout Operatörü" },
+    { isim: "YUSUF İSLAM TORUN", birim: "KJ Operatörü" },
+    { isim: "RAMAZAN KOÇAK", birim: "24TV - 360TV INGEST OPERATÖRÜ" },
+    { isim: "Selin", birim: "Uplink" }
+];
 
 function getMonday(d) {
     d = new Date(d);
@@ -59,9 +64,12 @@ function getMonday(d) {
 
 function checklistOlustur() {
     const container = document.getElementById("personelChecklist");
-    if(!container) return;
-    const sirali = [...personeller].sort((a,b) => a.birim.localeCompare(b.birim));
-    container.innerHTML = sirali.map(p => `
+    // Birim sıralamasına göre personelleri diz
+    const siraliPersoneller = [...personeller].sort((a, b) => {
+        return birimSiralamasi.indexOf(a.birim) - birimSiralamasi.indexOf(b.birim);
+    });
+
+    container.innerHTML = siraliPersoneller.map(p => `
         <div class="check-item">
             <input type="checkbox" id="check_${p.isim.replace(/\s+/g, '_')}" onchange="tabloyuOlustur(false)">
             <label for="check_${p.isim.replace(/\s+/g, '_')}"><strong>${p.isim}</strong><br><small>${p.birim}</small></label>
@@ -70,17 +78,15 @@ function checklistOlustur() {
 }
 
 function tabloyuOlustur(devirModu) {
-    const tarihText = document.getElementById("tarihAraligi");
-    if(tarihText) tarihText.innerText = `${mevcutPazartesi.toLocaleDateString('tr-TR')} Haftası`;
+    document.getElementById("tarihAraligi").innerText = `${mevcutPazartesi.toLocaleDateString('tr-TR')} Haftası`;
     
     haftalikProgram = {};
     personeller.forEach(p => {
-        const checkId = `check_${p.isim.replace(/\s+/g, '_')}`;
-        const isSelected = document.getElementById(checkId)?.checked;
+        const isSelected = document.getElementById(`check_${p.isim.replace(/\s+/g, '_')}`)?.checked;
         haftalikProgram[p.isim] = isSelected ? Array(7).fill("İZİN") : Array(7).fill(null);
     });
 
-    // İzin Atama
+    // İzin Dağıtımı (Haftalık 2 Gün)
     personeller.forEach(p => {
         if(haftalikProgram[p.isim][0] !== "İZİN") {
             let count = 0;
@@ -95,7 +101,7 @@ function tabloyuOlustur(devirModu) {
         }
     });
 
-    // Öncelikli Gece Vardiyası Ataması (00:00-07:00)
+    // ÖNCELİKLİ GECE ATAMALARI (Teknik Yönetmen & MCR)
     for(let i=0; i<7; i++) {
         planlaZorunlu(i, "Teknik Yönetmen", "00:00–07:00", 1);
         planlaZorunlu(i, "24TV MCR OPERATÖRÜ", "00:00–07:00", 1);
@@ -132,12 +138,12 @@ function renderTable() {
     saatler.forEach(saat => {
         bHtml += `<tr><td><strong>${saat}</strong></td>`;
         for (let i = 0; i < 7; i++) {
-            bHtml += `<td class="drop-zone" data-gun="${i}" data-saat="${saat}">${hucreIcerik(i, saat)}</td>`;
+            bHtml += `<td class="drop-zone" data-gun="${i}" data-saat="${saat}">${hucreIcerikGetir(i, saat)}</td>`;
         }
         bHtml += `</tr>`;
     });
     
-    // İzinliler
+    // İzinliler Satırı
     bHtml += `<tr style="background:#f8fafc"><td><strong>İZİNLİLER</strong></td>`;
     for (let i = 0; i < 7; i++) {
         let content = personeller.filter(p => haftalikProgram[p.isim][i] === "İZİN").map(p => `
@@ -150,9 +156,9 @@ function renderTable() {
     document.getElementById("tableBody").innerHTML = bHtml;
 }
 
-function hucreIcerik(gun, saat) {
+function hucreIcerikGetir(gun, saat) {
     let html = "";
-    // Zaten atanmış olanlar (geceler)
+    // Zaten planlanmış olanlar (Örn: Geceler)
     personeller.forEach(p => {
         if(haftalikProgram[p.isim][gun] === saat) {
             html += `<div class="birim-card" draggable="true" data-p="${p.isim}">
@@ -161,10 +167,10 @@ function hucreIcerik(gun, saat) {
         }
     });
 
-    if(saat === "00:00–07:00") return html; // Geceler bitti
+    if(saat === "00:00–07:00") return html;
 
-    // Diğerlerini doldur
-    birimler.forEach(birim => {
+    // Diğer birimleri sıralamaya göre doldur
+    birimSiralamasi.forEach(birim => {
         let kap = 0;
         if (birim === "Teknik Yönetmen") {
             if (["06:30–16:00", "16:00–00:00"].includes(saat)) kap = 2;
@@ -182,14 +188,14 @@ function hucreIcerik(gun, saat) {
         } else if (saat === "06:30–16:00") kap = 1;
 
         let adaylar = personeller.filter(p => p.birim === birim && !haftalikProgram[p.isim][gun]);
-        let suan = personeller.filter(p => p.birim === birim && haftalikProgram[p.isim][gun] === saat).length;
+        let suanHücrede = personeller.filter(p => p.birim === birim && haftalikProgram[p.isim][gun] === saat).length;
         
-        for(let k=0; k < (kap - suan); k++) {
+        for(let k=0; k < (kap - suanHücrede); k++) {
             if(adaylar.length > 0) {
-                let s = adaylar.splice(Math.floor(Math.random() * adaylar.length), 1)[0];
-                haftalikProgram[s.isim][gun] = saat;
-                html += `<div class="birim-card" draggable="true" data-p="${s.isim}">
-                    <span class="birim-tag">${birim}</span><span class="p-isim">${s.isim}</span>
+                let p = adaylar.splice(Math.floor(Math.random() * adaylar.length), 1)[0];
+                haftalikProgram[p.isim][gun] = saat;
+                html += `<div class="birim-card" draggable="true" data-p="${p.isim}">
+                    <span class="birim-tag">${birim}</span><span class="p-isim">${p.isim}</span>
                 </div>`;
             }
         }
@@ -222,19 +228,20 @@ function draggablesHazirla() {
 }
 
 function ozetGuncelle() {
-    let html = `<table style="width:100%; font-size:10px"><thead><tr><th>Personel</th><th>Birim</th><th>Mesai</th><th>Gece</th></tr></thead><tbody>`;
-    [...personeller].sort((a,b) => a.birim.localeCompare(b.birim)).forEach(p => {
+    let html = `<table><thead><tr><th>Personel</th><th>Birim</th><th>Mesai</th><th>Gece</th></tr></thead><tbody>`;
+    const sirali = [...personeller].sort((a, b) => birimSiralamasi.indexOf(a.birim) - birimSiralamasi.indexOf(b.birim));
+    
+    sirali.forEach(p => {
         const m = haftalikProgram[p.isim].filter(v => v && v !== "İZİN").length;
         const g = haftalikProgram[p.isim].filter(v => v === "00:00–07:00").length;
         html += `<tr><td>${p.isim}</td><td>${p.birim}</td><td>${m} G</td><td>${g} G</td></tr>`;
     });
     html += `</tbody></table>`;
-    const ozet = document.getElementById("ozetTablo");
-    if(ozet) ozet.innerHTML = html;
+    document.getElementById("ozetTablo").innerHTML = html;
 }
 
 function whatsappMesajiOlustur() {
-    let metin = `📋 *HAFTALIK VARDİYA PLANI* \n\n`;
+    let metin = `📋 *HAFTALIK TEKNİK VARDİYA PLANI* \n\n`;
     gunler.forEach((gun, idx) => {
         metin += `*${gun.toUpperCase()}*\n`;
         saatler.forEach(s => {
@@ -243,7 +250,7 @@ function whatsappMesajiOlustur() {
         });
         metin += `\n`;
     });
-    navigator.clipboard.writeText(metin).then(() => alert("Mesaj kopyalandı!"));
+    navigator.clipboard.writeText(metin).then(() => alert("Liste WhatsApp için kopyalandı!"));
 }
 
 function haftaDegistir(g) { mevcutPazartesi.setDate(mevcutPazartesi.getDate() + g); tabloyuOlustur(false); }
@@ -251,7 +258,6 @@ function exportExcel() { XLSX.writeFile(XLSX.utils.table_to_book(document.getEle
 function exportPDF() { html2pdf().from(document.getElementById('print-area')).save(); }
 function sifirla() { localStorage.clear(); location.reload(); }
 
-// Başlatıcı
 window.onload = () => {
     checklistOlustur();
     tabloyuOlustur(false);
