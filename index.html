@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PRO-Vardiya Yönetim Sistemi v8.3</title>
+  <title>PRO-Vardiya Yönetim Sistemi v8.4</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -12,7 +12,7 @@
   <div class="app-wrapper">
     <header class="no-print">
       <div class="logo-area">
-        <h1>TEKNİK VARDİYA <span>v8.3</span></h1>
+        <h1>TEKNİK VARDİYA <span>v8.4</span></h1>
         <p id="tarihAraligi">Sistem Hazırlanıyor...</p>
       </div>
       <div class="main-actions">
@@ -29,29 +29,17 @@
     </header>
 
     <section class="admin-panel no-print">
-      <div class="panel-header">
-        <h3>📋 Personel İzin Yönetimi</h3>
-        <p>Vardiyaya girmeyecek kişileri seçin. Birimler hiyerarşik sıraya göre dizilmiştir.</p>
-      </div>
       <div id="personelChecklist" class="checklist-grid"></div>
     </section>
 
     <main id="print-area">
       <div class="table-responsive">
         <table id="vardiyaTablosu">
-          <thead>
-            <tr id="tableHeader"></tr>
-          </thead>
+          <thead><tr id="tableHeader"></tr></thead>
           <tbody id="tableBody"></tbody>
         </table>
       </div>
-
-      <div class="stats-grid">
-        <div class="stat-card">
-          <h3>Haftalık Personel Mesai Analizi</h3>
-          <div id="ozetTablo"></div>
-        </div>
-      </div>
+      <div id="ozetTablo" class="stats-grid"></div>
     </main>
   </div>
   <script src="script.js"></script>
