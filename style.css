@@ -18,18 +18,18 @@ header h1 span { font-size: 10px; background: var(--blue); padding: 3px 8px; bor
 }
 .check-item:hover { background: #e2e8f0; border-color: var(--blue); }
 .check-item input { pointer-events: none; width: 18px; height: 18px; }
-.check-item label { flex-grow: 1; pointer-events: none; font-weight: 600; }
+.check-item label { flex-grow: 1; cursor: pointer; pointer-events: none; font-weight: 600; }
 .table-container { background: white; border-radius: 10px; border: 2px solid var(--primary); overflow: auto; margin-bottom: 20px; }
 table { width: 100%; border-collapse: collapse; min-width: 1300px; }
 th { background: var(--primary); color: white; padding: 12px; font-size: 11px; border-right: 1px solid #334155; }
 td { border: 1px solid var(--border); padding: 6px; vertical-align: top; background: #fff; }
-td:first-child { background: #f8fafc; font-weight: 900; color: var(--primary); width: 110px; text-align: center; vertical-align: middle; border-right: 3px solid var(--primary); }
+td:first-child { background: #f8fafc; font-weight: 900; color: var(--primary); width: 110px; text-align: center; vertical-align: middle; border-right: 3px solid var(--primary); font-size: 12px; }
 .birim-card { border-left: 4px solid var(--blue); padding: 5px 8px; margin-bottom: 5px; background: #fff; border: 1px solid #e2e8f0; border-radius: 4px; }
-.birim-tag { font-size: 8px; font-weight: 900; color: var(--blue); display: block; text-transform: uppercase; }
+.birim-tag { font-size: 8px; font-weight: 900; color: var(--blue); display: block; text-transform: uppercase; margin-bottom: 2px; }
 .p-isim { font-size: 10px; font-weight: 700; color: #1e293b; }
 .stats-table { width: 100%; border-collapse: collapse; }
 .stats-table th, .stats-table td { padding: 10px; border-bottom: 1px solid #f1f5f9; text-align: left; }
-button { cursor: pointer; border: none; padding: 8px 15px; border-radius: 6px; font-weight: 700; }
+button { cursor: pointer; border: none; padding: 8px 15px; border-radius: 6px; font-weight: 700; transition: 0.2s; }
 .btn-primary { background: var(--blue); color: white; }
 .btn-wa { background: #16a34a; color: white; }
 .pulse { animation: pulse 2s infinite; }

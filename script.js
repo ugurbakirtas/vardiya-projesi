@@ -1,6 +1,6 @@
 /**
- * PRO-Vardiya v13.1
- * KURAL: TEKNİK YÖNETMEN ÖZEL KAPASİTE VE BARIŞ İNCE DÖNGÜSÜ
+ * PRO-Vardiya v13.2
+ * TEKNİK YÖNETMEN GECE ROTASYONU VE BARIŞ İNCE DÖNGÜSÜ
  */
 
 const birimSiralamasi = [
@@ -94,26 +94,22 @@ function tabloyuOlustur() {
         haftalikProgram[p.isim] = isSelected ? Array(7).fill("İZİN") : Array(7).fill(null);
     });
 
-    // BARIŞ İNCE ÖZEL KURALI: 2 Gece, 2 İzin, Gerisi Sabah/Akşam
+    // BARIŞ İNCE DÖNGÜSÜ: Paz-Sal Gece, Çar-Per İzin, Cuma-Cmt-Paz (Havuzda)
     if(!haftalikProgram["BARIŞ İNCE"].includes("İZİN")) {
         haftalikProgram["BARIŞ İNCE"][0] = "00:00–07:00";
         haftalikProgram["BARIŞ İNCE"][1] = "00:00–07:00";
         haftalikProgram["BARIŞ İNCE"][2] = "İZİN";
         haftalikProgram["BARIŞ İNCE"][3] = "İZİN";
-        // Kalan 3 gün (Cuma, Cmt, Paz) sistem tarafından TY sabah/akşam kapasitesine göre doldurulacak.
     }
 
-    // EKREM FİDAN: Barış'ın olmadığı günler gece vardiyası sorumlusu (veya dönüşümlü)
+    // EKREM FİDAN: Geceleri Barış'tan devralır (Çar-Paz arası gece sorumlusu)
     if(!haftalikProgram["EKREM FİDAN"].includes("İZİN")) {
         for(let i=2; i<7; i++) {
-             if(haftalikProgram["BARIŞ İNCE"][i] !== "00:00–07:00") {
-                 haftalikProgram["EKREM FİDAN"][i] = "00:00–07:00";
-                 break; // Günde 1 TY gece kuralı
-             }
+            haftalikProgram["EKREM FİDAN"][i] = "00:00–07:00";
         }
     }
 
-    // Sabit Rotalar (MCR/INGEST/ZAFER)
+    // Sabit Rotalar
     applyMCRRota("24TV MCR OPERATÖRÜ");
     applyMCRRota("360TV MCR OPERATÖRÜ");
     applyIngestRota();
@@ -151,13 +147,13 @@ function hucreDoldur(gun, saat) {
             if(birim.includes("MCR") || birim.includes("INGEST")) return;
             
             let kap = 0;
-            // TEKNİK YÖNETMEN ÖZEL KAPASİTE MANTIĞI
+            // TEKNİK YÖNETMEN KAPASİTE KURALLARI
             if(birim === "TEKNİK YÖNETMEN") {
                 if(saat === "00:00–07:00") kap = 1;
                 else if(!isHS) { // Hafta İçi
                     if(saat === "06:30–16:00") kap = 2;
                     else if(saat === "16:00–00:00") kap = 1;
-                } else { // Hafta Sonu (Cmt-Paz)
+                } else { // Hafta Sonu
                     if(saat === "06:30–16:00") kap = 1;
                     else if(saat === "09:00–18:00") kap = 1;
                     else if(saat === "16:00–00:00") kap = 1;
@@ -182,6 +178,7 @@ function hucreDoldur(gun, saat) {
         });
     }
 
+    // Hiyerarşik Gösterim
     let finalListe = personeller.filter(p => haftalikProgram[p.isim][gun] === saat);
     finalListe.sort((a, b) => birimSiralamasi.indexOf(a.birim) - birimSiralamasi.indexOf(b.birim));
     
@@ -244,7 +241,7 @@ function whatsappMesajiOlustur() {
         });
         m += `\n`;
     });
-    navigator.clipboard.writeText(m).then(() => alert("Kopyalandı!"));
+    navigator.clipboard.writeText(m).then(() => alert("WhatsApp formatı kopyalandı!"));
 }
 
 window.onload = () => { checklistOlustur(); tabloyuOlustur(); };
