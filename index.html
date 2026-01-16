@@ -1,45 +1,37 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PRO-Vardiya v12.4 | Kesin Çözüm</title>
-  <link rel="stylesheet" href="style.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <meta charset="UTF-8">
+    <title>PRO-Vardiya v12.5 | Neon Fix</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body class="dark-mode">
-  <div class="app-wrapper">
-    <header class="no-print">
-      <h1 class="glow-text">TEKNİK VARDİYA SİSTEMİ <span>v12.4</span></h1>
-      <div class="nav-row">
-          <button onclick="haftaDegistir(-7)" class="btn-nav">« Geri</button>
-          <div class="date-display" id="tarihAraligi">Yükleniyor...</div>
-          <button onclick="haftaDegistir(7)" class="btn-nav">İleri »</button>
-      </div>
-      <div class="action-row">
-          <button onclick="tabloyuOlustur()" class="btn-primary pulse">⚡ PLAN OLUŞTUR</button>
-          <button onclick="temizleHafiza()" class="btn-danger">Sıfırla</button>
-      </div>
-    </header>
+    <div class="app-container">
+        <header class="no-print">
+            <h1 class="neon-title">TEKNİK VARDİYA <span>v12.5</span></h1>
+            <div class="nav-bar">
+                <button onclick="haftaDegistir(-7)" class="btn-nav">« GERİ</button>
+                <span id="tarihAraligi" class="date-glow">Yükleniyor...</span>
+                <button onclick="haftaDegistir(7)" class="btn-nav">İLERİ »</button>
+            </div>
+            <div class="controls">
+                <button onclick="tabloyuOlustur()" class="btn-main pulse">⚡ LİSTEYİ OLUŞTUR</button>
+                <button onclick="window.print()" class="btn-print">YAZDIR / PDF</button>
+            </div>
+        </header>
 
-    <div id="personelChecklist" class="checklist-grid no-print"></div>
+        <div id="checklist" class="checklist-grid no-print"></div>
 
-    <main id="print-area">
-      <div class="table-responsive">
-        <table id="vardiyaTablosu">
-          <thead><tr id="tableHeader"></tr></thead>
-          <tbody id="tableBody"></tbody>
-        </table>
-      </div>
-      <div id="ozetTablo" class="stats-section"></div>
-    </main>
-
-    <div class="export-bar no-print">
-        <button onclick="whatsappMesajiOlustur()" class="btn-wa">WhatsApp</button>
-        <button onclick="exportPDF()" class="btn-pdf">PDF Kaydet</button>
+        <main id="print-area">
+            <div class="table-box">
+                <table id="anaTablo">
+                    <thead><tr id="tabloKafa"></tr></thead>
+                    <tbody id="tabloGovde"></tbody>
+                </table>
+            </div>
+        </main>
     </div>
-  </div>
-  <script src="script.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
