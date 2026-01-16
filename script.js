@@ -1,6 +1,6 @@
 /**
- * PRO-Vardiya v16.8 | v14.5 Core
- * Tasarım Odaklı Güncelleme
+ * PRO-Vardiya v16.9 | v14.5 Core
+ * Layout Optimization for wide tables
  */
 
 let varsayilanBirimler = [
@@ -14,7 +14,7 @@ let birimSiralamasi = [...varsayilanBirimler, ...ekBirimler];
 const gunler = ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"];
 const saatler = ["06:30–16:00", "09:00–18:00", "12:00–22:00", "16:00–00:00", "00:00–07:00", "DIŞ YAYIN"];
 
-// Personel Listesi (Sabit)
+// Personel Listesi
 const sabitPersoneller = [
     { id: 1, isim: "YUNUS EMRE YAYLA", birim: "TEKNİK YÖNETMEN" },
     { id: 2, isim: "HASAN CAN SAĞLAM", birim: "TEKNİK YÖNETMEN" },
@@ -75,17 +75,41 @@ function getMonday(d) {
     return new Date(d.setDate(diff));
 }
 
-// UI YÖNETİMİ
-function toggleTheme() { document.body.classList.toggle("dark-mode"); }
+function checklistOlustur() {
+    const container = document.getElementById("personelChecklist");
+    const sirali = [...tumPersoneller].sort((a,b) => birimSiralamasi.indexOf(a.birim) - birimSiralamasi.indexOf(b.birim));
+    container.innerHTML = sirali.map(p => `
+        <div class="check-item" data-isim="${p.isim}" onclick="toggleCheckbox('${p.id}')">
+            <input type="checkbox" id="check_${p.id}" onchange="tabloyuOlustur()">
+            <div>
+                <span class="birim-label">${p.birim}</span>
+                <strong>${p.isim}</strong>
+            </div>
+        </div>
+    `).join('');
+}
+
+function toggleCheckbox(id) {
+    const cb = document.getElementById('check_' + id);
+    if(cb) { cb.checked = !cb.checked; tabloyuOlustur(); }
+}
+
+function checklistFiltrele() {
+    const ara = document.getElementById("personelAra").value.toUpperCase();
+    document.querySelectorAll(".check-item").forEach(item => {
+        item.style.display = item.getAttribute("data-isim").includes(ara) ? "flex" : "none";
+    });
+}
+
 function toggleAdminPanel() { 
     document.getElementById("adminPanel").classList.toggle("hidden"); 
     document.getElementById("birimSec").innerHTML = birimSiralamasi.map(b => `<option value="${b}">${b}</option>`).join('');
 }
 
 function birimEkle() {
-    const val = document.getElementById("yeniBirim").value.toUpperCase().trim();
-    if(val && !birimSiralamasi.includes(val)) {
-        ekBirimler.push(val);
+    const v = document.getElementById("yeniBirim").value.toUpperCase().trim();
+    if(v && !birimSiralamasi.includes(v)) {
+        ekBirimler.push(v);
         localStorage.setItem("ekBirimler", JSON.stringify(ekBirimler));
         location.reload();
     }
@@ -101,40 +125,6 @@ function personelEkle() {
     }
 }
 
-function checklistOlustur() {
-    const container = document.getElementById("personelChecklist");
-    container.innerHTML = "";
-    birimSiralamasi.forEach(birim => {
-        const liste = tumPersoneller.filter(p => p.birim === birim);
-        if(liste.length > 0) {
-            let html = `<div class="birim-grubu"><div class="birim-baslik">${birim}</div>`;
-            liste.forEach(p => {
-                html += `
-                    <div class="check-item" data-isim="${p.isim}" onclick="toggleCheckbox('${p.id}')">
-                        <input type="checkbox" id="check_${p.id}" onchange="tabloyuOlustur()">
-                        <span>${p.isim}</span>
-                    </div>
-                `;
-            });
-            html += `</div>`;
-            container.innerHTML += html;
-        }
-    });
-}
-
-function toggleCheckbox(id) {
-    const cb = document.getElementById('check_' + id);
-    if(cb) { cb.checked = !cb.checked; tabloyuOlustur(); }
-}
-
-function checklistFiltrele() {
-    const ara = document.getElementById("personelAra").value.toUpperCase();
-    document.querySelectorAll(".check-item").forEach(item => {
-        item.style.display = item.getAttribute("data-isim").includes(ara) ? "flex" : "none";
-    });
-}
-
-// ANA ALGORİTMA (v14.5 CORE KURALLARI)
 function tabloyuOlustur() {
     document.getElementById("tarihAraligi").innerText = `${mevcutPazartesi.toLocaleDateString('tr-TR')} Haftası`;
     haftalikProgram = {};
@@ -143,7 +133,7 @@ function tabloyuOlustur() {
         haftalikProgram[p.isim] = isSelected ? Array(7).fill("İZİN") : Array(7).fill(null);
     });
 
-    // Barış & Ekrem v14.5 Özel Kurallar
+    // Barış & Ekrem v14.5 Sabit Gece
     if(haftalikProgram["BARIŞ İNCE"] && !haftalikProgram["BARIŞ İNCE"].includes("İZİN")) {
         haftalikProgram["BARIŞ İNCE"][0] = "00:00–07:00"; haftalikProgram["BARIŞ İNCE"][1] = "00:00–07:00";
     }
@@ -184,8 +174,7 @@ function hucreDoldur(gun, saat) {
                 if(saat === "00:00–07:00") kap = 0; 
                 else if(saat === "09:00–18:00") kap = isHS ? 2 : 0;
                 else kap = isHS ? 2 : (saat === "06:30–16:00" ? 4 : 2);
-            } 
-            else if(birim === "TEKNİK YÖNETMEN") {
+            } else if(birim === "TEKNİK YÖNETMEN") {
                 if(saat === "00:00–07:00") kap = 1;
                 else if(!isHS) {
                     if(saat === "06:30–16:00") kap = 2; else if(saat === "16:00–00:00") kap = 1;
@@ -193,8 +182,7 @@ function hucreDoldur(gun, saat) {
                     if(saat === "06:30–16:00" || saat === "09:00–18:00" || saat === "16:00–00:00") kap = 1;
                 }
             } else if(birim === "PLAYOUT OPERATÖRÜ") {
-                if(saat === "06:30–16:00") kap = isHS ? 2 : 3;
-                else if(saat === "16:00–00:00") kap = 2;
+                if(saat === "06:30–16:00") kap = isHS ? 2 : 3; else if(saat === "16:00–00:00") kap = 2;
             } else if(birim === "KJ OPERATÖRÜ") {
                 if(saat === "06:30–16:00" || saat === "16:00–00:00") kap = 2;
             } else if(birim === "BİLGİ İŞLEM" || birim === "YAYIN SİSTEMLERİ") {
@@ -213,7 +201,6 @@ function hucreDoldur(gun, saat) {
             }
         });
     }
-
     let final = tumPersoneller.filter(p => haftalikProgram[p.isim][gun] === saat);
     final.sort((a, b) => birimSiralamasi.indexOf(a.birim) - birimSiralamasi.indexOf(b.birim));
     return final.map(p => `<div class="birim-card"><span class="birim-tag">${p.birim}</span><span class="p-isim">${p.isim}</span></div>`).join('');
@@ -249,15 +236,16 @@ function ozetGuncelle() {
         const calisilan = haftalikProgram[p.isim].filter(v => v && v !== "İZİN");
         const gun = calisilan.length;
         const uyari = gun >= 6 ? 'class="uyari-mesai"' : '';
-        h += `<tr><td>${p.isim}</td><td><small>${p.birim}</small></td><td><span ${uyari}>${gun} GÜN ${gun>=6?'⚠️':''}</span></td><td>${calisilan.filter(v => v === "00:00–07:00").length}</td></tr>`;
+        h += `<tr><td>${p.isim}</td><td><small>${p.birim}</small></td><td><span ${uyari}>${gun} GÜN</span></td><td>${calisilan.filter(v => v === "00:00–07:00").length}</td></tr>`;
     });
     document.getElementById("ozetTablo").innerHTML = h + "</tbody></table>";
 }
 
 function haftaDegistir(g) { mevcutPazartesi.setDate(mevcutPazartesi.getDate() + g); tabloyuOlustur(); }
-function exportExcel() { XLSX.writeFile(XLSX.utils.table_to_book(document.getElementById("vardiyaTablosu")), "Teknik_Vardiya.xlsx"); }
-function exportPDF() { html2pdf().from(document.getElementById('print-area')).save('Vardiya_Raporu.pdf'); }
-function sifirla() { if(confirm("Tüm veriler silinecek! Emin misiniz?")) { localStorage.clear(); location.reload(); } }
+function exportExcel() { XLSX.writeFile(XLSX.utils.table_to_book(document.getElementById("vardiyaTablosu")), "Vardiya.xlsx"); }
+function exportPDF() { html2pdf().from(document.getElementById('print-area')).save('Vardiya.pdf'); }
+function toggleTheme() { document.body.classList.toggle("dark-mode"); }
+function sifirla() { if(confirm("Sıfırlansın mı?")) { localStorage.clear(); location.reload(); } }
 
 function whatsappMesajiOlustur() {
     let m = `📋 *${mevcutPazartesi.toLocaleDateString('tr-TR')} HAFTALIK VARDİYA PLANI*\n\n`;
@@ -269,7 +257,7 @@ function whatsappMesajiOlustur() {
         });
         m += `\n`;
     });
-    navigator.clipboard.writeText(m).then(() => alert("Kopyalandı!"));
+    navigator.clipboard.writeText(m).then(() => alert("WhatsApp kopyalandı!"));
 }
 
 window.onload = () => { checklistOlustur(); tabloyuOlustur(); };

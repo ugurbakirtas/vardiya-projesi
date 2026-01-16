@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PRO-Vardiya v16.8 | Premium Dashboard</title>
+  <title>PRO-Vardiya v16.9 | Optimized Layout</title>
   <link rel="stylesheet" href="style.css">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -13,7 +13,7 @@
   <div class="app-wrapper">
     <header class="no-print main-header">
       <div class="logo-area">
-        <div class="badge">V16.8 CORE</div>
+        <div class="badge">V16.9 CORE</div>
         <h1>TEKNİK <span>VARDİYA</span></h1>
         <p id="tarihAraligi" class="date-display">Yükleniyor...</p>
       </div>
@@ -23,11 +23,21 @@
         <button onclick="haftaDegistir(7)" class="btn-step">İLERİ »</button>
       </div>
       <div class="utility-controls">
-        <button onclick="toggleTheme()" class="btn-circle" title="Tema Değiştir">🌓</button>
-        <button onclick="toggleAdminPanel()" class="btn-circle" title="Yönetim">⚙️</button>
-        <button onclick="whatsappMesajiOlustur()" class="btn-wa-icon" title="WhatsApp">WA</button>
+        <button onclick="toggleTheme()" class="btn-circle">🌓</button>
+        <button onclick="toggleAdminPanel()" class="btn-circle">⚙️</button>
+        <button onclick="whatsappMesajiOlustur()" class="btn-wa-icon">WA</button>
       </div>
     </header>
+
+    <section class="checklist-section no-print">
+      <div class="section-card">
+        <div class="section-header-compact">
+          <h3>Haftalık İzinli Personel Seçimi</h3>
+          <input type="text" id="personelAra" placeholder="🔍 Personel Ara..." onkeyup="checklistFiltrele()">
+        </div>
+        <div id="personelChecklist" class="checklist-horizontal-grid"></div>
+      </div>
+    </section>
 
     <section id="adminPanel" class="admin-panel no-print hidden">
       <div class="admin-card">
@@ -47,43 +57,31 @@
             <select id="birimSec"></select>
             <button onclick="personelEkle()" class="btn-save">Kaydet</button>
           </div>
-          <button onclick="sifirla()" class="btn-reset-danger">Tüm Sistemi Sıfırla</button>
+          <button onclick="sifirla()" class="btn-reset-danger">Sistemi Sıfırla</button>
         </div>
       </div>
     </section>
 
-    <div class="dashboard-grid">
-      <aside class="sidebar no-print">
-        <div class="section-card">
-          <div class="section-header">
-            <h3>İzinli Seçimi</h3>
-            <input type="text" id="personelAra" placeholder="🔍 Ara..." onkeyup="checklistFiltrele()">
-          </div>
-          <div id="personelChecklist" class="checklist-container"></div>
+    <main class="content-area">
+      <div class="table-card" id="print-area">
+        <div class="table-responsive">
+          <table id="vardiyaTablosu">
+            <thead><tr id="tableHeader"></tr></thead>
+            <tbody id="tableBody"></tbody>
+          </table>
         </div>
-      </aside>
+        
+        <div class="analysis-section">
+          <div class="analysis-header">📊 Haftalık Kapasite & Mesai Analizi</div>
+          <div id="ozetTablo"></div>
+        </div>
+      </div>
 
-      <main class="content-area">
-        <div class="table-card" id="print-area">
-          <div class="table-responsive">
-            <table id="vardiyaTablosu">
-              <thead><tr id="tableHeader"></tr></thead>
-              <tbody id="tableBody"></tbody>
-            </table>
-          </div>
-          
-          <div class="analysis-section">
-            <div class="analysis-header">📊 Haftalık Kapasite & Mesai Analizi</div>
-            <div id="ozetTablo"></div>
-          </div>
-        </div>
-
-        <div class="bottom-actions no-print">
-            <button onclick="exportExcel()" class="btn-export ex">Excel İndir</button>
-            <button onclick="exportPDF()" class="btn-export pdf">PDF Kaydet</button>
-        </div>
-      </main>
-    </div>
+      <div class="bottom-actions no-print">
+          <button onclick="exportExcel()" class="btn-export ex">Excel İndir</button>
+          <button onclick="exportPDF()" class="btn-export pdf">PDF Kaydet</button>
+      </div>
+    </main>
   </div>
   <script src="script.js"></script>
 </body>
