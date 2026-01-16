@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PRO-Vardiya v18.0 | Hafta İçi-Sonu Kontrol</title>
+  <title>PRO-Vardiya v19.0 | Tam Denetim</title>
   <link rel="stylesheet" href="style.css">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -13,17 +13,17 @@
   <div class="app-wrapper">
     <header class="no-print main-header">
       <div class="logo-area">
-        <div class="badge">V18.0 DİNAMİK</div>
+        <div class="badge">V19.0</div>
         <h1>TEKNİK <span>VARDİYA</span></h1>
         <p id="tarihAraligi" class="date-display">Yükleniyor...</p>
       </div>
       <div class="nav-controls">
         <button onclick="haftaDegistir(-7)" class="btn-step">« GERİ</button>
-        <button onclick="tabloyuOlustur()" class="btn-main-action">OTOMATİK PLANLA</button>
+        <button onclick="tabloyuOlustur()" class="btn-main-action pulse">OTOMATİK PLANLA</button>
         <button onclick="haftaDegistir(7)" class="btn-step">İLERİ »</button>
       </div>
       <div class="utility-controls">
-        <button onclick="toggleTheme()" class="btn-circle">🌓</button>
+        <button onclick="toggleTheme()" class="btn-circle" id="themeBtn">🌙</button>
         <button onclick="toggleAdminPanel()" class="btn-circle">⚙️ YÖNETİM</button>
       </div>
     </header>
@@ -41,25 +41,29 @@
     <div id="adminPanel" class="admin-overlay no-print hidden">
       <div class="admin-modal">
         <div class="admin-header">
-          <h2>Vardiya Kapasite ve Personel Yönetimi</h2>
+          <h2>Sistem Ayarları & Kapasite Yönetimi</h2>
           <button onclick="toggleAdminPanel()" class="btn-close">×</button>
         </div>
         <div class="admin-body">
           <div class="admin-layout">
             <div class="admin-side">
-              <h4>Personel / Birim</h4>
-              <input type="text" id="yeniBirim" placeholder="Yeni Birim Adı">
+              <h4>Hızlı İşlemler</h4>
               <button onclick="birimEkle()" class="btn-save">Birim Ekle</button>
+              <button onclick="personelEkle()" class="btn-save">Personel Ekle</button>
               <hr>
-              <input type="text" id="yeniIsim" placeholder="İsim Soyad">
-              <select id="birimSec"></select>
-              <button onclick="personelEkle()" class="btn-save">Kaydet</button>
-              <button onclick="sifirla()" class="btn-reset">Sıfırla</button>
+              <button onclick="ozelKosulEkle()" class="btn-rule">➕ KOŞUL/KURAL EKLE</button>
+              <p style="font-size:9px; color:#666; margin-top:5px">Eklediğiniz koşullar plana not olarak eklenir.</p>
+              <hr>
+              <button onclick="sifirla()" class="btn-reset">SİSTEMİ SIFIRLA</button>
             </div>
             <div class="admin-main">
-              <h4>Hafta İçi / Hafta Sonu Kapasiteleri</h4>
-              <p><small>* İlk kutu Hafta İçi, ikinci kutu (kırmızımsı) Hafta Sonu mevcudunu belirler. 0 yazılan vardiya silinir.</small></p>
+              <h4>Vardiya Kapasiteleri (Hafta İçi / Hafta Sonu)</h4>
               <div id="kapasiteListesi"></div>
+              
+              <div class="active-rules-box">
+                <h4>Aktif Koşullar</h4>
+                <div id="aktifKosullar"></div>
+              </div>
             </div>
           </div>
         </div>
@@ -75,11 +79,13 @@
           </table>
         </div>
         <div id="ozetTablo" class="analysis-section"></div>
+        <div id="kosulNotlari" class="rules-footer"></div>
       </div>
+      
       <div class="footer-buttons no-print">
-          <button onclick="whatsappMesajiOlustur()" class="wa-btn">WhatsApp</button>
-          <button onclick="exportExcel()" class="ex-btn">Excel</button>
-          <button onclick="exportPDF()" class="pdf-btn">PDF</button>
+          <button onclick="whatsappMesajiOlustur()" class="wa-btn">WhatsApp'a Kopyala</button>
+          <button onclick="exportExcel()" class="ex-btn">Excel İndir</button>
+          <button onclick="exportPDF()" class="pdf-btn">PDF Kaydet</button>
       </div>
     </main>
   </div>

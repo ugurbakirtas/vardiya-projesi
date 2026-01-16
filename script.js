@@ -1,5 +1,5 @@
 /**
- * PRO-Vardiya v18.0 | Hafta İçi / Hafta Sonu Kontrolü
+ * PRO-Vardiya v19.0 | Dark Mode & Dinamik Koşullar
  */
 
 let birimSiralamasi = [
@@ -65,21 +65,22 @@ let tumPersoneller = [...sabitPersoneller, ...ekPersoneller];
 let mevcutPazartesi = getMonday(new Date());
 let haftalikProgram = {};
 
-// KAPASİTE YÖNETİMİ
+// AYARLAR & KOŞULLAR
 let kapasiteAyarlari = JSON.parse(localStorage.getItem("kapasiteAyarlari")) || {};
+let ozelKosullar = JSON.parse(localStorage.getItem("ozelKosullar")) || [];
 
-function kapasiteVerileriniHazirla() {
+function baslat() {
     birimSiralamasi.forEach(b => {
         if(!kapasiteAyarlari[b]) {
             kapasiteAyarlari[b] = {};
             saatler.forEach(s => {
-                let v = 0;
-                if(b === "SES OPERATÖRÜ" && s !== "00:00–07:00") v = 2;
-                if(b === "TEKNİK YÖNETMEN" && s === "06:30–16:00") v = 1;
-                kapasiteAyarlari[b][s] = { haftaici: v, haftasonu: v };
+                kapasiteAyarlari[b][s] = { haftaici: 0, haftasonu: 0 };
             });
         }
     });
+    // Dark mode tercihi
+    if(localStorage.getItem("theme") === "dark") document.body.classList.add("dark-mode");
+    updateThemeIcon();
 }
 
 function getMonday(d) {
@@ -88,11 +89,14 @@ function getMonday(d) {
     return new Date(d.setDate(diff));
 }
 
-// PANEL İŞLEMLERİ
+// PANEL YÖNETİMİ
 function toggleAdminPanel() {
     const p = document.getElementById("adminPanel");
     p.classList.toggle("hidden");
-    if(!p.classList.contains("hidden")) kapasitePaneliniCiz();
+    if(!p.classList.contains("hidden")) {
+        kapasitePaneliniCiz();
+        kosullariCiz();
+    }
 }
 
 function kapasitePaneliniCiz() {
@@ -103,32 +107,66 @@ function kapasitePaneliniCiz() {
             ${saatler.map(s => `
                 <div class="cap-input-group">
                     <span>${s.split('–')[0]}</span>
-                    <input type="number" value="${kapasiteAyarlari[b][s].haftaici}" 
-                           onchange="guncelleKap('${b}','${s}','haftaici',this.value)" title="Hafta İçi">
-                    <input type="number" class="input-hs" value="${kapasiteAyarlari[b][s].haftasonu}" 
-                           onchange="guncelleKap('${b}','${s}','haftasonu',this.value)" title="Hafta Sonu">
+                    <input type="number" value="${kapasiteAyarlari[b][s].haftaici}" onchange="guncelleK('${b}','${s}','haftaici',this.value)">
+                    <input type="number" class="input-hs" value="${kapasiteAyarlari[b][s].haftasonu}" onchange="guncelleK('${b}','${s}','haftasonu',this.value)">
                 </div>
             `).join('')}
         </div>
     `).join('');
-    document.getElementById("birimSec").innerHTML = birimSiralamasi.map(b => `<option value="${b}">${b}</option>`).join('');
 }
 
-function guncelleKap(birim, saat, tip, val) {
-    kapasiteAyarlari[birim][saat][tip] = parseInt(val) || 0;
+function guncelleK(b, s, t, v) {
+    kapasiteAyarlari[b][s][t] = parseInt(v) || 0;
     localStorage.setItem("kapasiteAyarlari", JSON.stringify(kapasiteAyarlari));
 }
 
-// TABLO OLUŞTURMA
+// KOŞUL EKLEME SİSTEMİ
+function ozelKosulEkle() {
+    const k = prompt("Yeni Kural/Koşul Giriniz: (Örn: Reji ekibi 12:00 toplantısı)");
+    if(k) {
+        ozelKosullar.push(k);
+        localStorage.setItem("ozelKosullar", JSON.stringify(ozelKosullar));
+        kosullariCiz();
+        tabloyuOlustur();
+    }
+}
+
+function kosullariCiz() {
+    const cont = document.getElementById("aktifKosullar");
+    const footer = document.getElementById("kosulNotlari");
+    cont.innerHTML = ozelKosullar.map((k, i) => `<div>📌 ${k} <button onclick="kosulSil(${i})" style="color:red; background:none; border:none; cursor:pointer">×</button></div>`).join('');
+    footer.innerHTML = ozelKosullar.map(k => `• ${k}`).join('<br>');
+}
+
+function kosulSil(i) {
+    ozelKosullar.splice(i, 1);
+    localStorage.setItem("ozelKosullar", JSON.stringify(ozelKosullar));
+    kosullariCiz();
+    tabloyuOlustur();
+}
+
+// TEMA YÖNETİMİ
+function toggleTheme() {
+    document.body.classList.toggle("dark-mode");
+    const mode = document.body.classList.contains("dark-mode") ? "dark" : "light";
+    localStorage.setItem("theme", mode);
+    updateThemeIcon();
+}
+
+function updateThemeIcon() {
+    document.getElementById("themeBtn").innerText = document.body.classList.contains("dark-mode") ? "☀️" : "🌙";
+}
+
+// PLANLAMA MOTORU
 function tabloyuOlustur() {
     document.getElementById("tarihAraligi").innerText = `${mevcutPazartesi.toLocaleDateString('tr-TR')} Haftası`;
     haftalikProgram = {};
     tumPersoneller.forEach(p => {
-        const isIzinli = document.getElementById(`check_${p.id}`)?.checked;
-        haftalikProgram[p.isim] = isIzinli ? Array(7).fill("İZİN") : Array(7).fill(null);
+        const check = document.getElementById(`check_${p.id}`);
+        haftalikProgram[p.isim] = (check && check.checked) ? Array(7).fill("İZİN") : Array(7).fill(null);
     });
 
-    // Barış & Ekrem Sabit Gece (v14.5 Kuralı)
+    // Barış & Ekrem Sabit Gece (Değiştirilemez)
     if(haftalikProgram["BARIŞ İNCE"] && !haftalikProgram["BARIŞ İNCE"].includes("İZİN")) {
         haftalikProgram["BARIŞ İNCE"][0] = "00:00–07:00"; haftalikProgram["BARIŞ İNCE"][1] = "00:00–07:00";
     }
@@ -141,6 +179,7 @@ function tabloyuOlustur() {
     applyIngestRota();
     renderTable();
     ozetGuncelle();
+    kosullariCiz();
 }
 
 function renderTable() {
@@ -153,28 +192,24 @@ function renderTable() {
     let b = "";
     saatler.forEach(s => {
         b += `<tr><td>${s}</td>`;
-        for(let i=0; i<7; i++) b += `<td>${hucreCiz(i, s)}</td>`;
+        for(let i=0; i<7; i++) b += `<td>${hucreDoldur(i, s)}</td>`;
         b += `</tr>`;
     });
     document.getElementById("tableBody").innerHTML = b;
 }
 
-function hucreCiz(gun, saat) {
+function hucreDoldur(gun, saat) {
     const isHS = (gun >= 5);
     birimSiralamasi.forEach(birim => {
         if(birim.includes("MCR") || birim.includes("INGEST")) return;
-        
         let kap = 0;
         if(kapasiteAyarlari[birim] && kapasiteAyarlari[birim][saat]) {
             kap = isHS ? kapasiteAyarlari[birim][saat].haftasonu : kapasiteAyarlari[birim][saat].haftaici;
         }
-
-        // SES Gece Yasağı (Değişmez)
         if(birim === "SES OPERATÖRÜ" && saat === "00:00–07:00") kap = 0;
 
         let adaylar = tumPersoneller.filter(p => p.birim === birim && haftalikProgram[p.isim][gun] === null);
         let suan = tumPersoneller.filter(p => p.birim === birim && haftalikProgram[p.isim][gun] === saat).length;
-        
         for(let k=0; k < (kap-suan); k++) {
             if(adaylar.length > 0) {
                 let p = adaylar.splice(Math.floor(Math.random() * adaylar.length), 1)[0];
@@ -182,18 +217,12 @@ function hucreCiz(gun, saat) {
             }
         }
     });
-
-    let liste = tumPersoneller.filter(p => haftalikProgram[p.isim][gun] === saat);
-    liste.sort((a,b) => birimSiralamasi.indexOf(a.birim) - birimSiralamasi.indexOf(b.birim));
-    return liste.map(p => `
-        <div class="birim-card">
-            <span class="birim-tag">${p.birim}</span>
-            <span class="p-isim">${p.isim}</span>
-        </div>
-    `).join('');
+    let list = tumPersoneller.filter(p => haftalikProgram[p.isim][gun] === saat);
+    list.sort((a,b) => birimSiralamasi.indexOf(a.birim) - birimSiralamasi.indexOf(b.birim));
+    return list.map(p => `<div class="birim-card"><span class="birim-tag">${p.birim}</span><span class="p-isim">${p.isim}</span></div>`).join('');
 }
 
-// ROTA MANTIKLARI
+// Rotalar ve Yardımcılar
 function applyIngestRota() {
     const ekip = tumPersoneller.filter(p => p.birim === "INGEST OPERATÖRÜ");
     const rota = ["06:30–16:00", "06:30–16:00", "16:00–00:00", "16:00–00:00", "İZİN", "İZİN"];
@@ -205,7 +234,6 @@ function applyIngestRota() {
         }
     });
 }
-
 function applyMCRRota(birim) {
     const ekip = tumPersoneller.filter(p => p.birim === birim);
     const rota = ["06:30–16:00", "06:30–16:00", "16:00–00:00", "16:00–00:00", "00:00–07:00", "00:00–07:00", "İZİN", "İZİN"];
@@ -218,16 +246,10 @@ function applyMCRRota(birim) {
     });
 }
 
-// DİĞER FONKSİYONLAR
 function checklistOlustur() {
     const c = document.getElementById("personelChecklist");
-    const sirali = [...tumPersoneller].sort((a,b) => birimSiralamasi.indexOf(a.birim) - birimSiralamasi.indexOf(b.birim));
-    c.innerHTML = sirali.map(p => `
-        <div class="check-item" data-isim="${p.isim}" onclick="toggleCb('${p.id}')">
-            <input type="checkbox" id="check_${p.id}" onchange="tabloyuOlustur()">
-            <div><span class="birim-tag">${p.birim}</span><strong>${p.isim}</strong></div>
-        </div>
-    `).join('');
+    const s = [...tumPersoneller].sort((a,b) => birimSiralamasi.indexOf(a.birim) - birimSiralamasi.indexOf(b.birim));
+    c.innerHTML = s.map(p => `<div class="check-item" data-isim="${p.isim}" onclick="toggleCb('${p.id}')"><input type="checkbox" id="check_${p.id}" onchange="tabloyuOlustur()"><div><span style="font-size:8px; color:blue; display:block">${p.birim}</span><strong>${p.isim}</strong></div></div>`).join('');
 }
 function toggleCb(id) { const el = document.getElementById('check_'+id); if(el){ el.checked = !el.checked; tabloyuOlustur(); } }
 function checklistFiltrele() {
@@ -235,24 +257,21 @@ function checklistFiltrele() {
     document.querySelectorAll(".check-item").forEach(i => i.style.display = i.getAttribute("data-isim").includes(q) ? "flex" : "none");
 }
 function ozetGuncelle() {
-    let h = `<table style="width:100%; border-collapse:collapse; margin-top:20px; font-size:10px">
-             <tr style="background:#0f172a; color:white"><th>Personel</th><th>Birim</th><th>Mesai</th><th>Gece</th></tr>`;
+    let h = `<table style="width:100%; border-collapse:collapse; margin-top:20px; font-size:10px"><tr><th>Personel</th><th>Mesai</th></tr>`;
     [...tumPersoneller].sort((a,b) => birimSiralamasi.indexOf(a.birim) - birimSiralamasi.indexOf(b.birim)).forEach(p => {
         const calis = haftalikProgram[p.isim].filter(v => v && v !== "İZİN").length;
-        const gece = haftalikProgram[p.isim].filter(v => v === "00:00–07:00").length;
-        h += `<tr><td style="border:1px solid #ddd; padding:4px"><b>${p.isim}</b></td><td style="border:1px solid #ddd; padding:4px">${p.birim}</td><td style="border:1px solid #ddd; padding:4px">${calis} Gün</td><td style="border:1px solid #ddd; padding:4px">${gece}</td></tr>`;
+        h += `<tr><td>${p.isim}</td><td>${calis} Gün</td></tr>`;
     });
     document.getElementById("ozetTablo").innerHTML = h + "</table>";
 }
 function haftaDegistir(g) { mevcutPazartesi.setDate(mevcutPazartesi.getDate() + g); tabloyuOlustur(); }
-function birimEkle() { const v = document.getElementById("yeniBirim").value.toUpperCase().trim(); if(v) { ekBirimler.push(v); localStorage.setItem("ekBirimler", JSON.stringify(ekBirimler)); location.reload(); } }
-function personelEkle() { const n = document.getElementById("yeniIsim").value.toUpperCase().trim(); const b = document.getElementById("birimSec").value; if(n) { ekPersoneller.push({id:Date.now(), isim:n, birim:b}); localStorage.setItem("ekPersoneller", JSON.stringify(ekPersoneller)); location.reload(); } }
+function birimEkle() { const v = prompt("Birim Adı:"); if(v) { birimSiralamasi.push(v.toUpperCase()); localStorage.setItem("ekBirimler", JSON.stringify(birimSiralamasi)); location.reload(); } }
+function personelEkle() { const n = prompt("İsim:"); if(n) { ekPersoneller.push({id:Date.now(), isim:n.toUpperCase(), birim:birimSiralamasi[0]}); localStorage.setItem("ekPersoneller", JSON.stringify(ekPersoneller)); location.reload(); } }
 function exportExcel() { XLSX.writeFile(XLSX.utils.table_to_book(document.getElementById("vardiyaTablosu")), "Vardiya.xlsx"); }
 function exportPDF() { html2pdf().from(document.getElementById('print-area')).save('Vardiya.pdf'); }
-function toggleTheme() { document.body.classList.toggle("dark-mode"); }
-function sifirla() { if(confirm("Sıfırlansın mı?")) { localStorage.clear(); location.reload(); } }
+function sifirla() { if(confirm("Tüm veriler temizlensin mi?")) { localStorage.clear(); location.reload(); } }
 function whatsappMesajiOlustur() {
-    let m = `📋 *${mevcutPazartesi.toLocaleDateString('tr-TR')} HAFTALIK VARDİYA PLANI*\n\n`;
+    let m = `📋 *VARDİYA PLANI*\n\n`;
     gunler.forEach((g, i) => {
         m += `*${g.toUpperCase()}*\n`;
         saatler.forEach(s => {
@@ -263,4 +282,4 @@ function whatsappMesajiOlustur() {
     });
     navigator.clipboard.writeText(m).then(() => alert("Kopyalandı!"));
 }
-window.onload = () => { kapasiteVerileriniHazirla(); checklistOlustur(); tabloyuOlustur(); };
+window.onload = () => { baslat(); checklistOlustur(); tabloyuOlustur(); };
