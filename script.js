@@ -14,7 +14,7 @@ const birimler = [
   "Teknik Yönetmen",
   "Ses Operatörü",
   "Playout Operatörü",
-  "JK Operatörü",
+  "KJ Operatörü",
   "Ingest Operatörü",
   "Uplink"
 ];
