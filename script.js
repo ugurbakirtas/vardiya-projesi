@@ -59,7 +59,7 @@ function checklistOlustur() {
     const sirali = [...personeller].sort((a, b) => birimSiralamasi.indexOf(a.birim) - birimSiralamasi.indexOf(b.birim));
     container.innerHTML = sirali.map(p => `
         <div class="check-item">
-            <input type="checkbox" id="check_${p.isim.replace(/\s+/g, '_')}" onchange="tabloyuOlustur(false)">
+            <input type="checkbox" id="check_${p.isim.replace(/\s+/g, '_')}" onchange="tabloyuOlustur()">
             <label><strong>${p.isim}</strong><br><small>${p.birim}</small></label>
         </div>
     `).join('');
@@ -73,7 +73,8 @@ function tabloyuOlustur() {
         haftalikProgram[p.isim] = isSelected ? Array(7).fill("İZİN") : Array(7).fill(null);
     });
 
-    // 1. Özel Kural: BARIŞ İNCE (2 Gece, 2 İzin, Gerisi Sabah/Akşam)
+    // --- ÖZEL KURALLAR: TEKNİK YÖNETMEN ---
+    // Barış İnce: 2 Gece, 2 İzin
     let barisGeceler = 0;
     while(barisGeceler < 2) {
         let r = Math.floor(Math.random() * 7);
@@ -84,29 +85,30 @@ function tabloyuOlustur() {
         let r = Math.floor(Math.random() * 7);
         if(!haftalikProgram["BARIŞ İNCE"][r]) { haftalikProgram["BARIŞ İNCE"][r] = "İZİN"; barisIzinler++; }
     }
-
-    // 2. Özel Kural: EKREM FİDAN (Barış'ın olmadığı geceleri doldurur)
+    // Ekrem Fidan (Gece rotasyonu)
     for(let i=0; i<7; i++) {
-        if(haftalikProgram["BARIŞ İNCE"][i] !== "00:00–07:00") {
-            if(!haftalikProgram["EKREM FİDAN"][i]) haftalikProgram["EKREM FİDAN"][i] = "00:00–07:00";
+        if(haftalikProgram["BARIŞ İNCE"][i] !== "00:00–07:00" && !haftalikProgram["EKREM FİDAN"][i]) {
+            haftalikProgram["EKREM FİDAN"][i] = "00:00–07:00";
         }
     }
 
-    // Genel İzinler
+    // --- ÖZEL KURALLAR: SES OPERATÖRÜ (ZAFER AKAR) ---
+    // Hafta içi sabit 06:30, Hafta sonu İzin
+    for(let i=0; i<5; i++) { haftalikProgram["ZAFER AKAR"][i] = "06:30–16:00"; }
+    haftalikProgram["ZAFER AKAR"][5] = "İZİN";
+    haftalikProgram["ZAFER AKAR"][6] = "İZİN";
+
+    // Genel İzin Atamaları (Özel kuralı olmayanlar için)
     personeller.forEach(p => {
-        if(p.isim === "BARIŞ İNCE") return;
+        if(["BARIŞ İNCE", "ZAFER AKAR"].includes(p.isim)) return;
         let count = haftalikProgram[p.isim].filter(v => v === "İZİN").length;
-        let hedef = (p.isim === "ZAFER AKAR") ? 0 : 2;
-        if(p.isim === "ZAFER AKAR") { haftalikProgram[p.isim][5] = "İZİN"; haftalikProgram[p.isim][6] = "İZİN"; }
-        else {
-            while(count < hedef) {
-                let r = Math.floor(Math.random() * 7);
-                if(!haftalikProgram[p.isim][r]) { haftalikProgram[p.isim][r] = "İZİN"; count++; }
-            }
+        while(count < 2) {
+            let r = Math.floor(Math.random() * 7);
+            if(!haftalikProgram[p.isim][r]) { haftalikProgram[p.isim][r] = "İZİN"; count++; }
         }
     });
 
-    // MCR Gece Atamaları
+    // MCR Gece Vardiyaları
     for(let i=0; i<7; i++) {
         planlaZorunlu(i, "24TV MCR OPERATÖRÜ", "00:00–07:00", 1);
         planlaZorunlu(i, "360TV MCR OPERATÖRÜ", "00:00–07:00", 1);
@@ -127,7 +129,7 @@ function planlaZorunlu(gun, birim, saat, kapasite) {
 }
 
 function renderTable() {
-    let hHtml = `<th>Vardiya Saatleri</th>` + gunler.map((g, i) => {
+    let hHtml = `<th>Saatler</th>` + gunler.map((g, i) => {
         let t = new Date(mevcutPazartesi); t.setDate(t.getDate() + i);
         return `<th>${g}<br><small>${t.toLocaleDateString('tr-TR', {day:'2-digit', month:'2-digit'})}</small></th>`;
     }).join('');
@@ -137,7 +139,7 @@ function renderTable() {
     saatler.forEach(saat => {
         bHtml += `<tr><td><strong>${saat}</strong></td>`;
         for (let i = 0; i < 7; i++) {
-            bHtml += `<td class="drop-zone" data-gun="${i}" data-saat="${saat}">${hucreIcerikGetir(i, saat)}</td>`;
+            bHtml += `<td data-gun="${i}" data-saat="${saat}">${hucreIcerikGetir(i, saat)}</td>`;
         }
         bHtml += `</tr>`;
     });
@@ -146,40 +148,42 @@ function renderTable() {
 
 function hucreIcerikGetir(gun, saat) {
     let html = "";
+    // Zaten atanmışları göster (Özel kurallar)
     personeller.forEach(p => {
         if(haftalikProgram[p.isim][gun] === saat) {
             html += `<div class="birim-card"><span class="birim-tag">${p.birim}</span><span class="p-isim">${p.isim}</span></div>`;
         }
     });
 
-    if(saat === "00:00–07:00") return html;
+    if(saat === "00:00–07:00" || saat === "İZİN") return html;
 
     birimSiralamasi.forEach(birim => {
         let kap = 0;
-        const isHaftaSonu = (gun >= 5);
+        const isHS = (gun >= 5);
 
         if (birim === "Teknik Yönetmen") {
-            if (!isHaftaSonu) {
+            if (!isHS) {
                 if (saat === "06:30–16:00") kap = 2;
                 if (saat === "16:00–00:00") kap = 1;
             } else {
                 if (["06:30–16:00", "09:00–18:00", "16:00–00:00"].includes(saat)) kap = 1;
             }
-        } else if (birim.includes("MCR")) {
-            if (["06:30–16:00", "16:00–00:00"].includes(saat)) kap = 1;
-        } else if (birim.includes("BİLGİ") || birim.includes("YAYIN")) {
-            if (saat === "09:00–18:00") kap = 1;
-        } else if (birim === "Ses Operatörü") {
-            if (!isHaftaSonu) {
+        } 
+        else if (birim === "Ses Operatörü") {
+            if (!isHS) {
                 if (saat === "06:30–16:00") kap = 4;
                 if (saat === "16:00–00:00") kap = 2;
             } else {
-                if (["06:30–16:00", "16:00–00:00"].includes(saat)) kap = 2;
+                if (["06:30–16:00", "09:00–18:00", "16:00–00:00"].includes(saat)) kap = 2;
             }
-        } else if (saat === "06:30–16:00") kap = 1;
+        }
+        else if (birim.includes("MCR")) { if (["06:30–16:00", "16:00–00:00"].includes(saat)) kap = 1; }
+        else if (birim.includes("BİLGİ") || birim.includes("YAYIN")) { if (saat === "09:00–18:00") kap = 1; }
+        else if (saat === "06:30–16:00") kap = 1;
 
         let adaylar = personeller.filter(p => p.birim === birim && !haftalikProgram[p.isim][gun]);
         let suan = personeller.filter(p => p.birim === birim && haftalikProgram[p.isim][gun] === saat).length;
+        
         for(let k=0; k < (kap - suan); k++) {
             if(adaylar.length > 0) {
                 let p = adaylar.splice(Math.floor(Math.random() * adaylar.length), 1)[0];
