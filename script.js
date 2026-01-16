@@ -1,6 +1,6 @@
 /**
- * PRO-Vardiya v14.4
- * KURAL: SES HAFTA SONU 09:00 (2 KİŞİ) AKTİF, HAFTA İÇİ PASİF
+ * PRO-Vardiya v14.5
+ * TÜM KURALLAR DEĞİŞTİRİLEMEZ ŞEKİLDE SABİTLENMİŞTİR.
  */
 
 const birimSiralamasi = [
@@ -94,7 +94,7 @@ function tabloyuOlustur() {
         haftalikProgram[p.isim] = isSelected ? Array(7).fill("İZİN") : Array(7).fill(null);
     });
 
-    // BARIŞ İNCE & EKREM FİDAN ÖZEL
+    // TY ÖZEL KRİTİK DÖNGÜ
     if(!haftalikProgram["BARIŞ İNCE"].includes("İZİN")) {
         haftalikProgram["BARIŞ İNCE"][0] = "00:00–07:00";
         haftalikProgram["BARIŞ İNCE"][1] = "00:00–07:00";
@@ -109,7 +109,6 @@ function tabloyuOlustur() {
     applyMCRRota("360TV MCR OPERATÖRÜ");
     applyIngestRota();
 
-    // ZAFER AKAR HAFTA İÇİ SABİT
     if(haftalikProgram["ZAFER AKAR"] && !haftalikProgram["ZAFER AKAR"].includes("İZİN")) {
         for(let i=0; i<5; i++) haftalikProgram["ZAFER AKAR"][i] = "06:30–16:00";
         haftalikProgram["ZAFER AKAR"][5] = "İZİN"; haftalikProgram["ZAFER AKAR"][6] = "İZİN";
@@ -143,7 +142,7 @@ function hucreDoldur(gun, saat) {
             if(birim.includes("MCR") || birim.includes("INGEST")) return;
             
             let kap = 0;
-            // TY
+            // TY KURALLARI
             if(birim === "TEKNİK YÖNETMEN") {
                 if(saat === "00:00–07:00") kap = 1;
                 else if(!isHS) {
@@ -153,23 +152,23 @@ function hucreDoldur(gun, saat) {
                     if(saat === "06:30–16:00" || saat === "09:00–18:00" || saat === "16:00–00:00") kap = 1;
                 }
             } 
-            // SES OPERATÖRÜ (HAFTA SONU 09:00 DAHİL)
+            // SES KURALLARI (DEĞİŞTİRİLEMEZ HS 09:00 AKTİF)
             else if(birim === "SES OPERATÖRÜ") {
-                if(saat === "09:00–18:00") kap = isHS ? 2 : 0; // Sadece Hafta Sonu 2 kişi
+                if(saat === "09:00–18:00") kap = isHS ? 2 : 0;
                 else kap = isHS ? 2 : (saat === "06:30–16:00" ? 4 : 2);
             }
-            // PLAYOUT
+            // PLAYOUT KURALLARI (HAFTA İÇİ 3, HS 2)
             else if(birim === "PLAYOUT OPERATÖRÜ") {
                 if(saat === "06:30–16:00") kap = isHS ? 2 : 3;
                 else if(saat === "16:00–00:00") kap = 2;
                 else kap = 0;
             }
-            // KJ
+            // KJ KURALLARI (09:00 VE 00:00 KESİN YOK)
             else if(birim === "KJ OPERATÖRÜ") {
                 if(saat === "06:30–16:00" || saat === "16:00–00:00") kap = 2;
                 else kap = 0;
             }
-            // BİLGİ İŞLEM
+            // BİLGİ İŞLEM KURALLARI
             else if(birim === "BİLGİ İŞLEM" || birim === "YAYIN SİSTEMLERİ") {
                 kap = (!isHS && saat === "09:00–18:00") ? 1 : 0;
             }
@@ -228,13 +227,13 @@ function ozetGuncelle() {
     sirali.forEach(p => {
         const mesai = haftalikProgram[p.isim].filter(v => v && v !== "İZİN").length;
         const gece = haftalikProgram[p.isim].filter(v => v === "00:00–07:00").length;
-        h += `<tr><td><strong>${p.isim}</strong></td><td><small>${p.birim}</small></td><td>${mesai} G</td><td>${gece} G</td></tr>`;
+        h += `<tr><td><strong>${p.isim}</strong></td><td><small>${p.birim}</small></td><td>${mesai} Gün</td><td>${gece} Gece</td></tr>`;
     });
     document.getElementById("ozetTablo").innerHTML = h + "</tbody></table>";
 }
 
 function haftaDegistir(g) { mevcutPazartesi.setDate(mevcutPazartesi.getDate() + g); tabloyuOlustur(); }
-function exportExcel() { XLSX.writeFile(XLSX.utils.table_to_book(document.getElementById("vardiyaTablosu")), "Vardiya_Listesi.xlsx"); }
+function exportExcel() { XLSX.writeFile(XLSX.utils.table_to_book(document.getElementById("vardiyaTablosu")), "Vardiya_Raporu.xlsx"); }
 function exportPDF() { html2pdf().from(document.getElementById('print-area')).save('Vardiya_Listesi.pdf'); }
 function sifirla() { localStorage.clear(); location.reload(); }
 function whatsappMesajiOlustur() {
