@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PRO-Vardiya v12.3 | Ultimate Stable</title>
+  <title>PRO-Vardiya v12.4 | Kesin Çözüm</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -11,25 +11,19 @@
 <body class="dark-mode">
   <div class="app-wrapper">
     <header class="no-print">
-      <div class="header-top">
-        <h1 class="glow-text">TEKNİK VARDİYA <span>v12.3</span></h1>
-        <button onclick="toggleDarkMode()" class="btn-theme">✨ Görünüm Değiştir</button>
-      </div>
+      <h1 class="glow-text">TEKNİK VARDİYA SİSTEMİ <span>v12.4</span></h1>
       <div class="nav-row">
-          <button onclick="haftaDegistir(-7)" class="btn-nav">«</button>
+          <button onclick="haftaDegistir(-7)" class="btn-nav">« Geri</button>
           <div class="date-display" id="tarihAraligi">Yükleniyor...</div>
-          <button onclick="haftaDegistir(7)" class="btn-nav">»</button>
+          <button onclick="haftaDegistir(7)" class="btn-nav">İleri »</button>
       </div>
       <div class="action-row">
           <button onclick="tabloyuOlustur()" class="btn-primary pulse">⚡ PLAN OLUŞTUR</button>
-          <button onclick="temizleHafiza()" class="btn-danger">Hafızayı Sıfırla</button>
+          <button onclick="temizleHafiza()" class="btn-danger">Sıfırla</button>
       </div>
     </header>
 
-    <section class="checklist-section no-print">
-      <h3 class="glow-text">Manuel İzinli Personel Seçimi</h3>
-      <div id="personelChecklist" class="checklist-grid"></div>
-    </section>
+    <div id="personelChecklist" class="checklist-grid no-print"></div>
 
     <main id="print-area">
       <div class="table-responsive">
@@ -38,16 +32,12 @@
           <tbody id="tableBody"></tbody>
         </table>
       </div>
-      <div class="stats-section">
-          <h3 class="glow-text">Haftalık Analiz & Personel Yükü</h3>
-          <div id="ozetTablo"></div>
-      </div>
+      <div id="ozetTablo" class="stats-section"></div>
     </main>
 
     <div class="export-bar no-print">
-        <button onclick="whatsappMesajiOlustur()" class="btn-wa">WhatsApp'a Kopyala</button>
-        <button onclick="exportExcel()" class="btn-success">Excel Olarak İndir</button>
-        <button onclick="exportPDF()" class="btn-pdf">PDF Olarak Kaydet</button>
+        <button onclick="whatsappMesajiOlustur()" class="btn-wa">WhatsApp</button>
+        <button onclick="exportPDF()" class="btn-pdf">PDF Kaydet</button>
     </div>
   </div>
   <script src="script.js"></script>

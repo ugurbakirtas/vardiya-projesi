@@ -1,10 +1,11 @@
+// KRİTİK SIRALAMA VE PERSONEL LİSTESİ
 const birimSiralamasi = [
     "TEKNİK YÖNETMEN", "SES OPERATÖRÜ", "PLAYOUT OPERATÖRÜ", "KJ OPERATÖRÜ", 
     "INGEST OPERATÖRÜ", "BİLGİ İŞLEM", "YAYIN SİSTEMLERİ", 
     "24TV MCR OPERATÖRÜ", "360TV MCR OPERATÖRÜ"
 ];
 
-const varsayilanPersoneller = [
+const personeller = [
     { id: 1, isim: "YUNUS EMRE YAYLA", birim: "TEKNİK YÖNETMEN" },
     { id: 2, isim: "HASAN CAN SAĞLAM", birim: "TEKNİK YÖNETMEN" },
     { id: 3, isim: "MEHMET BERKMAN", birim: "TEKNİK YÖNETMEN" },
@@ -56,105 +57,102 @@ const varsayilanPersoneller = [
 const gunler = ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"];
 const saatler = ["06:30–16:00", "09:00–18:00", "12:00–22:00", "16:00–00:00", "00:00–07:00", "DIŞ YAYIN"];
 
-let personeller = [...varsayilanPersoneller];
 let haftalikProgram = {};
 let mevcutPazartesi = getMonday(new Date());
 
-function getMonday(d) { d = new Date(d); let day = d.getDay(), diff = d.getDate() - day + (day == 0 ? -6 : 1); return new Date(d.setDate(diff)); }
-function hiyerarsikSirala(liste) { return [...liste].sort((a, b) => birimSiralamasi.indexOf(a.birim) - birimSiralamasi.indexOf(b.birim) || a.isim.localeCompare(b.isim)); }
+function getMonday(d) {
+    d = new Date(d);
+    let day = d.getDay();
+    let diff = d.getDate() - day + (day == 0 ? -6 : 1);
+    return new Date(d.setDate(diff));
+}
 
 function tabloyuOlustur() {
-    try {
-        const haftaKey = mevcutPazartesi.toISOString().split('T')[0];
-        const gecenHaftaKey = new Date(mevcutPazartesi.getTime() - 7 * 86400000).toISOString().split('T')[0];
-        const hafiza = JSON.parse(localStorage.getItem("v12_v3_hafiza")) || {};
+    document.getElementById("tarihAraligi").innerText = `${mevcutPazartesi.toLocaleDateString('tr-TR')} Haftası`;
+    haftalikProgram = {};
 
-        document.getElementById("tarihAraligi").innerText = `${mevcutPazartesi.toLocaleDateString('tr-TR')} Haftası`;
-        haftalikProgram = {};
+    // 1. Programı temizle ve manuel izinleri kontrol et
+    personeller.forEach(p => {
+        const isChecked = document.getElementById(`check_${p.id}`)?.checked;
+        haftalikProgram[p.isim] = isChecked ? Array(7).fill("İZİN") : Array(7).fill(null);
+    });
 
-        // 1. Manuel İzinleri Al
-        personeller.forEach(p => {
-            const el = document.getElementById(`check_${p.id}`);
-            haftalikProgram[p.isim] = (el && el.checked) ? Array(7).fill("İZİN") : Array(7).fill(null);
-        });
+    // 2. MCR Rotasyonu (Sabit Döngü)
+    applyMCRRota("24TV MCR OPERATÖRÜ");
+    applyMCRRota("360TV MCR OPERATÖRÜ");
 
-        // 2. TY ve MCR Kuralları (Öncelikli)
-        const tyEkibi = personeller.filter(p => p.birim === "TEKNİK YÖNETMEN");
-        [5, 6].forEach(gun => {
-            let adaylar = tyEkibi.filter(p => !haftalikProgram[p.isim][gun]);
-            if(adaylar.length >= 2) {
-                haftalikProgram[adaylar[0].isim][gun] = "06:30–16:00";
-                haftalikProgram[adaylar[1].isim][gun] = "16:00–00:00";
-            }
-        });
-        applyMCRRota("24TV MCR OPERATÖRÜ");
-        applyMCRRota("360TV MCR OPERATÖRÜ");
+    // 3. Teknik Yönetmen Hafta Sonu Sabitleme
+    const tyEkibi = personeller.filter(p => p.birim === "TEKNİK YÖNETMEN");
+    [5, 6].forEach(g => {
+        let adaylar = tyEkibi.filter(p => !haftalikProgram[p.isim][g]);
+        if(adaylar[0]) haftalikProgram[adaylar[0].isim][g] = "06:30–16:00";
+        if(adaylar[1]) haftalikProgram[adaylar[1].isim][g] = "16:00–00:00";
+    });
 
-        // 3. Ana Atama Motoru
-        for(let g=0; g<7; g++) {
-            saatler.forEach(s => {
-                if(["00:00–07:00", "İZİN", "DIŞ YAYIN"].includes(s)) return;
+    // 4. Diğer Birimler ve Saatler
+    for(let g = 0; g < 7; g++) {
+        saatler.forEach(s => {
+            if(["00:00–07:00", "İZİN", "DIŞ YAYIN"].includes(s)) return;
+            if(g >= 5 && s === "09:00–18:00") return; // Hafta sonu 09:00 yok
+
+            birimSiralamasi.forEach(birim => {
+                if(birim.includes("MCR") || birim === "TEKNİK YÖNETMEN") return;
                 
-                birimSiralamasi.forEach(birim => {
-                    if(birim.includes("MCR") || birim === "TEKNİK YÖNETMEN") return;
-                    if(g >= 5 && s === "09:00–18:00") return; // Hafta sonu 09:00 kapalılık
+                let kap = (g >= 5) ? (birim === "SES OPERATÖRÜ" ? 2 : 1) : (birim === "SES OPERATÖRÜ" ? 3 : 2);
+                if(["BİLGİ İŞLEM", "YAYIN SİSTEMLERİ"].includes(birim)) kap = (g >= 5) ? 0 : 1;
 
-                    let kap = (g >= 5) ? (birim === "SES OPERATÖRÜ" ? 2 : 1) : (birim === "SES OPERATÖRÜ" ? 3 : 2);
-                    if(["BİLGİ İŞLEM", "YAYIN SİSTEMLERİ"].includes(birim)) kap = (g >= 5) ? 0 : 1;
+                let adaylar = personeller.filter(p => p.birim === birim && !haftalikProgram[p.isim][g]);
+                let suanCount = personeller.filter(p => p.birim === birim && haftalikProgram[p.isim][g] === s).length;
 
-                    let adaylar = personeller.filter(p => p.birim === birim && !haftalikProgram[p.isim][g]);
-                    
-                    // Adaletli Sıralama (Geçen hafta yüküne göre)
-                    adaylar.sort((a, b) => {
-                        let aGecen = (hafiza[gecenHaftaKey] && hafiza[gecenHaftaKey][a.isim]) || 5;
-                        let bGecen = (hafiza[gecenHaftaKey] && hafiza[gecenHaftaKey][b.isim]) || 5;
-                        return aGecen - bGecen;
-                    });
-
-                    let suanCount = personeller.filter(p => p.birim === birim && haftalikProgram[p.isim][g] === s).length;
-                    for(let k=0; k < (kap - suanCount); k++) {
-                        if(adaylar.length > 0) {
-                            let p = adaylar.find(x => haftalikProgram[x.isim].filter(v => v && v !== "İZİN").length < 5);
-                            if(!p) p = adaylar[0];
-                            if(p) {
-                                haftalikProgram[p.isim][g] = s;
-                                adaylar = adaylar.filter(x => x.isim !== p.isim);
-                            }
-                        }
+                for(let k = 0; k < (kap - suanCount); k++) {
+                    let p = adaylar.find(x => haftalikProgram[x.isim].filter(v => v && v !== "İZİN").length < 5);
+                    if(p) {
+                        haftalikProgram[p.isim][g] = s;
+                        adaylar = adaylar.filter(x => x.isim !== p.isim);
                     }
-                });
+                }
             });
-        }
-
-        // 4. TY Gece Vardiyası
-        for(let g=0; g<7; g++) {
-            let tyAday = tyEkibi.find(p => !haftalikProgram[p.isim][g]);
-            if(tyAday) haftalikProgram[tyAday.isim][g] = "00:00–07:00";
-        }
-
-        // 5. Temizlik ve Kayıt
-        let buHaftaYuk = {};
-        personeller.forEach(p => {
-            for(let i=0; i<7; i++) if(!haftalikProgram[p.isim][i]) haftalikProgram[p.isim][i] = "İZİN";
-            buHaftaYuk[p.isim] = haftalikProgram[p.isim].filter(v => v !== "İZİN").length;
         });
-        localStorage.setItem("v12_v3_hafiza", JSON.stringify({...hafiza, [haftaKey]: buHaftaYuk}));
-
-        renderTable();
-        ozetGuncelle();
-    } catch (err) {
-        console.error("Tablo oluşturma hatası:", err);
     }
+
+    // 5. Boşlukları İzinle Doldur
+    personeller.forEach(p => {
+        for(let i=0; i<7; i++) if(!haftalikProgram[p.isim][i]) haftalikProgram[p.isim][i] = "İZİN";
+    });
+
+    renderUI();
 }
 
-function renderTable() {
-    document.getElementById("tableHeader").innerHTML = `<th>Vardiya</th>` + gunler.map(g => `<th>${g}</th>`).join('');
-    document.getElementById("tableBody").innerHTML = saatler.map(s => `<tr><td>${s}</td>${[0,1,2,3,4,5,6].map(g => `<td>${hucreDoldur(g, s)}</td>`).join('')}</tr>`).join('');
-}
+function renderUI() {
+    // Header
+    document.getElementById("tableHeader").innerHTML = `<th>Saatler</th>` + gunler.map(g => `<th>${g}</th>`).join('');
+    
+    // Body
+    let html = "";
+    saatler.forEach(s => {
+        html += `<tr><td>${s}</td>`;
+        for(let g=0; g<7; g++) {
+            let hucredekiler = personeller.filter(p => haftalikProgram[p.isim][g] === s);
+            hucredekiler.sort((a,b) => birimSiralamasi.indexOf(a.birim) - birimSiralamasi.indexOf(b.birim));
+            let content = hucredekiler.map(p => `
+                <div class="birim-card">
+                    <span class="birim-tag">${p.birim}</span>
+                    <span class="p-isim">${p.isim}</span>
+                </div>
+            `).join('');
+            html += `<td>${content}</td>`;
+        }
+        html += `</tr>`;
+    });
+    document.getElementById("tableBody").innerHTML = html;
 
-function hucreDoldur(gun, saat) {
-    let list = personeller.filter(p => haftalikProgram[p.isim][gun] === saat);
-    return hiyerarsikSirala(list).map(p => `<div class="birim-card"><span class="birim-tag">${p.birim}</span><span class="p-isim">${p.isim}</span></div>`).join('');
+    // Özet
+    let ozetHtml = `<h3>Haftalık Çalışma Gün Sayıları</h3><div style="display:flex; flex-wrap:wrap; gap:10px;">`;
+    personeller.forEach(p => {
+        let count = haftalikProgram[p.isim].filter(v => v !== "İZİN").length;
+        ozetHtml += `<div style="padding:5px 10px; border-radius:5px; background:${count>5?'#f87171':'#4ade80'}; color:#000; font-size:10px;">${p.isim}: ${count}G</div>`;
+    });
+    document.getElementById("ozetTablo").innerHTML = ozetHtml + "</div>";
 }
 
 function applyMCRRota(birim) {
@@ -164,38 +162,25 @@ function applyMCRRota(birim) {
     ekip.forEach((p, idx) => {
         for(let i=0; i<7; i++) {
             let d = new Date(mevcutPazartesi.getTime() + (i * 86400000));
-            let rI = (Math.floor((d - ref) / 86400000) + (idx * 2)) % 8;
-            if(!haftalikProgram[p.isim][i]) haftalikProgram[p.isim][i] = rota[rI < 0 ? rI + 8 : rI];
+            let diff = Math.floor((d - ref) / 86400000) + (idx * 2);
+            let rI = diff % 8;
+            haftalikProgram[p.isim][i] = rota[rI < 0 ? rI + 8 : rI];
         }
     });
 }
 
-function ozetGuncelle() {
-    let h = `<table><tr><th>Personel</th><th>Birim</th><th>Gün</th></tr>`;
-    hiyerarsikSirala(personeller).forEach(p => {
-        const m = haftalikProgram[p.isim].filter(v => v !== "İZİN").length;
-        h += `<tr class="${m<=5?'izinli-row':''}"><td>${p.isim}</td><td>${p.birim}</td><td>${m}</td></tr>`;
-    });
-    document.getElementById("ozetTablo").innerHTML = h + `</table>`;
-}
-
 function checklistOlustur() {
-    const container = document.getElementById("personelChecklist");
-    if(container) {
-        container.innerHTML = hiyerarsikSirala(personeller).map(p => `
-            <label class="check-item"><input type="checkbox" id="check_${p.id}"> ${p.isim}</label>
-        `).join('');
-    }
+    const sorted = [...personeller].sort((a,b) => birimSiralamasi.indexOf(a.birim) - birimSiralamasi.indexOf(b.birim));
+    document.getElementById("personelChecklist").innerHTML = sorted.map(p => `
+        <label class="check-item"><input type="checkbox" id="check_${p.id}" onchange="tabloyuOlustur()"> ${p.isim}</label>
+    `).join('');
 }
 
 function haftaDegistir(g) { mevcutPazartesi.setDate(mevcutPazartesi.getDate() + g); tabloyuOlustur(); }
-function toggleDarkMode() { document.body.classList.toggle('light-mode'); }
-function temizleHafiza() { localStorage.removeItem("v12_v3_hafiza"); location.reload(); }
-function exportExcel() { XLSX.writeFile(XLSX.utils.table_to_book(document.getElementById("vardiyaTablosu")), "Teknik_Vardiya.xlsx"); }
-function exportPDF() { html2pdf().from(document.getElementById('print-area')).save(); }
-
+function temizleHafiza() { localStorage.clear(); location.reload(); }
+function exportPDF() { html2pdf().from(document.getElementById('print-area')).save('Vardiya_Listesi.pdf'); }
 function whatsappMesajiOlustur() {
-    let m = `📋 *${mevcutPazartesi.toLocaleDateString('tr-TR')} HAFTASI VARDİYASI*\n\n`;
+    let m = `📋 *${mevcutPazartesi.toLocaleDateString('tr-TR')} VARDİYASI*\n\n`;
     gunler.forEach((g, i) => {
         m += `*${g.toUpperCase()}*\n`;
         saatler.forEach(s => {
@@ -204,7 +189,7 @@ function whatsappMesajiOlustur() {
         });
         m += `\n`;
     });
-    navigator.clipboard.writeText(m).then(() => alert("Liste WhatsApp için kopyalandı!"));
+    navigator.clipboard.writeText(m).then(() => alert("Kopyalandı!"));
 }
 
-window.onload = () => { checklistOlustur(); setTimeout(tabloyuOlustur, 100); };
+window.onload = () => { checklistOlustur(); tabloyuOlustur(); };
