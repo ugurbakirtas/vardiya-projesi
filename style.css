@@ -21,10 +21,10 @@ header { display: flex; justify-content: space-between; align-items: center; bac
 .admin-box { flex: 1; display: flex; flex-direction: column; gap: 8px; }
 .admin-box input, .admin-box select { padding: 8px; border-radius: 6px; border: 1px solid var(--border); }
 
-/* Belirgin Tablolar */
-.table-container { background: white; border-radius: 10px; border: 3px solid var(--primary); overflow: auto; margin-bottom: 20px; }
+/* TABLO TASARIMI - DAHA BELİRGİN */
+.table-container { background: white; border-radius: 10px; border: 3px solid var(--primary); overflow: auto; margin-bottom: 20px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
 table { width: 100%; border-collapse: collapse; min-width: 1300px; }
-th { background: var(--primary); color: white; padding: 12px; font-size: 11px; border: 1px solid #334155; }
+th { background: var(--primary); color: white; padding: 12px; font-size: 11px; border: 1px solid #334155; text-transform: uppercase; }
 td { border: 2px solid #e2e8f0; padding: 8px; vertical-align: top; background: #fff; color: #334155; }
 td:first-child { background: #f1f5f9; font-weight: 900; color: var(--primary); width: 110px; text-align: center; vertical-align: middle; border-right: 4px solid var(--primary); }
 
@@ -32,10 +32,9 @@ td:first-child { background: #f1f5f9; font-weight: 900; color: var(--primary); w
 .birim-tag { font-size: 8px; font-weight: 900; color: var(--blue); display: block; text-transform: uppercase; }
 .p-isim { font-size: 10px; font-weight: 700; color: #0f172a; }
 
-/* Özet Tablosu */
-.stats-table { width: 100%; border-collapse: collapse; background: white; border: 1px solid var(--border); }
-.stats-table th { background: var(--primary); color: white; }
-.stats-table td { padding: 12px; border: 1px solid #e2e8f0; }
+.stats-table { width: 100%; border-collapse: collapse; background: white; border: 2px solid var(--primary); margin-top: 10px; }
+.stats-table th { background: var(--primary); color: white; padding: 10px; }
+.stats-table td { padding: 10px; border: 1px solid #e2e8f0; font-weight: 700; }
 
 .btn-theme { background: #f59e0b; color: white; }
 .btn-admin { background: var(--accent); color: white; }
