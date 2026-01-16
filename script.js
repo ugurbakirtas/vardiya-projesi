@@ -35,12 +35,11 @@ function programiSifirla() {
   haftalikProgram["ZAFER AKAR"][5] = "İZİN";
   haftalikProgram["ZAFER AKAR"][6] = "İZİN";
 
-  // GENEL İZİN ATAMA
+  // İZİN ATAMA
   gunler.forEach((_, gIdx) => {
     birimler.forEach(birim => {
       let adaylar = personeller.filter(p => p.birim === birim);
       let limit = (birim === "Ses Operatörü" || birim === "Teknik Yönetmen") ? 2 : 1;
-      
       let zatenAtanan = adaylar.filter(p => haftalikProgram[p.isim][gIdx] === "İZİN").length;
       let kalanLimit = limit - zatenAtanan;
 
@@ -75,12 +74,13 @@ function uygunlukKontrol(personel, gunIdx, saat) {
 
   if (gunIdx > 0) {
     const dun = program[gunIdx - 1];
-    // 16:00-00:00 ve 00:00-07:00 sonrası 06:30 gelemez
+    // Dinlenme kuralı: Gece veya akşam sonrası sabah gelemez
     if (saat === "06:30–16:00" && (dun === "16:00–00:00" || dun === "00:00–07:00")) return false;
   }
 
   if (saat === "00:00–07:00") {
     const gSay = program.filter(v => v === "00:00–07:00").length;
+    // Haftada max 2 gece ve sadece gece çalışabilenler
     if (gSay >= 2 || !personel.gece) return false;
   }
 
@@ -96,39 +96,48 @@ function tabloyuOlustur() {
     const sCls = saat.split('–')[0].replace(':', '').replace('DIŞ YAYIN', 'disyayin');
     html += `<tr class="saat-${sCls}"><td><strong>${saat}</strong></td>`;
     
-    // YENİ KURAL: Ses ve TY için 09:00, 12:00 ve Dış Yayın manuel
-    const manuelSaatler = ["09:00–18:00", "12:00–22:00", "DIŞ YAYIN"];
+    const manuelSaatler = ["12:00–22:00", "DIŞ YAYIN"];
 
     gunler.forEach((_, gIdx) => {
       let hucreContent = "";
+      const haftaSonuMu = (gIdx >= 5);
+
       birimler.forEach(birim => {
         let kapasite = 1;
+        const isSesVeyaTY = (birim === "Ses Operatörü" || birim === "Teknik Yönetmen");
         
-        // Kapasite ve Atama Kontrolü
-        const isManuelBirim = (birim === "Ses Operatörü" || birim === "Teknik Yönetmen");
-        const isManuelSaat = manuelSaatler.includes(saat);
-        const otomatikAtamaAktif = !(isManuelBirim && isManuelSaat);
-
-        if(birim === "Teknik Yönetmen") {
-           if(saat === "06:30–16:00" || saat === "16:00–00:00") kapasite = 2;
-           if(saat === "00:00–07:00") kapasite = 1;
-        } else if(birim === "Ses Operatörü") {
-           if(saat === "06:30–16:00") kapasite = 4;
-           if(saat === "16:00–00:00") kapasite = 2;
-           if(saat === "00:00–07:00" || isManuelSaat) kapasite = 0; // Otomatik atama yok
+        // Kapasite Kuralları
+        if (birim === "Ses Operatörü") {
+          if (haftaSonuMu) {
+            if (saat === "06:30–16:00") kapasite = 2;
+            else if (saat === "09:00–18:00") kapasite = 2;
+            else if (saat === "16:00–00:00") kapasite = 2;
+            else kapasite = 0;
+          } else {
+            if (saat === "06:30–16:00") kapasite = 4;
+            else if (saat === "16:00–00:00") kapasite = 2;
+            else kapasite = 0; // Hafta içi 09:00, 12:00, Gece, Dış Yayın Manuel
+          }
+        } else if (birim === "Teknik Yönetmen") {
+          if (saat === "06:30–16:00" || saat === "16:00–00:00") kapasite = 2;
+          else if (saat === "00:00–07:00") kapasite = 1; // HER GÜN ZORUNLU 1 KİŞİ
+          else kapasite = 0; // TY için 09:00, 12:00 ve Dış yayın Manuel
         }
+
+        let otomatikAtamaAktif = (kapasite > 0);
+        if (!haftaSonuMu && saat === "09:00–18:00" && isSesVeyaTY) otomatikAtamaAktif = false;
 
         let atananlar = [];
 
-        // Zafer Akar Sabitleme
-        if (birim === "Ses Operatörü" && saat === "06:30–16:00" && gIdx < 5) {
+        // Zafer Akar Sabit (Hafta içi sabah)
+        if (birim === "Ses Operatörü" && saat === "06:30–16:00" && !haftaSonuMu) {
           if (uygunlukKontrol({isim: "ZAFER AKAR"}, gIdx, saat)) {
              haftalikProgram["ZAFER AKAR"][gIdx] = saat;
              atananlar.push("ZAFER AKAR");
           }
         }
 
-        if (otomatikAtamaAktif && kapasite > 0) {
+        if (otomatikAtamaAktif) {
           let adaylar = personeller.filter(p => p.birim === birim && p.isim !== "ZAFER AKAR" && uygunlukKontrol(p, gIdx, saat));
           while(atananlar.length < kapasite && adaylar.length > 0) {
             const secilen = adaylar.splice(Math.floor(Math.random() * adaylar.length), 1)[0];
@@ -137,8 +146,7 @@ function tabloyuOlustur() {
           }
         }
 
-        // Kutucukları oluştur (Ses/TY 09:00 gibi manuel saatlerde kapasite 0 olsa bile 1 boş kutu bırakır)
-        let gosterilecekKutu = (isManuelBirim && isManuelSaat) ? 1 : Math.max(kapasite, 1);
+        let gosterilecekKutu = (isSesVeyaTY && (saat === "09:00–18:00" && !haftaSonuMu)) ? 1 : Math.max(kapasite, 1);
         for(let i=0; i < gosterilecekKutu; i++) {
           let isim = atananlar[i] || "-";
           hucreContent += `<div class="birim-card"><span class="birim-tag">${birim}</span><span class="p-isim">${isim}</span></div>`;
@@ -149,7 +157,7 @@ function tabloyuOlustur() {
     html += `</tr>`;
   });
 
-  // İZİN Satırı
+  // İZİN Satırı (Birim detaylı)
   html += `<tr class="saat-izin-row"><td><strong>İZİN</strong></td>`;
   gunler.forEach((_, gIdx) => {
     let izinIcerik = "";
@@ -181,8 +189,8 @@ function cakismaKontroluYap() {
       if(!hucre) return;
       hucre.classList.remove("conflict");
       const isimler = Array.from(hucre.querySelectorAll(".p-isim")).map(el => el.innerText.trim());
-      const izinIsimleri = hucre.innerText.split('\n').filter(t => t.trim().length > 3 && !birimler.includes(t.trim()));
-      [...isimler, ...izinIsimleri].forEach(m => { 
+      const izinMetni = hucre.innerText.split('\n').filter(t => t.trim().length > 3 && !birimler.includes(t.trim()));
+      [...isimler, ...izinMetni].forEach(m => { 
         if(m !== "-" && m !== "") isimSayaci[m] = (isimSayaci[m] || 0) + 1; 
       });
     });
