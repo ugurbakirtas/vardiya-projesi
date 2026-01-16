@@ -35,6 +35,8 @@ const personeller = [
 // Sayaçlar
 const izinSayaci = {};
 const oncekiAksam = {};
+
+// Teknik Yönetmen kuralları
 function uygunPersonelTeknikYonetmen(saat, gunIndex) {
   const geceMi = saat === "00:00–07:00";
   const sabahMi = saat === "06:30–16:00";
@@ -42,6 +44,7 @@ function uygunPersonelTeknikYonetmen(saat, gunIndex) {
   let uygunlar = personeller.filter(p => p.birim === "Teknik Yönetmen" && (!geceMi || p.gece));
   if (uygunlar.length === 0) return "İZİN";
   if (!uygunPersonelTeknikYonetmen.geceSayaci) uygunPersonelTeknikYonetmen.geceSayaci = {};
+
   if (geceMi) {
     uygunlar = uygunlar.filter(p => (uygunPersonelTeknikYonetmen.geceSayaci[p.isim] || 0) < 2);
     if (uygunlar.length === 0) return "İZİN";
@@ -70,6 +73,7 @@ function uygunPersonelTeknikYonetmen(saat, gunIndex) {
   return secilen.isim;
 }
 
+// Ses Operatörü kuralları
 function uygunPersonelSesOperatoru(saat, gunIndex) {
   const sabahMi = saat === "06:30–16:00";
   const aksamMi = saat === "16:00–00:00";
@@ -77,6 +81,7 @@ function uygunPersonelSesOperatoru(saat, gunIndex) {
   const izinMi = saat === "İZİN";
   const disYayinMi = saat === "DIŞ YAYIN";
   let uygunlar = personeller.filter(p => p.birim === "Ses Operatörü");
+
   if (geceMi) return "";
   if (disYayinMi) return "";
   if (izinMi) {
@@ -89,4 +94,42 @@ function uygunPersonelSesOperatoru(saat, gunIndex) {
         izinSayaci[aday.isim] = izinSayisi + 1;
       }
     }
-    return secilenler.join(",
+    return secilenler.join(", ");
+  }
+  if (aksamMi) {
+    const secilenler = [];
+    while (secilenler.length < 2) {
+      const aday = uygunlar[Math.floor(Math.random() * uygunlar.length)];
+      if (!secilenler.includes(aday.isim)) {
+        secilenler.push(aday.isim);
+        oncekiAksam[gunIndex] = oncekiAksam[gunIndex] || [];
+        oncekiAksam[gunIndex].push(aday.isim);
+      }
+    }
+    return secilenler.join(", ");
+  }
+  if (sabahMi) {
+    const secilenler = [];
+    while (secilenler.length < 4) {
+      const aday = uygunlar[Math.floor(Math.random() * uygunlar.length)];
+      const oncekiGun = gunIndex - 1;
+      if (oncekiGun >= 0 && oncekiAksam[oncekiGun] && oncekiAksam[oncekiGun].includes(aday.isim)) {
+        continue;
+      }
+      if (!secilenler.includes(aday.isim)) {
+        secilenler.push(aday.isim);
+      }
+    }
+    return secilenler.join(", ");
+  }
+  return "";
+}
+
+// Genel seçim
+function uygunPersonel(birim, saat, gunIndex) {
+  if (birim === "Teknik Yönetmen") return uygunPersonelTeknikYonetmen(saat, gunIndex);
+  if (birim === "Ses Operatörü") return uygunPersonelSesOperatoru(saat, gunIndex);
+  if (saat === "İZİN" || saat === "DIŞ YAYIN") return saat;
+  const geceMi = saat === "00:00–07:00";
+  let uygunlar = personeller.filter(p => p.birim === birim && (!geceMi || p.gece));
+  if (uygunlar.length === 0) return "
