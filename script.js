@@ -11,6 +11,36 @@ const birimSiralamasi = [
 ];
 
 const personeller = [
+    { isim: "YUNUS EMRE YAYLA", birim: "Teknik Yönetmen" },
+    { isim: "HASAN CAN SAĞLAM", birim: "Teknik Yönetmen" },
+    { isim: "MEHMET BERKMAN", birim: "Teknik Yönetmen" },
+    { isim: "EKREM FİDAN", birim: "Teknik Yönetmen" },
+    { isim: "CAN ŞENTUNALI", birim: "Teknik Yönetmen" },
+    { isim: "BARIŞ İNCE", birim: "Teknik Yönetmen" },
+    { isim: "ZAFER AKAR", birim: "Ses Operatörü" },
+    { isim: "ENES KALE", birim: "Ses Operatörü" },
+    { isim: "ANIL RİŞVAN", birim: "Ses Operatörü" },
+    { isim: "ERSAN TİLBE", birim: "Ses Operatörü" },
+    { isim: "ULVİ MUTLUBAŞ", birim: "Ses Operatörü" },
+    { isim: "OSMAN DİNÇER", birim: "Ses Operatörü" },
+    { isim: "DOĞUŞ MALGIL", birim: "Ses Operatörü" },
+    { isim: "ERDOĞAN KÜÇÜKKAYA", birim: "Ses Operatörü" },
+    { isim: "SENA MİNARECİ", birim: "Playout Operatörü" },
+    { isim: "MEHMET TUNÇ", birim: "Playout Operatörü" },
+    { isim: "KADİR ÇAÇAN", birim: "Playout Operatörü" },
+    { isim: "İBRAHİM SERİNSÖZ", birim: "Playout Operatörü" },
+    { isim: "YUSUF ALPKILIÇ", birim: "Playout Operatörü" },
+    { isim: "MUSTAFA ERCÜMENT KILIÇ", birim: "Playout Operatörü" },
+    { isim: "NEHİR KAYGUSUZ", birim: "Playout Operatörü" },
+    { isim: "YUSUF İSLAM TORUN", birim: "KJ Operatörü" },
+    { isim: "OĞUZHAN YALAZAN", birim: "KJ Operatörü" },
+    { isim: "UĞUR AKBABA", birim: "KJ Operatörü" },
+    { isim: "SENA BAYDAR", birim: "KJ Operatörü" },
+    { isim: "CEMREHAN SUBAŞI", birim: "KJ Operatörü" },
+    { isim: "YEŞİM KİREÇ", birim: "KJ Operatörü" },
+    { isim: "PINAR ÖZENÇ", birim: "KJ Operatörü" },
+    { isim: "RAMAZAN KOÇAK", birim: "24TV - 360TV INGEST OPERATÖRÜ" },
+    { isim: "Selin", birim: "Uplink" },
     { isim: "VOLKAN DEMİRBAŞ", birim: "24TV-360TV BİLGİ İŞLEM" },
     { isim: "GÖKHAN BAĞIŞ", birim: "24TV-360TV BİLGİ İŞLEM" },
     { isim: "HAKAN ELİPEK", birim: "24TV-360TV BİLGİ İşLEM" },
@@ -27,25 +57,7 @@ const personeller = [
     { isim: "EMRULLAH AHLATÇI", birim: "360TV MCR OPERATÖRÜ" },
     { isim: "EREN KAZAN", birim: "360TV MCR OPERATÖRÜ" },
     { isim: "MUSAB YAKUB DEMİRBAŞ", birim: "360TV MCR OPERATÖRÜ" },
-    { isim: "BÜKRE YAVUZ", birim: "360TV MCR OPERATÖRÜ" },
-    { isim: "YUNUS EMRE YAYLA", birim: "Teknik Yönetmen" },
-    { isim: "HASAN CAN SAĞLAM", birim: "Teknik Yönetmen" },
-    { isim: "MEHMET BERKMAN", birim: "Teknik Yönetmen" },
-    { isim: "EKREM FİDAN", birim: "Teknik Yönetmen" },
-    { isim: "CAN ŞENTUNALI", birim: "Teknik Yönetmen" },
-    { isim: "BARIŞ İNCE", birim: "Teknik Yönetmen" },
-    { isim: "ZAFER AKAR", birim: "Ses Operatörü" },
-    { isim: "ENES KALE", birim: "Ses Operatörü" },
-    { isim: "ANIL RİŞVAN", birim: "Ses Operatörü" },
-    { isim: "ERSAN TİLBE", birim: "Ses Operatörü" },
-    { isim: "ULVİ MUTLUBAŞ", birim: "Ses Operatörü" },
-    { isim: "OSMAN DİNÇER", birim: "Ses Operatörü" },
-    { isim: "DOĞUŞ MALGIL", birim: "Ses Operatörü" },
-    { isim: "ERDOĞAN KÜÇÜKKAYA", birim: "Ses Operatörü" },
-    { isim: "SENA MİNARECİ", birim: "Playout Operatörü" },
-    { isim: "YUSUF İSLAM TORUN", birim: "KJ Operatörü" },
-    { isim: "RAMAZAN KOÇAK", birim: "24TV - 360TV INGEST OPERATÖRÜ" },
-    { isim: "Selin", birim: "Uplink" }
+    { isim: "BÜKRE YAVUZ", birim: "360TV MCR OPERATÖRÜ" }
 ];
 
 function getMonday(d) {
@@ -73,8 +85,9 @@ function tabloyuOlustur() {
         haftalikProgram[p.isim] = isSelected ? Array(7).fill("İZİN") : Array(7).fill(null);
     });
 
-    // --- ÖZEL KURALLAR: TEKNİK YÖNETMEN ---
-    // Barış İnce: 2 Gece, 2 İzin
+    // --- ÖZEL ROTASYONLAR ---
+    
+    // 1. Teknik Yönetmen (Gece Kuralı)
     let barisGeceler = 0;
     while(barisGeceler < 2) {
         let r = Math.floor(Math.random() * 7);
@@ -85,22 +98,28 @@ function tabloyuOlustur() {
         let r = Math.floor(Math.random() * 7);
         if(!haftalikProgram["BARIŞ İNCE"][r]) { haftalikProgram["BARIŞ İNCE"][r] = "İZİN"; barisIzinler++; }
     }
-    // Ekrem Fidan (Gece rotasyonu)
     for(let i=0; i<7; i++) {
         if(haftalikProgram["BARIŞ İNCE"][i] !== "00:00–07:00" && !haftalikProgram["EKREM FİDAN"][i]) {
             haftalikProgram["EKREM FİDAN"][i] = "00:00–07:00";
         }
     }
 
-    // --- ÖZEL KURALLAR: SES OPERATÖRÜ (ZAFER AKAR) ---
-    // Hafta içi sabit 06:30, Hafta sonu İzin
-    for(let i=0; i<5; i++) { haftalikProgram["ZAFER AKAR"][i] = "06:30–16:00"; }
+    // 2. Ses (Zafer Akar Sabit)
+    for(let i=0; i<5; i++) haftalikProgram["ZAFER AKAR"][i] = "06:30–16:00";
     haftalikProgram["ZAFER AKAR"][5] = "İZİN";
     haftalikProgram["ZAFER AKAR"][6] = "İZİN";
 
-    // Genel İzin Atamaları (Özel kuralı olmayanlar için)
+    // 3. Playout & KJ (Değişken 09:00 Kuralı)
+    const pSorumlu = setDegiskenSorumlu("Playout Operatörü");
+    const kSorumlu = setDegiskenSorumlu("KJ Operatörü");
+
+    // 4. MCR ROTASYONU (2 SABAH, 2 AKŞAM, 2 GECE, 2 İZİN)
+    applyMCRRota("24TV MCR OPERATÖRÜ");
+    applyMCRRota("360TV MCR OPERATÖRÜ");
+
+    // Genel İzinler
     personeller.forEach(p => {
-        if(["BARIŞ İNCE", "ZAFER AKAR"].includes(p.isim)) return;
+        if(["BARIŞ İNCE", "ZAFER AKAR", pSorumlu, kSorumlu].includes(p.isim) || p.birim.includes("MCR")) return;
         let count = haftalikProgram[p.isim].filter(v => v === "İZİN").length;
         while(count < 2) {
             let r = Math.floor(Math.random() * 7);
@@ -108,24 +127,40 @@ function tabloyuOlustur() {
         }
     });
 
-    // MCR Gece Vardiyaları
-    for(let i=0; i<7; i++) {
-        planlaZorunlu(i, "24TV MCR OPERATÖRÜ", "00:00–07:00", 1);
-        planlaZorunlu(i, "360TV MCR OPERATÖRÜ", "00:00–07:00", 1);
-    }
-
     renderTable();
     ozetGuncelle();
 }
 
-function planlaZorunlu(gun, birim, saat, kapasite) {
-    let adaylar = personeller.filter(p => p.birim === birim && !haftalikProgram[p.isim][gun]);
-    let atanmis = 0;
-    while(atanmis < kapasite && adaylar.length > 0) {
-        let p = adaylar.splice(Math.floor(Math.random() * adaylar.length), 1)[0];
-        haftalikProgram[p.isim][gun] = saat;
-        atanmis++;
-    }
+function setDegiskenSorumlu(birim) {
+    const ekip = personeller.filter(p => p.birim === birim);
+    const s = ekip[Math.floor(Math.random() * ekip.length)].isim;
+    for(let i=0; i<5; i++) haftalikProgram[s][i] = "09:00–18:00";
+    haftalikProgram[s][5] = "İZİN";
+    haftalikProgram[s][6] = "İZİN";
+    return s;
+}
+
+function applyMCRRota(birim) {
+    const ekip = personeller.filter(p => p.birim === birim);
+    const rota = [
+        "06:30–16:00", "06:30–16:00", 
+        "16:00–00:00", "16:00–00:00", 
+        "00:00–07:00", "00:00–07:00", 
+        "İZİN", "İZİN"
+    ];
+    
+    const msPerDay = 24 * 60 * 60 * 1000;
+    const referansTarih = new Date(2025, 0, 6); // Pazartesi
+
+    ekip.forEach((p, idx) => {
+        for(let i=0; i<7; i++) {
+            let gunTarihi = new Date(mevcutPazartesi.getTime() + (i * msPerDay));
+            let fark = Math.floor((gunTarihi - referansTarih) / msPerDay);
+            let rotaIndex = (fark + (idx * 2)) % 8;
+            if(rotaIndex < 0) rotaIndex += 8;
+            haftalikProgram[p.isim][i] = rota[rotaIndex];
+        }
+    });
 }
 
 function renderTable() {
@@ -138,9 +173,7 @@ function renderTable() {
     let bHtml = "";
     saatler.forEach(saat => {
         bHtml += `<tr><td><strong>${saat}</strong></td>`;
-        for (let i = 0; i < 7; i++) {
-            bHtml += `<td data-gun="${i}" data-saat="${saat}">${hucreIcerikGetir(i, saat)}</td>`;
-        }
+        for (let i = 0; i < 7; i++) { bHtml += `<td>${hucreIcerikGetir(i, saat)}</td>`; }
         bHtml += `</tr>`;
     });
     document.getElementById("tableBody").innerHTML = bHtml;
@@ -148,7 +181,6 @@ function renderTable() {
 
 function hucreIcerikGetir(gun, saat) {
     let html = "";
-    // Zaten atanmışları göster (Özel kurallar)
     personeller.forEach(p => {
         if(haftalikProgram[p.isim][gun] === saat) {
             html += `<div class="birim-card"><span class="birim-tag">${p.birim}</span><span class="p-isim">${p.isim}</span></div>`;
@@ -158,27 +190,23 @@ function hucreIcerikGetir(gun, saat) {
     if(saat === "00:00–07:00" || saat === "İZİN") return html;
 
     birimSiralamasi.forEach(birim => {
+        if(birim.includes("MCR")) return; // MCR otomatik rotasyonda
+
         let kap = 0;
         const isHS = (gun >= 5);
 
         if (birim === "Teknik Yönetmen") {
-            if (!isHS) {
-                if (saat === "06:30–16:00") kap = 2;
-                if (saat === "16:00–00:00") kap = 1;
-            } else {
-                if (["06:30–16:00", "09:00–18:00", "16:00–00:00"].includes(saat)) kap = 1;
-            }
+            if (!isHS) { kap = (saat === "06:30–16:00") ? 2 : (saat === "16:00–00:00" ? 1 : 0); }
+            else { kap = (["06:30–16:00", "09:00–18:00", "16:00–00:00"].includes(saat)) ? 1 : 0; }
         } 
         else if (birim === "Ses Operatörü") {
-            if (!isHS) {
-                if (saat === "06:30–16:00") kap = 4;
-                if (saat === "16:00–00:00") kap = 2;
-            } else {
-                if (["06:30–16:00", "09:00–18:00", "16:00–00:00"].includes(saat)) kap = 2;
-            }
+            if (!isHS) { kap = (saat === "06:30–16:00") ? 4 : (saat === "16:00–00:00" ? 2 : 0); }
+            else { kap = (["06:30–16:00", "09:00–18:00", "16:00–00:00"].includes(saat)) ? 2 : 0; }
         }
-        else if (birim.includes("MCR")) { if (["06:30–16:00", "16:00–00:00"].includes(saat)) kap = 1; }
-        else if (birim.includes("BİLGİ") || birim.includes("YAYIN")) { if (saat === "09:00–18:00") kap = 1; }
+        else if (birim === "Playout Operatörü" || birim === "KJ Operatörü") {
+            kap = (["06:30–16:00", "16:00–00:00"].includes(saat)) ? 2 : 0;
+        }
+        else if (birim.includes("BİLGİ") || birim.includes("YAYIN")) { kap = (saat === "09:00–18:00") ? 1 : 0; }
         else if (saat === "06:30–16:00") kap = 1;
 
         let adaylar = personeller.filter(p => p.birim === birim && !haftalikProgram[p.isim][gun]);
@@ -196,18 +224,16 @@ function hucreIcerikGetir(gun, saat) {
 }
 
 function ozetGuncelle() {
-    let html = `<table style="font-size:10px; width:100%"><thead><tr><th>Personel</th><th>Birim</th><th>Mesai</th><th>Gece</th></tr></thead><tbody>`;
-    const sirali = [...personeller].sort((a, b) => birimSiralamasi.indexOf(a.birim) - birimSiralamasi.indexOf(b.birim));
-    sirali.forEach(p => {
+    let html = `<table style="width:100%"><thead><tr><th>Personel</th><th>Birim</th><th>Mesai</th></tr></thead><tbody>`;
+    personeller.forEach(p => {
         const m = haftalikProgram[p.isim].filter(v => v && v !== "İZİN").length;
-        const g = haftalikProgram[p.isim].filter(v => v === "00:00–07:00").length;
-        html += `<tr><td>${p.isim}</td><td>${p.birim}</td><td>${m}</td><td>${g}</td></tr>`;
+        html += `<tr><td>${p.isim}</td><td>${p.birim}</td><td>${m} G</td></tr>`;
     });
     document.getElementById("ozetTablo").innerHTML = html + "</tbody></table>";
 }
 
 function whatsappMesajiOlustur() {
-    let metin = `📋 *VARDİYA PLANI* \n\n`;
+    let metin = `📋 *HAFTALIK VARDİYA PLANI* \n\n`;
     gunler.forEach((gun, idx) => {
         metin += `*${gun.toUpperCase()}*\n`;
         saatler.forEach(s => {
