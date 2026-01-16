@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PRO-Vardiya v11.2 | Hiyerarşik Düzen</title>
+  <title>PRO-Vardiya v11.3 | Barış & Ekrem Özel</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -12,7 +12,7 @@
   <div class="app-wrapper">
     <header class="no-print">
       <div class="header-top">
-        <h1>TEKNİK VARDİYA <span>v11.2</span></h1>
+        <h1>TEKNİK VARDİYA <span>v11.3 PRO</span></h1>
         <button onclick="toggleDarkMode()" class="btn-theme" id="themeBtn">🌙 Koyu Mod</button>
       </div>
       <div class="nav-row">
@@ -21,8 +21,8 @@
           <button onclick="haftaDegistir(7)" class="btn-nav">İleri »</button>
       </div>
       <div class="action-row">
-          <button onclick="tabloyuOlustur()" class="btn-primary">⚡ Planı Hiyerarşik Oluştur</button>
-          <button onclick="togglePanel('personelPanel')" class="btn-admin">⚙️ Personel & Ayarlar</button>
+          <button onclick="tabloyuOlustur()" class="btn-primary">⚡ Planı Oluştur</button>
+          <button onclick="togglePanel('personelPanel')" class="btn-admin">⚙️ Ayarlar</button>
       </div>
     </header>
 
@@ -41,10 +41,11 @@
                     <select id="pBirim"></select>
                     <select id="pSabit">
                         <option value="">Sabit Vardiya Yok</option>
-                        <option value="06:30–16:00">06:30–16:00 (Sabit)</option>
-                        <option value="09:00–18:00">09:00–18:00 (Sabit)</option>
-                        <option value="12:00–22:00">12:00–22:00 (Sabit)</option>
-                        <option value="16:00–00:00">16:00–00:00 (Sabit)</option>
+                        <option value="06:30–16:00">06:30–16:00</option>
+                        <option value="09:00–18:00">09:00–18:00</option>
+                        <option value="12:00–22:00">12:00–22:00</option>
+                        <option value="16:00–00:00">16:00–00:00</option>
+                        <option value="00:00–07:00">00:00–07:00</option>
                     </select>
                     <button onclick="personelEkle()" class="btn-success">Ekle</button>
                 </div>
@@ -53,13 +54,13 @@
             <div class="panel-box">
                 <h3>Haftalık Notlar</h3>
                 <div id="notesForm" class="notes-grid"></div>
-                <button onclick="notlariKaydet()" class="btn-primary" style="width:100%; margin-top:10px;">Notları Kaydet</button>
+                <button onclick="notlariKaydet()" class="btn-primary" style="width:100%; margin-top:10px;">Kaydet</button>
             </div>
         </div>
     </section>
 
     <section class="checklist-section no-print">
-      <h3>İzinli Personeli İşaretle (Hiyerarşik)</h3>
+      <h3>İzinli Personel (Hiyerarşik)</h3>
       <div id="personelChecklist" class="checklist-grid"></div>
     </section>
 
@@ -71,9 +72,8 @@
           <tfoot id="tableFooter"></tfoot>
         </table>
       </div>
-      
       <div class="stats-section">
-          <h3>Haftalık Analiz (Hiyerarşik Sıralı)</h3>
+          <h3>Haftalık Analiz</h3>
           <div id="ozetTablo"></div>
       </div>
     </main>
