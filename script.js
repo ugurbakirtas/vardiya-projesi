@@ -1,16 +1,11 @@
 const gunler = ["Pazartesi","Salı","Çarşamba","Perşembe","Cuma","Cumartesi","Pazar"];
 const saatler = [
-  "06:30–16:00","06:30–16:00","06:30–16:00","06:30–16:00",
-  "09:00–18:00",
-  "12:00–22:00",
-  "16:00–00:00","16:00–00:00","16:00–00:00",
-  "00:00–07:00","00:00–07:00",
-  "İZİN","İZİN","İZİN",
-  "DIŞ YAYIN","DIŞ YAYIN","DIŞ YAYIN"
+  "06:30–16:00","09:00–18:00","12:00–22:00",
+  "16:00–00:00","00:00–07:00",
+  "İZİN","DIŞ YAYIN"
 ];
 const birimler = ["Teknik Yönetmen","Ses Operatörü","Playout Operatörü","KJ Operatörü","Ingest Operatörü","Uplink"];
 
-// Örnek personel listesi (tam listeyi senin verdiğin isimlerle doldurabilirsin)
 const personeller = [
   { isim:"YUNUS EMRE YAYLA", birim:"Teknik Yönetmen", gece:true },
   { isim:"HASAN CAN SAĞLAM", birim:"Teknik Yönetmen", gece:true },
@@ -132,4 +127,10 @@ function uygunPersonel(birim, saat, gunIndex) {
   if (saat === "İZİN" || saat === "DIŞ YAYIN") return saat;
   const geceMi = saat === "00:00–07:00";
   let uygunlar = personeller.filter(p => p.birim === birim && (!geceMi || p.gece));
-  if (uygunlar.length === 0) return "
+  if (uygunlar.length === 0) return "İZİN";
+  const secilen = uygunlar[Math.floor(Math.random() * uygunlar.length)];
+  return secilen.isim;
+}
+
+// Tablo oluşturma
+function tabloyuOlustur() {
