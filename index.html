@@ -3,24 +3,23 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>PRO-Vardiya Mobil v10.2</title>
+  <title>PRO-Vardiya Yönetimi v10.3</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
-<body>
+<body class="light-mode">
   <div class="app-wrapper">
     <header class="no-print">
-      <div class="logo-area">
-        <h1>TEKNİK VARDİYA <span>v10.2</span></h1>
-        <p id="tarihAraligi">Yükleniyor...</p>
+      <div class="header-top">
+        <h1>TEKNİK VARDİYA <span>v10.3</span></h1>
+        <button onclick="toggleDarkMode()" class="btn-theme" id="themeBtn">🌙 Koyu Mod</button>
       </div>
-      <div class="header-actions">
-        <div class="nav-row">
-            <button onclick="haftaDegistir(-7)" class="btn-nav">« Geri</button>
-            <button onclick="tabloyuOlustur()" class="btn-primary">Planla</button>
-            <button onclick="haftaDegistir(7)" class="btn-nav">İleri »</button>
-        </div>
+      <p id="tarihAraligi">Yükleniyor...</p>
+      <div class="nav-row">
+          <button onclick="haftaDegistir(-7)" class="btn-nav">« Geri</button>
+          <button onclick="tabloyuOlustur()" class="btn-primary">Planla</button>
+          <button onclick="haftaDegistir(7)" class="btn-nav">İleri »</button>
       </div>
     </header>
 
@@ -28,11 +27,23 @@
         <button onclick="whatsappMesajiOlustur()" class="btn-wa">WhatsApp</button>
         <button onclick="exportExcel()" class="btn-success">Excel</button>
         <button onclick="exportPDF()" class="btn-danger">PDF</button>
-        <button onclick="sifirla()" class="btn-warning">Sıfırla</button>
+        <button onclick="togglePanel('personelPanel')" class="btn-admin">⚙️ Personel Yönetimi</button>
     </div>
 
-    <section class="admin-panel no-print">
-      <h3 class="section-title">Personel Seçimi (İzinliler)</h3>
+    <section id="personelPanel" class="admin-panel no-print hidden">
+        <h3 class="section-title">Yeni Personel Ekle</h3>
+        <div class="add-form">
+            <input type="text" id="newPersonelName" placeholder="Ad Soyad">
+            <select id="newPersonelBirim"></select>
+            <button onclick="personelEkle()" class="btn-success">Ekle</button>
+        </div>
+        <hr>
+        <h3 class="section-title">Mevcut Personeller (Silmek için isme tıklayın)</h3>
+        <div id="manageList" class="manage-list"></div>
+    </section>
+
+    <section class="checklist-section no-print">
+      <h3 class="section-title">İzinli Personeli Seçin</h3>
       <div id="personelChecklist" class="checklist-grid"></div>
     </section>
 
@@ -43,7 +54,6 @@
           <tbody id="tableBody"></tbody>
         </table>
       </div>
-      
       <div class="stats-container">
         <h2 class="stats-title">Haftalık Özet</h2>
         <div id="ozetTablo" class="table-responsive"></div>
