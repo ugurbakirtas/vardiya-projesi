@@ -2,16 +2,28 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <title>Teknik Personel Vardiya Sistemi</title>
+  <title>Profesyonel Teknik Vardiya Sistemi</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h2>Teknik Personel Çalışma Listesi</h2>
-  <div style="margin-bottom: 20px;">
-    <button id="excelBtn">Excel Olarak İndir</button>
-    <button id="yeniListeBtn" style="background:#007bff">Yeni Liste Oluştur (Reset)</button>
+  <h2 id="tabloBaslik">Teknik Personel Vardiya Takip Sistemi</h2>
+  
+  <div class="controls">
+    <button id="prevWeek" style="background:#6c757d"><< Önceki Hafta</button>
+    <button id="excelBtn">Excel İndir</button>
+    <button id="yeniListeBtn" style="background:#007bff">Rastgele Yeni Liste</button>
+    <button id="sonrakiHaftaBtn" style="background:#6f42c1">Sonraki Hafta (Devret) >></button>
+    <button id="temizleBtn" style="background:#dc3545">Hafızayı Temizle</button>
   </div>
+
+  <div id="bilgiPaneli" style="margin: 10px; font-weight: bold; color: #2c3e50;"></div>
+  
   <div id="tablolar"></div>
+
+  <div class="ozet-konteyner">
+    <h3>Haftalık Personel Mesai Özeti</h3>
+    <div id="ozetTablo"></div>
+  </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="script.js"></script>
