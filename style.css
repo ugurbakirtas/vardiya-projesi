@@ -16,13 +16,12 @@ header h1 span { font-size: 10px; background: var(--blue); padding: 3px 8px; bor
     background: #f1f5f9; border: 1px solid #e2e8f0; padding: 8px; border-radius: 8px; 
     display: flex; align-items: center; gap: 10px; cursor: pointer;
 }
-.check-item input { width: 16px; height: 16px; pointer-events: none; }
-.check-item label { flex-grow: 1; pointer-events: none; font-weight: 600; }
+.check-item input { pointer-events: none; }
 .table-container { background: white; border-radius: 10px; border: 2px solid var(--primary); overflow: auto; margin-bottom: 20px; }
 table { width: 100%; border-collapse: collapse; min-width: 1300px; }
 th { background: var(--primary); color: white; padding: 12px; font-size: 11px; border-right: 1px solid #334155; }
 td { border: 1px solid var(--border); padding: 6px; vertical-align: top; background: #fff; }
-td:first-child { background: #f8fafc; font-weight: 900; color: var(--primary); width: 110px; text-align: center; vertical-align: middle; border-right: 3px solid var(--primary); font-size: 12px; }
+td:first-child { background: #f8fafc; font-weight: 900; color: var(--primary); width: 110px; text-align: center; vertical-align: middle; border-right: 3px solid var(--primary); }
 .birim-card { border-left: 4px solid var(--blue); padding: 5px 8px; margin-bottom: 5px; background: #fff; border: 1px solid #e2e8f0; border-radius: 4px; }
 .birim-tag { font-size: 8px; font-weight: 900; color: var(--blue); display: block; text-transform: uppercase; margin-bottom: 2px; }
 .p-isim { font-size: 10px; font-weight: 700; color: #1e293b; }
