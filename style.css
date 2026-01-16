@@ -1,42 +1,39 @@
 :root { 
     --primary: #0f172a; --blue: #2563eb; --success: #16a34a; --danger: #dc2626; 
-    --bg: #f8fafc; --card-bg: #ffffff; --text: #0f172a; --border: #e2e8f0;
+    --bg: #f8fafc; --card-bg: #ffffff; --text: #0f172a; --border: #cbd5e1;
 }
 .dark-mode {
     --primary: #020617; --blue: #3b82f6; --bg: #0f172a; --card-bg: #1e293b; 
     --text: #f8fafc; --border: #334155;
 }
 body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; font-size: 13px; transition: 0.3s; }
-.app-wrapper { width: 100%; padding: 15px; max-width: 1400px; margin: 0 auto; }
-header { background: var(--primary); color: white; padding: 20px; border-radius: 12px; margin-bottom: 15px; }
+.app-wrapper { width: 100%; padding: 15px; max-width: 1500px; margin: 0 auto; }
+header { background: var(--primary); color: white; padding: 15px; border-radius: 12px; margin-bottom: 10px; }
 .header-top { display: flex; justify-content: space-between; align-items: center; }
-.nav-row { display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 10px; margin-top: 15px; }
-.export-bar { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-bottom: 20px; }
+.nav-row { display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 10px; margin-top: 10px; }
+.export-bar { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; margin-bottom: 15px; }
 .hidden { display: none !important; }
 .admin-panel { background: var(--card-bg); border: 2px solid var(--blue); padding: 15px; border-radius: 12px; margin-bottom: 15px; }
 .panel-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-.checklist-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; max-height: 250px; overflow-y: auto; background: var(--card-bg); padding: 15px; border-radius: 12px; border: 1px solid var(--border); }
-.check-item { background: var(--bg); padding: 10px; border-radius: 8px; display: flex; align-items: center; gap: 10px; border: 1px solid var(--border); cursor: pointer; }
+.checklist-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 8px; max-height: 250px; overflow-y: auto; background: var(--card-bg); padding: 15px; border-radius: 10px; border: 1px solid var(--border); }
+.check-item { background: var(--bg); padding: 8px; border-radius: 8px; display: flex; align-items: center; gap: 8px; border: 1px solid var(--border); cursor: pointer; }
 
-/* Tablo Yapısı */
-.table-responsive { width: 100%; overflow-x: auto; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
-table { width: 100%; border-collapse: collapse; min-width: 1000px; table-layout: fixed; }
-th { background: var(--primary); color: white; padding: 15px 5px; border: 1px solid var(--border); }
-td { border: 1px solid var(--border); padding: 8px; vertical-align: top; background: var(--card-bg); min-height: 100px; }
-td:first-child { position: sticky; left: 0; z-index: 5; background: var(--primary) !important; color: white; font-weight: bold; text-align: center; width: 110px; vertical-align: middle; }
+/* Tablo Tasarımı */
+.table-responsive { width: 100%; overflow-x: auto; border-radius: 8px; border: 2px solid var(--primary); background: var(--card-bg); }
+table { width: 100%; border-collapse: collapse; min-width: 1100px; table-layout: fixed; }
+th { background: var(--primary); color: white; padding: 12px 5px; border: 1px solid var(--border); font-size: 12px; }
+td { border: 1px solid var(--border); padding: 6px; vertical-align: top; background: var(--card-bg); min-height: 90px; }
+td:first-child { position: sticky; left: 0; z-index: 5; background: var(--primary) !important; color: white !important; font-weight: bold; text-align: center; width: 100px; vertical-align: middle; }
 
-/* Personel Kartları */
-.birim-card { background: var(--bg); border-left: 4px solid var(--blue); padding: 6px; margin-bottom: 5px; border-radius: 4px; border: 1px solid var(--border); border-left-width: 4px; }
-.birim-tag { font-size: 8px; font-weight: 800; color: #64748b; display: block; margin-bottom: 2px; }
-.p-isim { font-size: 11px; font-weight: 700; color: var(--text); }
-
-.note-cell { background: #fffde7 !important; color: #854d0e !important; font-size: 11px; font-style: italic; }
+/* Kartlar */
+.birim-card { background: var(--bg); border-left: 4px solid var(--blue); padding: 5px; margin-bottom: 4px; border-radius: 4px; border: 1px solid var(--border); border-left-width: 4px; }
+.birim-tag { font-size: 7px; font-weight: 800; color: #64748b; display: block; text-transform: uppercase; }
+.p-isim { font-size: 10px; font-weight: 700; color: var(--text); }
+.note-cell { background: #fffde7 !important; color: #854d0e !important; font-size: 11px; }
 .dark-mode .note-cell { background: #422006 !important; color: #fef3c7 !important; }
 
-button { padding: 10px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
-.btn-primary { background: var(--blue); color: white; }
+button { cursor: pointer; border-radius: 8px; border: none; font-weight: bold; }
+.btn-primary { background: var(--blue); color: white; padding: 10px; }
 .btn-wa { background: #25d366; color: white; }
-.btn-success { background: var(--success); color: white; }
-.btn-danger { background: var(--danger); color: white; }
 
 @media (max-width: 768px) { .panel-grid { grid-template-columns: 1fr; } }
