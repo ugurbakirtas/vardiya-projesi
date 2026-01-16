@@ -66,7 +66,7 @@ function hiyerarsikSirala(liste) { return [...liste].sort((a, b) => birimSiralam
 function tabloyuOlustur() {
     const haftaKey = mevcutPazartesi.toISOString().split('T')[0];
     const gecenHaftaKey = new Date(mevcutPazartesi.getTime() - 7 * 86400000).toISOString().split('T')[0];
-    const hafiza = JSON.parse(localStorage.getItem("v_rota_hafiza")) || {};
+    const hafiza = JSON.parse(localStorage.getItem("v12_hafiza")) || {};
 
     document.getElementById("tarihAraligi").innerText = `${mevcutPazartesi.toLocaleDateString('tr-TR')} Haftası`;
     haftalikProgram = {};
@@ -76,7 +76,7 @@ function tabloyuOlustur() {
         haftalikProgram[p.isim] = isIzinli ? Array(7).fill("İZİN") : Array(7).fill(null);
     });
 
-    // 1. TY HAFTA SONU SABİTLEME (Sizin Kuralınız: 1 kişi 06:30, 1 kişi 16:00)
+    // 1. TY HAFTA SONU SABİTLEME (GÜVENLİ KADRO)
     const tyEkibi = personeller.filter(p => p.birim === "TEKNİK YÖNETMEN");
     [5, 6].forEach(gun => {
         let adaylar = tyEkibi.filter(p => !haftalikProgram[p.isim][gun]);
@@ -94,7 +94,7 @@ function tabloyuOlustur() {
         if(tyAday) haftalikProgram[tyAday.isim][g] = "00:00–07:00";
     }
 
-    // 3. GENEL ATAMA (MAX 5 GÜN / 2 İZİN HEDEFİ)
+    // 3. GENEL ATAMA MOTORU (ADALETLİ ROTASYON)
     for(let g=0; g<7; g++) {
         saatler.forEach(s => {
             if(["00:00–07:00", "İZİN"].includes(s)) return;
@@ -109,7 +109,7 @@ function tabloyuOlustur() {
 
                 let adaylar = personeller.filter(p => p.birim === birim && !haftalikProgram[p.isim][g]);
                 
-                // Hafıza: Geçen hafta 6 gün çalışana bu hafta öncelik tanıma
+                // HAFIZA KONTROLÜ: Geçen hafta 6 gün çalışanı bul, bu hafta geriye çek
                 adaylar.sort((a, b) => {
                     let aGecen = (hafiza[gecenHaftaKey] && hafiza[gecenHaftaKey][a.isim]) || 5;
                     let bGecen = (hafiza[gecenHaftaKey] && hafiza[gecenHaftaKey][b.isim]) || 5;
@@ -131,27 +131,32 @@ function tabloyuOlustur() {
         });
     }
 
-    // İZİNLERİ DOLDUR VE HAFIZAYA YAZ
+    // BOŞLUKLARI İZİN YAP VE HAFIZAYA İŞLE
     let buHaftaYuk = {};
     personeller.forEach(p => {
         for(let i=0; i<7; i++) if(!haftalikProgram[p.isim][i]) haftalikProgram[p.isim][i] = "İZİN";
         buHaftaYuk[p.isim] = haftalikProgram[p.isim].filter(v => v !== "İZİN").length;
     });
     hafiza[haftaKey] = buHaftaYuk;
-    localStorage.setItem("v_rota_hafiza", JSON.stringify(hafiza));
+    localStorage.setItem("v12_hafiza", JSON.stringify(hafiza));
 
     renderTable();
-    ozetGuncelle();
+    ozetGuncelle(gecenHaftaKey, hafiza);
 }
 
 function renderTable() {
-    document.getElementById("tableHeader").innerHTML = `<th>SAATLER</th>` + gunler.map(g => `<th>${g}</th>`).join('');
+    document.getElementById("tableHeader").innerHTML = `<th>Vardiya</th>` + gunler.map(g => `<th>${g}</th>`).join('');
     document.getElementById("tableBody").innerHTML = saatler.map(s => `<tr><td>${s}</td>${[0,1,2,3,4,5,6].map(g => `<td>${hucreDoldur(g, s)}</td>`).join('')}</tr>`).join('');
 }
 
 function hucreDoldur(gun, saat) {
     let list = personeller.filter(p => haftalikProgram[p.isim][gun] === saat);
-    return hiyerarsikSirala(list).map(p => `<div class="birim-box"><span class="birim-label">${p.birim}</span><span class="personel-name">${p.isim}</span></div>`).join('');
+    return hiyerarsikSirala(list).map(p => `
+        <div class="birim-card">
+            <span class="birim-tag">${p.birim}</span>
+            <span class="p-isim">${p.isim}</span>
+        </div>
+    `).join('');
 }
 
 function applyMCRRota(birim) {
@@ -168,11 +173,12 @@ function applyMCRRota(birim) {
     });
 }
 
-function ozetGuncelle() {
-    let h = `<table><tr><th>Personel</th><th>Birim</th><th>Çalışılan Gün</th></tr>`;
+function ozetGuncelle(gecenKey, hafiza) {
+    let h = `<table><tr><th>Personel</th><th>Birim</th><th>Geçen Hafta</th><th>Bu Hafta</th><th>Sonuç</th></tr>`;
     hiyerarsikSirala(personeller).forEach(p => {
         const m = haftalikProgram[p.isim].filter(v => v !== "İZİN").length;
-        h += `<tr class="${m<=5?'success-row':'alert-row'}"><td>${p.isim}</td><td>${p.birim}</td><td>${m} Gün</td></tr>`;
+        const g = (hafiza[gecenKey] && hafiza[gecenKey][p.isim]) || 5;
+        h += `<tr class="${m<=5?'izinli-row':'mesai-row'}"><td>${p.isim}</td><td>${p.birim}</td><td>${g} Gün</td><td>${m} Gün</td><td>${m<=5?'✅ 2 İzin':'1 İzin'}</td></tr>`;
     });
     document.getElementById("ozetTablo").innerHTML = h + `</table>`;
 }
@@ -184,9 +190,13 @@ function checklistOlustur() {
 }
 
 function haftaDegistir(g) { mevcutPazartesi.setDate(mevcutPazartesi.getDate() + g); tabloyuOlustur(); }
-function exportPDF() { html2pdf().from(document.getElementById('print-area')).save('Vardiya.pdf'); }
+function toggleDarkMode() { document.body.classList.toggle('dark-mode'); }
+function temizleHafiza() { localStorage.removeItem("v12_hafiza"); location.reload(); }
+function exportExcel() { XLSX.writeFile(XLSX.utils.table_to_book(document.getElementById("vardiyaTablosu")), "Vardiya.xlsx"); }
+function exportPDF() { html2pdf().from(document.getElementById('print-area')).save(); }
+
 function whatsappMesajiOlustur() {
-    let m = `📋 *VARDİYA LİSTESİ*\n\n`;
+    let m = `📋 *${mevcutPazartesi.toLocaleDateString('tr-TR')} VARDİYA LİSTESİ*\n\n`;
     gunler.forEach((g, i) => {
         m += `*${g.toUpperCase()}*\n`;
         saatler.forEach(s => {

@@ -3,43 +3,52 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PRO-Vardiya v12.0 | Klasik Görünüm</title>
+  <title>PRO-Vardiya v12.1 | Neon & Rules</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
-<body>
-  <div class="container">
+<body class="dark-mode">
+  <div class="app-wrapper">
     <header class="no-print">
-      <h1>TEKNİK VARDİYA SİSTEMİ</h1>
-      <div class="nav-controls">
-        <button onclick="haftaDegistir(-7)" class="btn-side">« Geri</button>
-        <h2 id="tarihAraligi">Yükleniyor...</h2>
-        <button onclick="haftaDegistir(7)" class="btn-side">İleri »</button>
+      <div class="header-top">
+        <h1 class="glow-text">TEKNİK VARDİYA <span>v12.1</span></h1>
+        <button onclick="toggleDarkMode()" class="btn-theme">✨ Mod Değiştir</button>
       </div>
-      <div class="main-actions">
-        <button onclick="tabloyuOlustur()" class="btn-generate">⚡ PLAN OLUŞTUR</button>
-        <button onclick="exportPDF()" class="btn-export">PDF İndir</button>
-        <button onclick="whatsappMesajiOlustur()" class="btn-wa">WhatsApp'a Kopyala</button>
+      <div class="nav-row">
+          <button onclick="haftaDegistir(-7)" class="btn-nav">«</button>
+          <div class="date-display" id="tarihAraligi">Yükleniyor...</div>
+          <button onclick="haftaDegistir(7)" class="btn-nav">»</button>
+      </div>
+      <div class="action-row">
+          <button onclick="tabloyuOlustur()" class="btn-primary pulse">⚡ ADALETLİ PLAN OLUŞTUR</button>
+          <button onclick="temizleHafiza()" class="btn-danger">Hafızayı Resetle</button>
       </div>
     </header>
 
-    <div class="checklist-container no-print">
-      <h3>Manuel İzinli Personel Seçimi</h3>
-      <div id="personelChecklist" class="checklist"></div>
-    </div>
+    <section class="checklist-section no-print">
+      <h3 class="glow-text">Manuel İzinler (Rapor/Yıllık)</h3>
+      <div id="personelChecklist" class="checklist-grid"></div>
+    </section>
 
     <main id="print-area">
-      <table id="vardiyaTablosu">
-        <thead><tr id="tableHeader"></tr></thead>
-        <tbody id="tableBody"></tbody>
-      </table>
-      
-      <div class="stats-container">
-        <h3>Haftalık Çalışma Özeti (2 İzin Takibi)</h3>
-        <div id="ozetTablo"></div>
+      <div class="table-responsive">
+        <table id="vardiyaTablosu">
+          <thead><tr id="tableHeader"></tr></thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+      <div class="stats-section">
+          <h3 class="glow-text">Haftalık Analiz & 2 Gün İzin Takibi</h3>
+          <div id="ozetTablo"></div>
       </div>
     </main>
+
+    <div class="export-bar no-print">
+        <button onclick="whatsappMesajiOlustur()" class="btn-wa">WhatsApp'a At</button>
+        <button onclick="exportExcel()" class="btn-success">Excel Al</button>
+        <button onclick="exportPDF()" class="btn-pdf">PDF Kaydet</button>
+    </div>
   </div>
   <script src="script.js"></script>
 </body>
