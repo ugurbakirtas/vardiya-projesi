@@ -4,10 +4,17 @@ let haftalikProgram = {};
 const gunler = ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"];
 const saatler = ["06:30–16:00", "09:00–18:00", "12:00–22:00", "16:00–00:00", "00:00–07:00", "DIŞ YAYIN"];
 
+// YENİ HİYERARŞİK SIRALAMA (Belirttiğiniz sırayla)
 const birimSiralamasi = [
-    "Teknik Yönetmen", "Ses Operatörü", "Playout Operatörü", "KJ Operatörü",
-    "24TV - 360TV INGEST OPERATÖRÜ", "Uplink", "24TV-360TV BİLGİ İŞLEM",
-    "24TV-360TV YAYIN SİSTEMLERİ", "24TV MCR OPERATÖRÜ", "360TV MCR OPERATÖRÜ"
+    "Teknik Yönetmen", 
+    "Ses Operatörü", 
+    "Playout Operatörü", 
+    "KJ Operatörü", 
+    "24TV - 360TV INGEST OPERATÖRÜ", 
+    "24TV-360TV BİLGİ İŞLEM", 
+    "24TV-360TV YAYIN SİSTEMLERİ", 
+    "24TV MCR OPERATÖRÜ", 
+    "360TV MCR OPERATÖRÜ"
 ];
 
 const personeller = [
@@ -85,33 +92,22 @@ function tabloyuOlustur() {
         haftalikProgram[p.isim] = isSelected ? Array(7).fill("İZİN") : Array(7).fill(null);
     });
 
-    // --- ROTASYONEL BİRİMLER ---
-    
-    // MCR (2Sabah, 2Akşam, 2Gece, 2İzin)
     applyMCRRota("24TV MCR OPERATÖRÜ");
     applyMCRRota("360TV MCR OPERATÖRÜ");
-
-    // INGEST (2Sabah, 2Akşam, 2İzin + Pzt-HS Kısıtı)
     applyIngestRota();
 
-    // --- ÖZEL PERSONEL KURALLARI ---
-    
-    // Teknik Yönetmen Gece (Barış/Ekrem Dengesi)
     let bGec = 0; while(bGec < 2) {
         let r = Math.floor(Math.random() * 7);
         if(!haftalikProgram["BARIŞ İNCE"][r]) { haftalikProgram["BARIŞ İNCE"][r] = "00:00–07:00"; bGec++; }
     }
     for(let i=0; i<7; i++) { if(haftalikProgram["BARIŞ İNCE"][i] !== "00:00–07:00") haftalikProgram["EKREM FİDAN"][i] = "00:00–07:00"; }
 
-    // Ses Zafer Akar (Sabit Hafta içi Sabah)
     for(let i=0; i<5; i++) haftalikProgram["ZAFER AKAR"][i] = "06:30–16:00";
     haftalikProgram["ZAFER AKAR"][5] = "İZİN"; haftalikProgram["ZAFER AKAR"][6] = "İZİN";
 
-    // Playout & KJ (Hafta sonu Sabah Tek Kişi Kuralı)
     const pS = setDegisken("Playout Operatörü");
     const kS = setDegisken("KJ Operatörü");
 
-    // Genel İzin Atamaları (Diğer Birimler)
     personeller.forEach(p => {
         if(["BARIŞ İNCE", "ZAFER AKAR", pS, kS].includes(p.isim) || p.birim.includes("MCR") || p.birim.includes("INGEST")) return;
         let c = 0; while(c < 2) {
@@ -141,20 +137,13 @@ function applyIngestRota() {
 
 function applyMCRRota(birim) {
     const ekip = personeller.filter(p => p.birim === birim);
-    // KURAL: 2 SABAH, 2 AKŞAM, 2 GECE, 2 İZİN (8 Günlük Döngü)
-    const rota = [
-        "06:30–16:00", "06:30–16:00", 
-        "16:00–00:00", "16:00–00:00", 
-        "00:00–07:00", "00:00–07:00", 
-        "İZİN", "İZİN"
-    ];
-    const ref = new Date(2025, 0, 6); // Pazartesi
+    const rota = ["06:30–16:00", "06:30–16:00", "16:00–00:00", "16:00–00:00", "00:00–07:00", "00:00–07:00", "İZİN", "İZİN"];
+    const ref = new Date(2025, 0, 6);
     ekip.forEach((p, idx) => {
         for(let i=0; i<7; i++) {
             let d = new Date(mevcutPazartesi.getTime() + (i * 86400000));
             let f = Math.floor((d - ref) / 86400000);
-            let rI = (f + (idx * 2)) % 8; // Her personel 2 gün kaydırılarak döngüye sokulur
-            if(rI < 0) rI += 8;
+            let rI = (f + (idx * 2)) % 8; if(rI < 0) rI += 8;
             haftalikProgram[p.isim][i] = rota[rI];
         }
     });
@@ -186,7 +175,13 @@ function renderTable() {
 
 function hucreDoldur(gun, saat) {
     let res = "";
-    personeller.forEach(p => {
+    const siraliPersoneller = [...personeller].sort((a, b) => {
+        let ai = birimSiralamasi.indexOf(a.birim);
+        let bi = birimSiralamasi.indexOf(b.birim);
+        return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
+    });
+
+    siraliPersoneller.forEach(p => {
         if(haftalikProgram[p.isim][gun] === saat) {
             res += `<div class="birim-card"><span class="birim-tag">${p.birim}</span><span class="p-isim">${p.isim}</span></div>`;
         }
@@ -221,7 +216,13 @@ function hucreDoldur(gun, saat) {
 
 function ozetTablosuGuncelle() {
     let h = `<table class="stats-table"><thead><tr><th>Personel</th><th>Birim</th><th>Mesai</th><th>Gece</th></tr></thead><tbody>`;
-    personeller.forEach(p => {
+    const siraliPersoneller = [...personeller].sort((a, b) => {
+        let ai = birimSiralamasi.indexOf(a.birim);
+        let bi = birimSiralamasi.indexOf(b.birim);
+        return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
+    });
+    
+    siraliPersoneller.forEach(p => {
         const mesai = haftalikProgram[p.isim].filter(v => v && v !== "İZİN").length;
         const gece = haftalikProgram[p.isim].filter(v => v === "00:00–07:00").length;
         h += `<tr><td><strong>${p.isim}</strong></td><td><small>${p.birim}</small></td><td class="${mesai >= 6 ? 'tehlike-mesai' : ''}">${mesai} G</td><td>${gece} Gece</td></tr>`;
