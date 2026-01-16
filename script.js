@@ -4,7 +4,7 @@ let haftalikProgram = {};
 const gunler = ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"];
 const saatler = ["06:30–16:00", "09:00–18:00", "12:00–22:00", "16:00–00:00", "00:00–07:00", "DIŞ YAYIN"];
 
-// ÖZEL BİRİM SIRALAMASI
+// HAFIZADAKİ ÖZEL BİRİM SIRALAMASI
 const birimSiralamasi = [
     "Teknik Yönetmen",
     "Ses Operatörü",
@@ -64,12 +64,8 @@ function getMonday(d) {
 
 function checklistOlustur() {
     const container = document.getElementById("personelChecklist");
-    // Birim sıralamasına göre personelleri diz
-    const siraliPersoneller = [...personeller].sort((a, b) => {
-        return birimSiralamasi.indexOf(a.birim) - birimSiralamasi.indexOf(b.birim);
-    });
-
-    container.innerHTML = siraliPersoneller.map(p => `
+    const sirali = [...personeller].sort((a, b) => birimSiralamasi.indexOf(a.birim) - birimSiralamasi.indexOf(b.birim));
+    container.innerHTML = sirali.map(p => `
         <div class="check-item">
             <input type="checkbox" id="check_${p.isim.replace(/\s+/g, '_')}" onchange="tabloyuOlustur(false)">
             <label for="check_${p.isim.replace(/\s+/g, '_')}"><strong>${p.isim}</strong><br><small>${p.birim}</small></label>
@@ -79,20 +75,18 @@ function checklistOlustur() {
 
 function tabloyuOlustur(devirModu) {
     document.getElementById("tarihAraligi").innerText = `${mevcutPazartesi.toLocaleDateString('tr-TR')} Haftası`;
-    
     haftalikProgram = {};
     personeller.forEach(p => {
         const isSelected = document.getElementById(`check_${p.isim.replace(/\s+/g, '_')}`)?.checked;
         haftalikProgram[p.isim] = isSelected ? Array(7).fill("İZİN") : Array(7).fill(null);
     });
 
-    // İzin Dağıtımı (Haftalık 2 Gün)
+    // İzinler (Zafer Akar kuralı dahil)
     personeller.forEach(p => {
         if(haftalikProgram[p.isim][0] !== "İZİN") {
             let count = 0;
-            if(p.isim === "ZAFER AKAR") { 
-                haftalikProgram[p.isim][5] = "İZİN"; haftalikProgram[p.isim][6] = "İZİN"; 
-            } else {
+            if(p.isim === "ZAFER AKAR") { haftalikProgram[p.isim][5] = "İZİN"; haftalikProgram[p.isim][6] = "İZİN"; }
+            else {
                 while(count < 2) {
                     let r = Math.floor(Math.random() * 7);
                     if(!haftalikProgram[p.isim][r]) { haftalikProgram[p.isim][r] = "İZİN"; count++; }
@@ -101,7 +95,7 @@ function tabloyuOlustur(devirModu) {
         }
     });
 
-    // ÖNCELİKLİ GECE ATAMALARI (Teknik Yönetmen & MCR)
+    // HAFIZADAKİ KRİTİK GECE KURALI (00:00-07:00 Ataması)
     for(let i=0; i<7; i++) {
         planlaZorunlu(i, "Teknik Yönetmen", "00:00–07:00", 1);
         planlaZorunlu(i, "24TV MCR OPERATÖRÜ", "00:00–07:00", 1);
@@ -124,7 +118,6 @@ function planlaZorunlu(gun, birim, saat, kapasite) {
 }
 
 function renderTable() {
-    // Header
     let hHtml = `<th>Vardiya Saatleri</th>`;
     gunler.forEach((g, i) => {
         let t = new Date(mevcutPazartesi);
@@ -133,7 +126,6 @@ function renderTable() {
     });
     document.getElementById("tableHeader").innerHTML = hHtml;
 
-    // Body
     let bHtml = "";
     saatler.forEach(saat => {
         bHtml += `<tr><td><strong>${saat}</strong></td>`;
@@ -143,7 +135,7 @@ function renderTable() {
         bHtml += `</tr>`;
     });
     
-    // İzinliler Satırı
+    // İzinliler
     bHtml += `<tr style="background:#f8fafc"><td><strong>İZİNLİLER</strong></td>`;
     for (let i = 0; i < 7; i++) {
         let content = personeller.filter(p => haftalikProgram[p.isim][i] === "İZİN").map(p => `
@@ -158,7 +150,6 @@ function renderTable() {
 
 function hucreIcerikGetir(gun, saat) {
     let html = "";
-    // Zaten planlanmış olanlar (Örn: Geceler)
     personeller.forEach(p => {
         if(haftalikProgram[p.isim][gun] === saat) {
             html += `<div class="birim-card" draggable="true" data-p="${p.isim}">
@@ -166,31 +157,21 @@ function hucreIcerikGetir(gun, saat) {
             </div>`;
         }
     });
-
     if(saat === "00:00–07:00") return html;
 
-    // Diğer birimleri sıralamaya göre doldur
     birimSiralamasi.forEach(birim => {
         let kap = 0;
-        if (birim === "Teknik Yönetmen") {
-            if (["06:30–16:00", "16:00–00:00"].includes(saat)) kap = 2;
-        } else if (birim.includes("MCR")) {
-            if (["06:30–16:00", "16:00–00:00"].includes(saat)) kap = 1;
-        } else if (birim.includes("BİLGİ") || birim.includes("YAYIN")) {
-            if (saat === "09:00–18:00") kap = 1;
-        } else if (birim === "Ses Operatörü") {
-            if (gun < 5) {
-                if (saat === "06:30–16:00") kap = 4;
-                if (saat === "16:00–00:00") kap = 2;
-            } else {
-                if (["06:30–16:00", "16:00–00:00"].includes(saat)) kap = 2;
-            }
+        if (birim === "Teknik Yönetmen") { if (["06:30–16:00", "16:00–00:00"].includes(saat)) kap = 2; }
+        else if (birim.includes("MCR")) { if (["06:30–16:00", "16:00–00:00"].includes(saat)) kap = 1; }
+        else if (birim.includes("BİLGİ") || birim.includes("YAYIN")) { if (saat === "09:00–18:00") kap = 1; }
+        else if (birim === "Ses Operatörü") {
+            if (gun < 5) { if (saat === "06:30–16:00") kap = 4; if (saat === "16:00–00:00") kap = 2; }
+            else { if (["06:30–16:00", "16:00–00:00"].includes(saat)) kap = 2; }
         } else if (saat === "06:30–16:00") kap = 1;
 
         let adaylar = personeller.filter(p => p.birim === birim && !haftalikProgram[p.isim][gun]);
-        let suanHücrede = personeller.filter(p => p.birim === birim && haftalikProgram[p.isim][gun] === saat).length;
-        
-        for(let k=0; k < (kap - suanHücrede); k++) {
+        let suan = personeller.filter(p => p.birim === birim && haftalikProgram[p.isim][gun] === saat).length;
+        for(let k=0; k < (kap - suan); k++) {
             if(adaylar.length > 0) {
                 let p = adaylar.splice(Math.floor(Math.random() * adaylar.length), 1)[0];
                 haftalikProgram[p.isim][gun] = saat;
@@ -230,7 +211,6 @@ function draggablesHazirla() {
 function ozetGuncelle() {
     let html = `<table><thead><tr><th>Personel</th><th>Birim</th><th>Mesai</th><th>Gece</th></tr></thead><tbody>`;
     const sirali = [...personeller].sort((a, b) => birimSiralamasi.indexOf(a.birim) - birimSiralamasi.indexOf(b.birim));
-    
     sirali.forEach(p => {
         const m = haftalikProgram[p.isim].filter(v => v && v !== "İZİN").length;
         const g = haftalikProgram[p.isim].filter(v => v === "00:00–07:00").length;
@@ -241,7 +221,7 @@ function ozetGuncelle() {
 }
 
 function whatsappMesajiOlustur() {
-    let metin = `📋 *HAFTALIK TEKNİK VARDİYA PLANI* \n\n`;
+    let metin = `📋 *TEKNİK VARDİYA PLANI* \n\n`;
     gunler.forEach((gun, idx) => {
         metin += `*${gun.toUpperCase()}*\n`;
         saatler.forEach(s => {
@@ -250,7 +230,7 @@ function whatsappMesajiOlustur() {
         });
         metin += `\n`;
     });
-    navigator.clipboard.writeText(metin).then(() => alert("Liste WhatsApp için kopyalandı!"));
+    navigator.clipboard.writeText(metin).then(() => alert("Kopyalandı!"));
 }
 
 function haftaDegistir(g) { mevcutPazartesi.setDate(mevcutPazartesi.getDate() + g); tabloyuOlustur(false); }
@@ -258,7 +238,4 @@ function exportExcel() { XLSX.writeFile(XLSX.utils.table_to_book(document.getEle
 function exportPDF() { html2pdf().from(document.getElementById('print-area')).save(); }
 function sifirla() { localStorage.clear(); location.reload(); }
 
-window.onload = () => {
-    checklistOlustur();
-    tabloyuOlustur(false);
-};
+window.onload = () => { checklistOlustur(); tabloyuOlustur(false); };
