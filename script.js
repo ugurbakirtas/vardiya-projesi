@@ -1,7 +1,4 @@
-const gunler = ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"];
-const saatler = ["06:30–16:00", "09:00–18:00", "12:00–22:00", "16:00–00:00", "00:00–07:00", "DIŞ YAYIN"];
-
-// KESİN HİYERARŞİ SIRALAMASI
+// DEĞİŞTİRİLEMEZ HİYERARŞİ SIRALAMASI
 const birimSiralamasi = [
     "TEKNİK YÖNETMEN", 
     "SES OPERATÖRÜ", 
@@ -13,6 +10,9 @@ const birimSiralamasi = [
     "24TV MCR OPERATÖRÜ", 
     "360TV MCR OPERATÖRÜ"
 ];
+
+const gunler = ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"];
+const saatler = ["06:30–16:00", "09:00–18:00", "12:00–22:00", "16:00–00:00", "00:00–07:00", "DIŞ YAYIN"];
 
 const personeller = [
     { id: 1, isim: "YUNUS EMRE YAYLA", birim: "TEKNİK YÖNETMEN" },
@@ -74,25 +74,25 @@ function getMonday(d) {
 
 function checklistOlustur() {
     const container = document.getElementById("personelChecklist");
+    // Hiyerarşik Sıralama
     const sirali = [...personeller].sort((a, b) => birimSiralamasi.indexOf(a.birim) - birimSiralamasi.indexOf(b.birim));
     
-    // DONMAYI ÖNLEYEN YENİ TIKLAMA MANTIĞI
     container.innerHTML = sirali.map(p => `
-        <div class="check-item" onclick="toggleCb('${p.id}')">
-            <input type="checkbox" id="check_${p.id}" onclick="event.stopPropagation(); tabloyuOlustur();">
+        <div class="check-item" onclick="toggleCheckbox('${p.id}')">
+            <input type="checkbox" id="check_${p.id}" onchange="tabloyuOlustur()">
             <label><strong>${p.isim}</strong><br><small>${p.birim}</small></label>
         </div>
     `).join('');
 }
 
-function toggleCb(id) {
+function toggleCheckbox(id) {
     const cb = document.getElementById('check_' + id);
     cb.checked = !cb.checked;
     tabloyuOlustur();
 }
 
 function tabloyuOlustur() {
-    document.getElementById("tarihAraligi").innerText = `${mevcutPazartesi.toLocaleDateString('tr-TR')} Haftası Planı`;
+    document.getElementById("tarihAraligi").innerText = `${mevcutPazartesi.toLocaleDateString('tr-TR')} Haftası`;
     haftalikProgram = {};
     
     personeller.forEach(p => {
@@ -100,57 +100,27 @@ function tabloyuOlustur() {
         haftalikProgram[p.isim] = isSelected ? Array(7).fill("İZİN") : Array(7).fill(null);
     });
 
-    // MCR / INGEST
+    // MCR / INGEST Rotaları (Sabit Döngü)
     applyMCRRota("24TV MCR OPERATÖRÜ");
     applyMCRRota("360TV MCR OPERATÖRÜ");
     applyIngestRota();
 
-    // Sabit Kurallar
+    // Özel Kişi Kuralları
     if(haftalikProgram["ZAFER AKAR"] && !haftalikProgram["ZAFER AKAR"].includes("İZİN")) {
         for(let i=0; i<5; i++) haftalikProgram["ZAFER AKAR"][i] = "06:30–16:00";
         haftalikProgram["ZAFER AKAR"][5] = "İZİN"; haftalikProgram["ZAFER AKAR"][6] = "İZİN";
     }
 
     renderTable();
-    ozetTablosuGuncelle();
-}
-
-function applyIngestRota() {
-    const ekip = personeller.filter(p => p.birim === "INGEST OPERATÖRÜ");
-    const rota = ["06:30–16:00", "06:30–16:00", "16:00–00:00", "16:00–00:00", "İZİN", "İZİN"];
-    const ref = new Date(2025, 0, 6);
-    ekip.forEach((p, idx) => {
-        if(haftalikProgram[p.isim].includes("İZİN")) return;
-        for(let i=0; i<7; i++) {
-            let d = new Date(mevcutPazartesi.getTime() + (i * 86400000));
-            let f = Math.floor((d - ref) / 86400000);
-            let rI = (f + (idx * 2)) % 6; if(rI < 0) rI += 6;
-            haftalikProgram[p.isim][i] = rota[rI];
-        }
-    });
-}
-
-function applyMCRRota(birim) {
-    const ekip = personeller.filter(p => p.birim === birim);
-    const rota = ["06:30–16:00", "06:30–16:00", "16:00–00:00", "16:00–00:00", "00:00–07:00", "00:00–07:00", "İZİN", "İZİN"];
-    const ref = new Date(2025, 0, 6);
-    ekip.forEach((p, idx) => {
-        if(haftalikProgram[p.isim].includes("İZİN")) return;
-        for(let i=0; i<7; i++) {
-            let d = new Date(mevcutPazartesi.getTime() + (i * 86400000));
-            let f = Math.floor((d - ref) / 86400000);
-            let rI = (f + (idx * 2)) % 8; if(rI < 0) rI += 8;
-            haftalikProgram[p.isim][i] = rota[rI];
-        }
-    });
+    ozetGuncelle();
 }
 
 function renderTable() {
-    let h = `<th>SAATLER</th>` + gunler.map((g, i) => {
+    const header = document.getElementById("tableHeader");
+    header.innerHTML = `<th>SAATLER</th>` + gunler.map((g, i) => {
         let t = new Date(mevcutPazartesi); t.setDate(t.getDate() + i);
         return `<th>${g}<br><small>${t.toLocaleDateString('tr-TR')}</small></th>`;
     }).join('');
-    document.getElementById("tableHeader").innerHTML = h;
 
     let b = "";
     saatler.forEach(s => {
@@ -164,6 +134,7 @@ function renderTable() {
 function hucreDoldur(gun, saat) {
     let res = "";
     const isHS = (gun >= 5);
+    // Hiyerarşik Sıralama ile Doldurma
     const siraliP = [...personeller].sort((a, b) => birimSiralamasi.indexOf(a.birim) - birimSiralamasi.indexOf(b.birim));
 
     siraliP.forEach(p => {
@@ -174,6 +145,7 @@ function hucreDoldur(gun, saat) {
 
     if(["12:00–22:00", "DIŞ YAYIN", "00:00–07:00", "İZİN"].includes(saat)) return res;
 
+    // Otomatik Atama Kuralları
     birimSiralamasi.forEach(birim => {
         if(birim.includes("MCR") || birim.includes("INGEST")) return;
         let kap = 0;
@@ -181,20 +153,17 @@ function hucreDoldur(gun, saat) {
         if(birim === "TEKNİK YÖNETMEN") {
             if(isHS) kap = (saat === "06:30–16:00" || saat === "16:00–00:00") ? 1 : 0;
             else kap = (saat === "06:30–16:00") ? 2 : (saat === "16:00–00:00" ? 1 : 0);
-        }
-        else if(birim === "SES OPERATÖRÜ") {
-            if(isHS) kap = 2;
-            else kap = (saat === "06:30–16:00") ? 4 : 2;
-        }
-        else if (["PLAYOUT OPERATÖRÜ", "KJ OPERATÖRÜ"].includes(birim)) {
+        } else if(birim === "SES OPERATÖRÜ") {
+            kap = isHS ? 2 : (saat === "06:30–16:00" ? 4 : 2);
+        } else if(["PLAYOUT OPERATÖRÜ", "KJ OPERATÖRÜ"].includes(birim)) {
             kap = 2;
-        }
-        else if(birim === "BİLGİ İŞLEM" || birim === "YAYIN SİSTEMLERİ") {
-            kap = (saat === "09:00–18:00" ? 1 : 0);
+        } else if(birim === "BİLGİ İŞLEM" || birim === "YAYIN SİSTEMLERİ") {
+            kap = (saat === "09:00–18:00" && !isHS ? 1 : 0);
         }
 
         let adaylar = personeller.filter(p => p.birim === birim && !haftalikProgram[p.isim][gun]);
         let suan = personeller.filter(p => p.birim === birim && haftalikProgram[p.isim][gun] === saat).length;
+        
         for(let k=0; k < (kap-suan); k++) {
             if(adaylar.length > 0) {
                 let p = adaylar.splice(Math.floor(Math.random() * adaylar.length), 1)[0];
@@ -206,10 +175,39 @@ function hucreDoldur(gun, saat) {
     return res;
 }
 
-function ozetTablosuGuncelle() {
+// YARDIMCI FONKSİYONLAR (MCR/INGEST Rotaları)
+function applyIngestRota() {
+    const ekip = personeller.filter(p => p.birim === "INGEST OPERATÖRÜ");
+    const rota = ["06:30–16:00", "06:30–16:00", "16:00–00:00", "16:00–00:00", "İZİN", "İZİN"];
+    const ref = new Date(2025, 0, 6);
+    ekip.forEach((p, idx) => {
+        if(haftalikProgram[p.isim].includes("İZİN")) return;
+        for(let i=0; i<7; i++) {
+            let d = new Date(mevcutPazartesi.getTime() + (i * 86400000));
+            let rI = (Math.floor((d - ref) / 86400000) + (idx * 2)) % 6;
+            haftalikProgram[p.isim][i] = rota[rI < 0 ? rI + 6 : rI];
+        }
+    });
+}
+
+function applyMCRRota(birim) {
+    const ekip = personeller.filter(p => p.birim === birim);
+    const rota = ["06:30–16:00", "06:30–16:00", "16:00–00:00", "16:00–00:00", "00:00–07:00", "00:00–07:00", "İZİN", "İZİN"];
+    const ref = new Date(2025, 0, 6);
+    ekip.forEach((p, idx) => {
+        if(haftalikProgram[p.isim].includes("İZİN")) return;
+        for(let i=0; i<7; i++) {
+            let d = new Date(mevcutPazartesi.getTime() + (i * 86400000));
+            let rI = (Math.floor((d - ref) / 86400000) + (idx * 2)) % 8;
+            haftalikProgram[p.isim][i] = rota[rI < 0 ? rI + 8 : rI];
+        }
+    });
+}
+
+function ozetGuncelle() {
     let h = `<table class="stats-table"><thead><tr><th>Personel</th><th>Birim</th><th>Mesai</th></tr></thead><tbody>`;
-    const siraliP = [...personeller].sort((a, b) => birimSiralamasi.indexOf(a.birim) - birimSiralamasi.indexOf(b.birim));
-    siraliP.forEach(p => {
+    const sirali = [...personeller].sort((a, b) => birimSiralamasi.indexOf(a.birim) - birimSiralamasi.indexOf(b.birim));
+    sirali.forEach(p => {
         const mesai = haftalikProgram[p.isim].filter(v => v && v !== "İZİN").length;
         h += `<tr><td><strong>${p.isim}</strong></td><td><small>${p.birim}</small></td><td>${mesai} G</td></tr>`;
     });
@@ -217,8 +215,8 @@ function ozetTablosuGuncelle() {
 }
 
 function haftaDegistir(g) { mevcutPazartesi.setDate(mevcutPazartesi.getDate() + g); tabloyuOlustur(); }
-function exportExcel() { XLSX.writeFile(XLSX.utils.table_to_book(document.getElementById("vardiyaTablosu")), "Vardiya.xlsx"); }
-function exportPDF() { html2pdf().from(document.getElementById('print-area')).save(); }
+function exportExcel() { XLSX.writeFile(XLSX.utils.table_to_book(document.getElementById("vardiyaTablosu")), "Vardiya_Listesi.xlsx"); }
+function exportPDF() { html2pdf().from(document.getElementById('print-area')).save('Vardiya_Listesi.pdf'); }
 function sifirla() { localStorage.clear(); location.reload(); }
 function whatsappMesajiOlustur() {
     let m = `📋 *${mevcutPazartesi.toLocaleDateString('tr-TR')} HAFTALIK VARDİYA*\n\n`;

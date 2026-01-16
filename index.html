@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PRO-Vardiya v12.7 | Kesin Çözüm</title>
+  <title>PRO-Vardiya v12.8 | Hiyerarşi Sabit</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -12,12 +12,12 @@
   <div class="app-wrapper">
     <header class="no-print">
       <div class="logo-area">
-        <h1>TEKNİK VARDİYA <span>v12.7</span></h1>
-        <p id="tarihAraligi">Sistem Yükleniyor...</p>
+        <h1>TEKNİK VARDİYA <span>v12.8</span></h1>
+        <p id="tarihAraligi">Yükleniyor...</p>
       </div>
       <div class="main-actions">
         <button onclick="haftaDegistir(-7)" class="btn-nav">« Geri</button>
-        <button onclick="tabloyuOlustur()" class="btn-primary main-btn pulse">Otomatik Planla</button>
+        <button onclick="tabloyuOlustur()" class="btn-primary main-btn pulse">OTOMATİK PLANLA</button>
         <button onclick="haftaDegistir(7)" class="btn-nav">İleri »</button>
       </div>
       <div class="export-actions">
@@ -29,7 +29,7 @@
     </header>
 
     <section class="admin-panel no-print">
-      <h3 class="panel-title">Manuel İzinli Personel Seçimi</h3>
+      <h3 class="panel-title">Haftalık İzinli Personel Seçimi</h3>
       <div id="personelChecklist" class="checklist-grid"></div>
     </section>
 
@@ -42,7 +42,7 @@
       </div>
       
       <div class="stats-container">
-        <h2 class="stats-title">Haftalık Personel Mesai ve Gece Özeti</h2>
+        <h2 class="stats-title">Personel Çalışma Özeti (Hiyerarşik)</h2>
         <div id="ozetTablo"></div>
       </div>
     </main>
