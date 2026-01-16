@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PRO-Vardiya v11.4 | Akıllı Kontrol Sistemi</title>
+  <title>PRO-Vardiya v11.5 | Kural Kilidi</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -12,7 +12,7 @@
   <div class="app-wrapper">
     <header class="no-print">
       <div class="header-top">
-        <h1>TEKNİK VARDİYA <span>v11.4 PRO+</span></h1>
+        <h1>TEKNİK VARDİYA <span>v11.5 KATI KURAL</span></h1>
         <button onclick="toggleDarkMode()" class="btn-theme" id="themeBtn">🌙 Koyu Mod</button>
       </div>
       <div class="nav-row">
@@ -21,7 +21,7 @@
           <button onclick="haftaDegistir(7)" class="btn-nav">İleri »</button>
       </div>
       <div class="action-row">
-          <button onclick="tabloyuOlustur()" class="btn-primary">⚡ Planı Akıllı Oluştur</button>
+          <button onclick="tabloyuOlustur()" class="btn-primary">⚡ Sabit Planı Oluştur</button>
           <button onclick="togglePanel('personelPanel')" class="btn-admin">⚙️ Ayarlar</button>
       </div>
     </header>
@@ -45,7 +45,6 @@
                         <option value="09:00–18:00">09:00–18:00</option>
                         <option value="12:00–22:00">12:00–22:00</option>
                         <option value="16:00–00:00">16:00–00:00</option>
-                        <option value="00:00–07:00">00:00–07:00</option>
                     </select>
                     <button onclick="personelEkle()" class="btn-success">Ekle</button>
                 </div>
@@ -60,7 +59,7 @@
     </section>
 
     <section class="checklist-section no-print">
-      <h3>İzinli Personel (Zorunlu İzin Harici)</h3>
+      <h3>İzinli Personel Seçimi</h3>
       <div id="personelChecklist" class="checklist-grid"></div>
     </section>
 
@@ -73,7 +72,7 @@
         </table>
       </div>
       <div class="stats-section">
-          <h3>Haftalık Analiz & Uyarılar</h3>
+          <h3>Haftalık Analiz & Güvenlik Kontrolü</h3>
           <div id="ozetTablo"></div>
       </div>
     </main>
