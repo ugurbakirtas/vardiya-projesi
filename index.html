@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PRO-Vardiya Yönetim Sistemi v8.0</title>
+  <title>PRO-Vardiya Yönetim Sistemi v8.1</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -12,7 +12,7 @@
   <div class="app-wrapper">
     <header class="no-print">
       <div class="logo-area">
-        <h1>TEKNİK VARDİYA <span>v8.0</span></h1>
+        <h1>TEKNİK VARDİYA <span>v8.1 - Fix</span></h1>
         <p id="tarihAraligi">Yükleniyor...</p>
       </div>
       <div class="main-actions">
@@ -31,7 +31,7 @@
     <section class="admin-panel no-print">
       <div class="panel-header">
         <h3>📋 Personel Durum Yönetimi</h3>
-        <span>İzinli personelleri işaretleyin, sistem onları otomatik ayıracaktır.</span>
+        <span>Özel izinli/raporlu olanları seçin. Teknik Yönetmen gece vardiyası önceliklidir.</span>
       </div>
       <div id="personelChecklist" class="checklist-grid"></div>
     </section>
@@ -48,15 +48,13 @@
 
       <div class="stats-grid">
         <div class="stat-card">
-          <h3>Haftalık Analiz</h3>
+          <h3>Haftalık Personel Mesai Analizi</h3>
           <div id="ozetTablo"></div>
         </div>
       </div>
     </main>
   </div>
-
   <div id="alertBox" class="alert-box"></div>
-
   <script src="script.js"></script>
 </body>
 </html>

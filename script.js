@@ -2,9 +2,8 @@ let mevcutPazartesi = getMonday(new Date());
 let haftalikProgram = {};
 
 const gunler = ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"];
-const saatler = ["06:30–16:00", "09:00–18:00", "12:00–22:00", "16:00–00:00", "00:00–07:00", "DIŞ YAYIN"];
+const saatler = ["00:00–07:00", "06:30–16:00", "09:00–18:00", "12:00–22:00", "16:00–00:00", "DIŞ YAYIN"];
 
-// --- PERSONEL VERİSİ ---
 const personeller = [
     { isim: "VOLKAN DEMİRBAŞ", birim: "24TV-360TV BİLGİ İŞLEM", gece: false },
     { isim: "GÖKHAN BAĞIŞ", birim: "24TV-360TV BİLGİ İŞLEM", gece: false },
@@ -68,31 +67,28 @@ function checklistOlustur() {
 }
 
 function tabloyuOlustur(devirModu) {
-    const baslangicTarihi = new Date(mevcutPazartesi);
-    document.getElementById("tarihAraligi").innerText = `${baslangicTarihi.toLocaleDateString('tr-TR')} Pazartesi Haftası`;
+    document.getElementById("tarihAraligi").innerText = `${mevcutPazartesi.toLocaleDateString('tr-TR')} Pazartesi Haftası`;
     
+    // Program Sıfırlama ve İzin Atama
     haftalikProgram = {};
     personeller.forEach(p => {
         const isSelected = document.getElementById(`check_${p.isim}`)?.checked;
         haftalikProgram[p.isim] = isSelected ? Array(7).fill("İZİN") : Array(7).fill(null);
     });
 
-    // Otomatik İzin Atama (Haftalık 2 gün)
     personeller.forEach(p => {
         if(haftalikProgram[p.isim][0] !== "İZİN") {
-            if(p.isim === "ZAFER AKAR") { 
-                haftalikProgram[p.isim][5] = "İZİN"; haftalikProgram[p.isim][6] = "İZİN"; 
-            } else {
-                let count = 0;
-                while(count < 2) {
+            let izinCount = 0;
+            if(p.isim === "ZAFER AKAR") { haftalikProgram[p.isim][5] = "İZİN"; haftalikProgram[p.isim][6] = "İZİN"; }
+            else {
+                while(izinCount < 2) {
                     let r = Math.floor(Math.random() * 7);
-                    if(!haftalikProgram[p.isim][r]) { haftalikProgram[p.isim][r] = "İZİN"; count++; }
+                    if(!haftalikProgram[p.isim][r]) { haftalikProgram[p.isim][r] = "İZİN"; izinCount++; }
                 }
             }
         }
     });
 
-    // Tabloyu Çiz
     headerCiz();
     bodyCiz();
     draggablesHazirla();
@@ -111,51 +107,70 @@ function headerCiz() {
 
 function bodyCiz() {
     let html = "";
+    // Önce saatleri döndürüyoruz, ancak Teknik Yönetmen GECE atamasını içeride önceliklendiriyoruz
     saatler.forEach(saat => {
-        html += `<tr><td class="saat-kolon"><strong>${saat}</strong></td>`;
+        html += `<tr><td><strong>${saat}</strong></td>`;
         for (let i = 0; i < 7; i++) {
-            html += `<td class="drop-zone" data-gun="${i}" data-saat="${saat}">${hucreIcerikGetir(i, saat)}</td>`;
+            html += `<td class="drop-zone" data-gun="${i}" data-saat="${saat}">${hucreDoldur(i, saat)}</td>`;
         }
         html += `</tr>`;
     });
-
-    // İzinliler Satırı
-    html += `<tr class="izin-row"><td><strong>İZİNLİLER</strong></td>`;
+    
+    // İzinliler
+    html += `<tr style="background:#f8fafc"><td><strong>İZİNLİLER</strong></td>`;
     for (let i = 0; i < 7; i++) {
-        let icerik = "";
-        personeller.forEach(p => {
-            if(haftalikProgram[p.isim][i] === "İZİN") {
-                icerik += `<div class="birim-card" draggable="true" data-p="${p.isim}" style="border-left-color:#94a3b8">
-                    <span class="birim-tag">${p.birim}</span><span class="p-isim">${p.isim}</span>
-                </div>`;
-            }
-        });
-        html += `<td class="drop-zone" data-gun="${i}" data-saat="İZİN">${icerik}</td>`;
+        let izinliler = personeller.filter(p => haftalikProgram[p.isim][i] === "İZİN");
+        let content = izinliler.map(p => `
+            <div class="birim-card" draggable="true" data-p="${p.isim}" style="border-left-color:#94a3b8">
+                <span class="birim-tag">${p.birim}</span><span class="p-isim">${p.isim}</span>
+            </div>`).join('');
+        html += `<td class="drop-zone" data-gun="${i}" data-saat="İZİN">${content}</td>`;
     }
     html += `</tr>`;
     document.getElementById("tableBody").innerHTML = html;
 }
 
-function hucreIcerikGetir(gunIdx, saat) {
+function hucreDoldur(gunIdx, saat) {
     let content = "";
     birimler.forEach(birim => {
         let kapasite = 0;
-        // Akıllı Kapasite Kuralları
-        if (birim.includes("MCR")) kapasite = (["06:30–16:00", "16:00–00:00", "00:00–07:00"].includes(saat)) ? 1 : 0;
-        else if (birim.includes("BİLGİ") || birim.includes("YAYIN")) kapasite = (saat === "09:00–18:00") ? 1 : 0;
-        else if (birim === "Teknik Yönetmen") kapasite = (saat === "00:00–07:00") ? 1 : (["06:30–16:00", "16:00–00:00"].includes(saat)) ? 2 : 0;
+        
+        // --- KRİTİK GECE VE KAPASİTE MANTIĞI ---
+        if (birim === "Teknik Yönetmen") {
+            if (saat === "00:00–07:00") kapasite = 1; // HER GÜN 1 KİŞİ ŞART
+            else if (["06:30–16:00", "16:00–00:00"].includes(saat)) kapasite = 2;
+        } 
+        else if (birim.includes("MCR")) {
+            if (["06:30–16:00", "16:00–00:00", "00:00–07:00"].includes(saat)) kapasite = 1;
+        }
+        else if (birim.includes("BİLGİ") || birim.includes("YAYIN")) {
+            if (saat === "09:00–18:00") kapasite = 1;
+        }
         else if (birim === "Ses Operatörü") {
-            if (gunIdx < 5) kapasite = (saat === "06:30–16:00") ? 4 : (saat === "16:00–00:00") ? 2 : 0;
-            else kapasite = (["06:30–16:00", "16:00–00:00"].includes(saat)) ? 2 : 0;
+            if (gunIdx < 5) {
+                if (saat === "06:30–16:00") kapasite = 4;
+                if (saat === "16:00–00:00") kapasite = 2;
+            } else {
+                if (["06:30–16:00", "16:00–00:00"].includes(saat)) kapasite = 2;
+            }
         } else if (saat === "06:30–16:00") kapasite = 1;
 
         let adaylar = personeller.filter(p => p.birim === birim && !haftalikProgram[p.isim][gunIdx]);
+        
+        // Eğer gece vardiyası ise ve kimse atanmamışsa, uygun olanı zorla ata
         for(let k=0; k < kapasite; k++) {
             if(adaylar.length > 0) {
-                let p = adaylar.splice(Math.floor(Math.random() * adaylar.length), 1)[0];
-                haftalikProgram[p.isim][gunIdx] = saat;
-                content += `<div class="birim-card" draggable="true" data-p="${p.isim}">
-                    <span class="birim-tag">${birim}</span><span class="p-isim">${p.isim}</span>
+                // Gece vardiyası ise uygunluk kontrolü (Haftalık max 2 gece)
+                let pIdx = 0;
+                if(saat === "00:00–07:00") {
+                    pIdx = adaylar.findIndex(p => p.gece && haftalikProgram[p.isim].filter(v => v === "00:00–07:00").length < 2);
+                    if(pIdx === -1) pIdx = 0; // Eğer kriter tutmasa da birini ata (Süreklilik için)
+                }
+
+                let secilen = adaylar.splice(pIdx, 1)[0];
+                haftalikProgram[secilen.isim][gunIdx] = saat;
+                content += `<div class="birim-card" draggable="true" data-p="${secilen.isim}">
+                    <span class="birim-tag">${birim}</span><span class="p-isim">${secilen.isim}</span>
                 </div>`;
             }
         }
@@ -163,79 +178,56 @@ function hucreIcerikGetir(gunIdx, saat) {
     return content;
 }
 
-// --- SÜRÜKLE BIRAK MANTIĞI ---
 function draggablesHazirla() {
     const cards = document.querySelectorAll('.birim-card');
     const zones = document.querySelectorAll('.drop-zone');
-
-    cards.forEach(card => {
-        card.addEventListener('dragstart', () => card.classList.add('dragging'));
-        card.addEventListener('dragend', () => card.classList.remove('dragging'));
+    cards.forEach(c => {
+        c.ondragstart = () => c.classList.add('dragging');
+        c.ondragend = () => c.classList.remove('dragging');
     });
-
-    zones.forEach(zone => {
-        zone.addEventListener('dragover', e => {
-            e.preventDefault();
-            zone.classList.add('drag-over');
-        });
-        zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
-        zone.addEventListener('drop', e => {
-            e.preventDefault();
-            zone.classList.remove('drag-over');
-            const draggingCard = document.querySelector('.dragging');
-            const pIsim = draggingCard.getAttribute('data-p');
-            const yeniGun = parseInt(zone.getAttribute('data-gun'));
-            const yeniSaat = zone.getAttribute('data-saat');
-
-            // Çakışma Kontrolü
-            if (haftalikProgram[pIsim][yeniGun] && yeniSaat !== "İZİN") {
-                showAlert(`${pIsim} zaten o gün başka bir vardiyada!`, "danger");
-            } else {
-                haftalikProgram[pIsim][yeniGun] = yeniSaat;
-                zone.appendChild(draggingCard);
-                ozetGuncelle();
-            }
-        });
+    zones.forEach(z => {
+        z.ondragover = (e) => { e.preventDefault(); z.style.background = "#e0f2fe"; };
+        z.ondragleave = () => { z.style.background = ""; };
+        z.ondrop = (e) => {
+            z.style.background = "";
+            const card = document.querySelector('.dragging');
+            const p = card.getAttribute('data-p');
+            const gun = z.getAttribute('data-gun');
+            const s = z.getAttribute('data-saat');
+            haftalikProgram[p][gun] = s;
+            z.appendChild(card);
+            ozetGuncelle();
+        };
     });
-}
-
-function showAlert(msg) {
-    const b = document.getElementById("alertBox");
-    b.innerText = msg; b.style.display = "block";
-    setTimeout(() => b.style.display = "none", 3000);
 }
 
 function ozetGuncelle() {
-    let html = `<table style="width:100%; font-size:11px"><thead><tr><th>İsim</th><th>Mesai</th><th>Gece</th></tr></thead><tbody>`;
-    personeller.forEach(p => {
+    let html = `<table style="width:100%; font-size:10px"><thead><tr><th>Personel</th><th>Birim</th><th>Mesai</th><th>Gece</th></tr></thead><tbody>`;
+    personeller.sort((a,b) => a.birim.localeCompare(b.birim)).forEach(p => {
         const m = haftalikProgram[p.isim].filter(v => v && v !== "İZİN").length;
         const g = haftalikProgram[p.isim].filter(v => v === "00:00–07:00").length;
-        html += `<tr><td>${p.isim}</td><td>${m}</td><td>${g}</td></tr>`;
+        html += `<tr><td>${p.isim}</td><td>${p.birim}</td><td>${m} G</td><td>${g} G</td></tr>`;
     });
     html += `</tbody></table>`;
     document.getElementById("ozetTablo").innerHTML = html;
 }
 
 function whatsappMesajiOlustur() {
-    let metin = `📝 *HAFTALIK TEKNİK VARDİYA* (${document.getElementById("tarihAraligi").innerText})\n\n`;
+    let metin = `📋 *YENİ VARDİYA PLANI* \n\n`;
     gunler.forEach((gun, idx) => {
         metin += `*${gun.toUpperCase()}*\n`;
         saatler.forEach(s => {
-            let calisanlar = personeller.filter(p => haftalikProgram[p.isim][idx] === s).map(p => p.isim);
-            if(calisanlar.length > 0) metin += `▪️ ${s}: ${calisanlar.join(", ")}\n`;
+            let p = personeller.filter(p => haftalikProgram[p.isim][idx] === s).map(x => x.isim);
+            if(p.length > 0) metin += `▪️ ${s}: ${p.join(", ")}\n`;
         });
         metin += `\n`;
     });
     navigator.clipboard.writeText(metin);
-    showAlert("WhatsApp mesajı kopyalandı!");
+    alert("WhatsApp mesajı kopyalandı!");
 }
 
-function haftaDegistir(gun) {
-    mevcutPazartesi.setDate(mevcutPazartesi.getDate() + gun);
-    tabloyuOlustur(true);
-}
-
-function exportExcel() { XLSX.writeFile(XLSX.utils.table_to_book(document.getElementById("vardiyaTablosu")), "Teknik_Vardiya.xlsx"); }
+function haftaDegistir(gun) { mevcutPazartesi.setDate(mevcutPazartesi.getDate() + gun); tabloyuOlustur(false); }
+function exportExcel() { XLSX.writeFile(XLSX.utils.table_to_book(document.getElementById("vardiyaTablosu")), "Vardiya.xlsx"); }
 function exportPDF() { html2pdf().from(document.getElementById('print-area')).save(); }
 function sifirla() { localStorage.clear(); location.reload(); }
 
