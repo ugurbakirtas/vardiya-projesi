@@ -3,37 +3,59 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TV Teknik Vardiya Sistemi v7.0</title>
+  <title>PRO-Vardiya Yönetim Sistemi v8.0</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
-  <div class="header-container no-print">
-    <h2 id="tabloBaslik">Teknik Vardiya Planı</h2>
-    <div class="controls">
-      <button id="prevWeek" class="btn-secondary"><< Önceki</button>
-      <button id="yeniListeBtn" class="btn-primary">Listeyi Hazırla</button>
-      <button id="sonrakiHaftaBtn" class="btn-accent">Haftayı Devret >></button>
-      <button id="excelBtn" class="btn-success">Excel</button>
-      <button id="pdfBtn" class="btn-danger">PDF Al</button>
-      <button id="temizleBtn" class="btn-warning">Sıfırla</button>
-    </div>
+  <div class="app-wrapper">
+    <header class="no-print">
+      <div class="logo-area">
+        <h1>TEKNİK VARDİYA <span>v8.0</span></h1>
+        <p id="tarihAraligi">Yükleniyor...</p>
+      </div>
+      <div class="main-actions">
+        <button onclick="haftaDegistir(-7)" class="btn-nav">« Önceki</button>
+        <button onclick="tabloyuOlustur(false)" class="btn-primary main-btn">Otomatik Planla</button>
+        <button onclick="haftaDegistir(7)" class="btn-accent">Haftayı Devret »</button>
+      </div>
+      <div class="export-actions">
+        <button onclick="whatsappMesajiOlustur()" class="btn-wa">WhatsApp</button>
+        <button onclick="exportExcel()" class="btn-success">Excel</button>
+        <button onclick="exportPDF()" class="btn-danger">PDF</button>
+        <button onclick="sifirla()" class="btn-warning">Sıfırla</button>
+      </div>
+    </header>
+
+    <section class="admin-panel no-print">
+      <div class="panel-header">
+        <h3>📋 Personel Durum Yönetimi</h3>
+        <span>İzinli personelleri işaretleyin, sistem onları otomatik ayıracaktır.</span>
+      </div>
+      <div id="personelChecklist" class="checklist-grid"></div>
+    </section>
+
+    <main id="print-area">
+      <div class="table-responsive">
+        <table id="vardiyaTablosu">
+          <thead>
+            <tr id="tableHeader"></tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <h3>Haftalık Analiz</h3>
+          <div id="ozetTablo"></div>
+        </div>
+      </div>
+    </main>
   </div>
 
-  <div class="admin-panel no-print">
-    <h3>📋 Personel İzin/Rapor Paneli</h3>
-    <p style="font-size: 12px; color: #666;">İzinli olanları seçip "Listeyi Hazırla"ya basın. Seçilenler vardiyaya yazılmaz.</p>
-    <div id="personelChecklist" class="checklist-grid"></div>
-  </div>
-
-  <div id="print-area">
-    <div id="tablolar"></div>
-    <div class="ozet-konteyner">
-      <h3>Haftalık Personel Mesai Özeti</h3>
-      <div id="ozetTablo"></div>
-    </div>
-  </div>
+  <div id="alertBox" class="alert-box"></div>
 
   <script src="script.js"></script>
 </body>
