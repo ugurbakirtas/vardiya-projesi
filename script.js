@@ -4,7 +4,7 @@ let haftalikProgram = {};
 const gunler = ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"];
 const saatler = ["06:30–16:00", "09:00–18:00", "12:00–22:00", "16:00–00:00", "00:00–07:00", "DIŞ YAYIN"];
 
-// YENİ HİYERARŞİK SIRALAMA (Belirttiğiniz sırayla)
+// HIYERARŞİ SIRALAMASI
 const birimSiralamasi = [
     "Teknik Yönetmen", 
     "Ses Operatörü", 
@@ -175,6 +175,7 @@ function renderTable() {
 
 function hucreDoldur(gun, saat) {
     let res = "";
+    const isHS = (gun >= 5);
     const siraliPersoneller = [...personeller].sort((a, b) => {
         let ai = birimSiralamasi.indexOf(a.birim);
         let bi = birimSiralamasi.indexOf(b.birim);
@@ -187,19 +188,41 @@ function hucreDoldur(gun, saat) {
         }
     });
 
-    if(saat === "00:00–07:00" || saat === "İZİN") return res;
+    // MANUEL SATIRLAR: 12:00 VE DIŞ YAYIN otomatik doldurulmaz.
+    if(saat === "12:00–22:00" || saat === "DIŞ YAYIN" || saat === "00:00–07:00" || saat === "İZİN") return res;
 
     birimSiralamasi.forEach(birim => {
         if(birim.includes("MCR") || birim.includes("INGEST")) return;
-        let kap = 0; const isHS = (gun >= 5);
-        if (birim === "Playout Operatörü" || birim === "KJ Operatörü") {
+        let kap = 0;
+        
+        if(birim === "Teknik Yönetmen") {
+            if(isHS) {
+                if(saat === "06:30–16:00") kap = 1;
+                else if(saat === "09:00–18:00") kap = 1;
+                else if(saat === "16:00–00:00") kap = 1;
+            } else {
+                if(saat === "06:30–16:00") kap = 2;
+                else if(saat === "16:00–00:00") kap = 1;
+            }
+        }
+        else if(birim === "Ses Operatörü") {
+            if(isHS) {
+                // Hafta sonu: Sabah (2), Mesai (2), Akşam (2)
+                if(saat === "06:30–16:00") kap = 2;
+                else if(saat === "09:00–18:00") kap = 2;
+                else if(saat === "16:00–00:00") kap = 2;
+            } else {
+                if(saat === "06:30–16:00") kap = 4;
+                else if(saat === "16:00–00:00") kap = 2;
+            }
+        }
+        else if (birim === "Playout Operatörü" || birim === "KJ Operatörü") {
             if (isHS) kap = (saat === "06:30–16:00") ? 1 : (saat === "16:00–00:00" ? 2 : 0);
             else kap = (saat === "06:30–16:00" || saat === "16:00–00:00") ? 2 : 0;
         }
-        else if(birim === "Teknik Yönetmen") kap = !isHS ? (saat === "06:30–16:00" ? 2 : (saat === "16:00–00:00" ? 1 : 0)) : 1;
-        else if(birim === "Ses Operatörü") kap = !isHS ? (saat === "06:30–16:00" ? 4 : (saat === "16:00–00:00" ? 2 : 0)) : 2;
-        else if(birim.includes("BİLGİ") || birim.includes("YAYIN")) kap = (saat === "09:00–18:00" ? 1 : 0);
-        else if(saat === "06:30–16:00") kap = 1;
+        else if(birim.includes("BİLGİ") || birim.includes("YAYIN")) {
+            kap = (saat === "09:00–18:00" ? 1 : 0);
+        }
 
         let adaylar = personeller.filter(p => p.birim === birim && !haftalikProgram[p.isim][gun]);
         let suan = personeller.filter(p => p.birim === birim && haftalikProgram[p.isim][gun] === saat).length;
@@ -221,7 +244,6 @@ function ozetTablosuGuncelle() {
         let bi = birimSiralamasi.indexOf(b.birim);
         return (ai === -1 ? 99 : ai) - (bi === -1 ? 99 : bi);
     });
-    
     siraliPersoneller.forEach(p => {
         const mesai = haftalikProgram[p.isim].filter(v => v && v !== "İZİN").length;
         const gece = haftalikProgram[p.isim].filter(v => v === "00:00–07:00").length;
