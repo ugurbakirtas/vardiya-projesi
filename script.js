@@ -1,25 +1,22 @@
 /**
- * PRO-Vardiya v16.0 | Persistent & Dynamic Edition
- * Tüm operasyonel kurallar kilitli, yönetim özellikleri aktiftir.
+ * PRO-Vardiya v16.0 | Kural Korumalı & Gelişmiş Takip
  */
 
-// BAŞLANGIÇ VERİLERİ (LocalStorage yoksa bunlar kullanılır)
-let birimler = JSON.parse(localStorage.getItem("birimListesi")) || [
+// BİRİM SIRALAMASI (DEĞİŞTİRİLEMEZ ÇEKİRDEK)
+let birimSiralamasi = JSON.parse(localStorage.getItem("birimListesi")) || [
     "TEKNİK YÖNETMEN", "SES OPERATÖRÜ", "PLAYOUT OPERATÖRÜ", "KJ OPERATÖRÜ", 
     "INGEST OPERATÖRÜ", "BİLGİ İŞLEM", "YAYIN SİSTEMLERİ", "24TV MCR OPERATÖRÜ", "360TV MCR OPERATÖRÜ"
 ];
 
+// PERSONEL LİSTESİ (HAFIZA DESTEKLİ)
 let personeller = JSON.parse(localStorage.getItem("personelListesi")) || [
     { id: 1, isim: "YUNUS EMRE YAYLA", birim: "TEKNİK YÖNETMEN" },
-    { id: 2, isim: "HASAN CAN SAĞLAM", birim: "TEKNİK YÖNETMEN" },
-    { id: 3, isim: "MEHMET BERKMAN", birim: "TEKNİK YÖNETMEN" },
     { id: 4, isim: "EKREM FİDAN", birim: "TEKNİK YÖNETMEN" },
-    { id: 5, isim: "CAN ŞENTUNALI", birim: "TEKNİK YÖNETMEN" },
     { id: 6, isim: "BARIŞ İNCE", birim: "TEKNİK YÖNETMEN" },
     { id: 7, isim: "ZAFER AKAR", birim: "SES OPERATÖRÜ" },
-    { id: 8, isim: "ENES KALE", birim: "SES OPERATÖRÜ" },
     { id: 15, isim: "SENA MİNARECİ", birim: "PLAYOUT OPERATÖRÜ" },
     { id: 22, isim: "YUSUF İSLAM TORUN", birim: "KJ OPERATÖRÜ" },
+    { id: 29, isim: "RAMAZAN KOÇAK", birim: "INGEST OPERATÖRÜ" },
     { id: 40, isim: "KADİR YILMAZ", birim: "24TV MCR OPERATÖRÜ" },
     { id: 44, isim: "EMRULLAH AHLATÇI", birim: "360TV MCR OPERATÖRÜ" }
 ];
@@ -30,49 +27,39 @@ const saatler = ["06:30–16:00", "09:00–18:00", "12:00–22:00", "16:00–00:
 let mevcutPazartesi = getMonday(new Date());
 let haftalikProgram = {};
 
-// HAFTA HESAPLAMA
 function getMonday(d) {
     d = new Date(d);
     let day = d.getDay(), diff = d.getDate() - day + (day == 0 ? -6 : 1);
     return new Date(d.setDate(diff));
 }
 
-// TEMA DEĞİŞTİRME
-function toggleTheme() {
-    const body = document.body;
-    const btn = document.getElementById("themeBtn");
-    if(body.classList.contains("light-mode")) {
-        body.classList.replace("light-mode", "dark-mode");
-        btn.innerText = "☀️ Aydınlık Mod";
-    } else {
-        body.classList.replace("dark-mode", "light-mode");
-        btn.innerText = "🌙 Karanlık Mod";
-    }
+// --- YÖNETİM FONKSİYONLARI ---
+function toggleAdminPanel() {
+    const p = document.getElementById("adminPanel");
+    p.classList.toggle("hidden");
+    adminPanelGuncelle();
 }
 
-// YÖNETİM MODU
-function modDegistir() {
-    const panel = document.getElementById("adminPanel");
-    panel.classList.toggle("hidden");
-    adminPanelGuncelle();
+function toggleTheme() {
+    document.body.classList.toggle("dark-mode");
+    const isDark = document.body.classList.contains("dark-mode");
+    document.getElementById("themeBtn").innerText = isDark ? "☀️ Aydınlık Mod" : "🌙 Karanlık Mod";
 }
 
 function birimEkle() {
     const ad = document.getElementById("yeniBirimAd").value.toUpperCase();
     if(!ad) return;
-    birimler.push(ad);
-    localStorage.setItem("birimListesi", JSON.stringify(birimler));
-    document.getElementById("yeniBirimAd").value = "";
+    birimSiralamasi.push(ad);
+    localStorage.setItem("birimListesi", JSON.stringify(birimSiralamasi));
     adminPanelGuncelle();
 }
 
 function personelEkle() {
-    const isim = document.getElementById("yeniPersonelIsim").value.toUpperCase();
-    const birim = document.getElementById("yeniPersonelBirim").value;
+    const isim = document.getElementById("yeniIsim").value.toUpperCase();
+    const birim = document.getElementById("birimSec").value;
     if(!isim) return;
     personeller.push({ id: Date.now(), isim, birim });
     localStorage.setItem("personelListesi", JSON.stringify(personeller));
-    document.getElementById("yeniPersonelIsim").value = "";
     adminPanelGuncelle();
     checklistOlustur();
     tabloyuOlustur();
@@ -87,27 +74,26 @@ function personelSil(id) {
 }
 
 function adminPanelGuncelle() {
-    const sel = document.getElementById("yeniPersonelBirim");
-    sel.innerHTML = birimler.map(b => `<option value="${b}">${b}</option>`).join('');
-    
+    const sel = document.getElementById("birimSec");
+    sel.innerHTML = birimSiralamasi.map(b => `<option value="${b}">${b}</option>`).join('');
     const list = document.getElementById("yonetimListesi");
     list.innerHTML = personeller.map(p => `
-        <div class="yonetim-item">
+        <div class="yonetim-card">
             <span><b>${p.isim}</b> <br><small>${p.birim}</small></span>
-            <button onclick="personelSil(${p.id})" class="btn-del" style="background:red; color:white; padding:2px 5px; border-radius:4px;">Sil</button>
+            <button onclick="personelSil(${p.id})" style="background:red; color:white; border-radius:4px; padding:2px 5px;">Sil</button>
         </div>
     `).join('');
 }
 
-// OTOMATİK PLANLAMA VE HAFTALIK KAYIT
+// --- VARDİYA MANTIĞI (v14.5 Korumalı) ---
 function tabloyuOlustur() {
-    const haftaKey = "v16_data_" + mevcutPazartesi.toISOString().split('T')[0];
+    const haftaKey = "data_" + mevcutPazartesi.toISOString().split('T')[0];
     document.getElementById("tarihAraligi").innerText = `${mevcutPazartesi.toLocaleDateString('tr-TR')} Haftası`;
     
-    // Önce hafızayı kontrol et
-    const kaydedilmis = localStorage.getItem(haftaKey);
-    if(kaydedilmis) {
-        haftalikProgram = JSON.parse(kaydedilmis);
+    // Hafızadan yükle yoksa yeni kurallar çalıştır
+    const localData = localStorage.getItem(haftaKey);
+    if(localData) {
+        haftalikProgram = JSON.parse(localData);
     } else {
         haftalikProgram = {};
         personeller.forEach(p => {
@@ -115,12 +101,12 @@ function tabloyuOlustur() {
             haftalikProgram[p.isim] = isSelected ? Array(7).fill("İZİN") : Array(7).fill(null);
         });
 
-        // KURALLARI UYGULA (MCR, Ingest, TY vb.)
+        // Sabit kurallar
         applyMCRRota("24TV MCR OPERATÖRÜ");
         applyMCRRota("360TV MCR OPERATÖRÜ");
         applyIngestRota();
         
-        // TY Barış & Ekrem Özel
+        // TY Barış & Ekrem Döngüsü
         if(haftalikProgram["BARIŞ İNCE"]) {
             haftalikProgram["BARIŞ İNCE"][0] = "00:00–07:00";
             haftalikProgram["BARIŞ İNCE"][1] = "00:00–07:00";
@@ -132,21 +118,10 @@ function tabloyuOlustur() {
     localStorage.setItem(haftaKey, JSON.stringify(haftalikProgram));
 }
 
-function checklistOlustur() {
-    const container = document.getElementById("personelChecklist");
-    container.innerHTML = personeller.sort((a,b) => a.birim.localeCompare(b.birim)).map(p => `
-        <div class="check-item">
-            <input type="checkbox" id="check_${p.id}" onchange="tabloyuOlustur()">
-            <label><strong>${p.isim}</strong><br><small>${p.birim}</small></label>
-        </div>
-    `).join('');
-}
-
 function hucreDoldur(gun, saat) {
     const isHS = (gun >= 5);
-    
     if(!["12:00–22:00", "DIŞ YAYIN", "İZİN"].includes(saat)) {
-        birimler.forEach(birim => {
+        birimSiralamasi.forEach(birim => {
             if(birim.includes("MCR") || birim.includes("INGEST")) return;
             
             let kap = 0;
@@ -164,7 +139,6 @@ function hucreDoldur(gun, saat) {
 
             let adaylar = personeller.filter(p => p.birim === birim && !haftalikProgram[p.isim][gun]);
             let suan = personeller.filter(p => p.birim === birim && haftalikProgram[p.isim][gun] === saat).length;
-            
             for(let k=0; k < (kap-suan); k++) {
                 if(adaylar.length > 0) {
                     let p = adaylar.splice(Math.floor(Math.random() * adaylar.length), 1)[0];
@@ -175,12 +149,16 @@ function hucreDoldur(gun, saat) {
     }
 
     let list = personeller.filter(p => haftalikProgram[p.isim][gun] === saat);
+    list.sort((a,b) => birimSiralamasi.indexOf(a.birim) - birimSiralamasi.indexOf(b.birim));
     return list.map(p => `<div class="birim-card"><span class="birim-tag">${p.birim}</span><span class="p-isim">${p.isim}</span></div>`).join('');
 }
 
 function renderTable() {
     const h = document.getElementById("tableHeader");
-    h.innerHTML = `<th>SAATLER</th>` + gunler.map(g => `<th>${g}</th>`).join('');
+    h.innerHTML = `<th>SAATLER</th>` + gunler.map((g, i) => {
+        let t = new Date(mevcutPazartesi); t.setDate(t.getDate() + i);
+        return `<th>${g}<br><small>${t.toLocaleDateString('tr-TR')}</small></th>`;
+    }).join('');
     let b = "";
     saatler.forEach(s => {
         b += `<tr><td>${s}</td>`;
@@ -190,7 +168,18 @@ function renderTable() {
     document.getElementById("tableBody").innerHTML = b;
 }
 
-// MCR & INGEST ROTASYON MANTIKLARI
+// MESAI TAKİBİ
+function ozetGuncelle() {
+    let h = `<table class="stats-table"><tr><th>Personel</th><th>Birim</th><th>Gün Mesai</th><th>Gece</th><th>Durum</th></tr>`;
+    personeller.sort((a,b) => birimSiralamasi.indexOf(a.birim) - birimSiralamasi.indexOf(b.birim)).forEach(p => {
+        const gunMesai = haftalikProgram[p.isim].filter(v => v && v !== "İZİN").length;
+        const geceMesai = haftalikProgram[p.isim].filter(v => v === "00:00–07:00").length;
+        h += `<tr><td><b>${p.isim}</b></td><td><small>${p.birim}</small></td><td>${gunMesai} Gün</td><td>${geceMesai} Gece</td><td>${gunMesai > 5 ? '⚠️' : '✅'}</td></tr>`;
+    });
+    document.getElementById("ozetTablo").innerHTML = h + "</table>";
+}
+
+// MCR & INGEST (v14.5 Sabit Rota)
 function applyIngestRota() {
     const ekip = personeller.filter(p => p.birim === "INGEST OPERATÖRÜ");
     const rota = ["06:30–16:00", "06:30–16:00", "16:00–00:00", "16:00–00:00", "İZİN", "İZİN"];
@@ -215,28 +204,27 @@ function applyMCRRota(birim) {
     });
 }
 
-// MESAI TAKİBİ
-function ozetGuncelle() {
-    let h = `<table class="stats-table"><thead><tr><th>Personel</th><th>Birim</th><th>Top. Gün</th><th>Gece</th><th>Durum</th></tr></thead><tbody>`;
-    personeller.forEach(p => {
-        const gunSayisi = haftalikProgram[p.isim].filter(v => v && v !== "İZİN").length;
-        const geceSayisi = haftalikProgram[p.isim].filter(v => v === "00:00–07:00").length;
-        h += `<tr>
-            <td><strong>${p.isim}</strong></td>
-            <td><small>${p.birim}</small></td>
-            <td>${gunSayisi} G</td>
-            <td>${geceSayisi} G</td>
-            <td>${gunSayisi > 5 ? '⚠️ Fazla' : '✅ Normal'}</td>
-        </tr>`;
-    });
-    document.getElementById("ozetTablo").innerHTML = h + "</tbody></table>";
+function checklistOlustur() {
+    const container = document.getElementById("personelChecklist");
+    container.innerHTML = personeller.sort((a,b) => birimSiralamasi.indexOf(a.birim) - birimSiralamasi.indexOf(b.birim)).map(p => `
+        <div class="check-item" onclick="toggleCheckbox('${p.id}')">
+            <input type="checkbox" id="check_${p.id}" onchange="tabloyuOlustur()">
+            <label><strong>${p.isim}</strong><br><small>${p.birim}</small></label>
+        </div>
+    `).join('');
+}
+
+function toggleCheckbox(id) {
+    const cb = document.getElementById('check_' + id);
+    if(cb) { cb.checked = !cb.checked; tabloyuOlustur(); }
 }
 
 function haftaDegistir(g) { mevcutPazartesi.setDate(mevcutPazartesi.getDate() + g); tabloyuOlustur(); }
 function exportExcel() { XLSX.writeFile(XLSX.utils.table_to_book(document.getElementById("vardiyaTablosu")), "Teknik_Vardiya.xlsx"); }
 function exportPDF() { html2pdf().from(document.getElementById('print-area')).save('Vardiya_Raporu.pdf'); }
+function sifirla() { localStorage.clear(); location.reload(); }
 function whatsappMesajiOlustur() {
-    let m = `📋 *TEKNİK VARDİYA | ${mevcutPazartesi.toLocaleDateString('tr-TR')}*\n\n`;
+    let m = `📋 *${mevcutPazartesi.toLocaleDateString('tr-TR')} HAFTASI*\n\n`;
     gunler.forEach((g, i) => {
         m += `*${g.toUpperCase()}*\n`;
         saatler.forEach(s => {
@@ -245,7 +233,7 @@ function whatsappMesajiOlustur() {
         });
         m += `\n`;
     });
-    navigator.clipboard.writeText(m).then(() => alert("Liste WhatsApp formatında kopyalandı!"));
+    navigator.clipboard.writeText(m).then(() => alert("Kopyalandı!"));
 }
 
-window.onload = () => { checklistOlustur(); tabloyuOlustur(); };
+window.onload = () => { checklistOlustur(); tabloyuOlustur(); adminPanelGuncelle(); };
