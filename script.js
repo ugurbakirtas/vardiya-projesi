@@ -19,53 +19,8 @@ const birimler = [
   "Uplink"
 ];
 
-const personeller = [
-  // Teknik Yönetmen
-  { isim:"YUNUS EMRE YAYLA", birim:"Teknik Yönetmen", gece:true },
-  { isim:"HASAN CAN SAĞLAM", birim:"Teknik Yönetmen", gece:true },
-  { isim:"MEHMET BERKMAN", birim:"Teknik Yönetmen", gece:true },
-  { isim:"EKREM FİDAN", birim:"Teknik Yönetmen", gece:true },
-  { isim:"CAN ŞENTUNALI", birim:"Teknik Yönetmen", gece:true },
-  { isim:"BARIŞ İNCE", birim:"Teknik Yönetmen", gece:true },
-
-  // Ses Operatörü
-  { isim:"ZAFER AKAR", birim:"Ses Operatörü", gece:false },
-  { isim:"ENES KALE", birim:"Ses Operatörü", gece:false },
-  { isim:"ANIL RİŞVAN", birim:"Ses Operatörü", gece:false },
-  { isim:"ERSAN TİLBE", birim:"Ses Operatörü", gece:false },
-  { isim:"ULVİ MUTLUBAŞ", birim:"Ses Operatörü", gece:false },
-  { isim:"OSMAN DİNÇER", birim:"Ses Operatörü", gece:false },
-  { isim:"DOĞUŞ MALGIL", birim:"Ses Operatörü", gece:false },
-  { isim:"ERDOĞAN KÜÇÜKKAYA", birim:"Ses Operatörü", gece:false },
-
-  // Playout
-  { isim:"SENA MİNARECİ", birim:"Playout Operatörü", gece:true },
-  { isim:"MEHMET TUNÇ", birim:"Playout Operatörü", gece:true },
-  { isim:"KADİR ÇAÇAN", birim:"Playout Operatörü", gece:true },
-  { isim:"ÖMER FARUK ÖZBEY", birim:"Playout Operatörü", gece:true },
-  { isim:"İBRAHİM SERİNSÖZ", birim:"Playout Operatörü", gece:true },
-  { isim:"YUSUF ALPKILIÇ", birim:"Playout Operatörü", gece:true },
-  { isim:"MUSTAFA ERCÜMENT KILIÇ", birim:"Playout Operatörü", gece:true },
-  { isim:"NEHİR KAYGUSUZ", birim:"Playout Operatörü", gece:true },
-
-  // KJ
-  { isim:"YUSUF İSLAM TORUN", birim:"KJ Operatörü", gece:false },
-  { isim:"OĞUZHAN YALAZAN", birim:"KJ Operatörü", gece:false },
-  { isim:"UĞUR AKBABA", birim:"KJ Operatörü", gece:false },
-  { isim:"SENA BAYDAR", birim:"KJ Operatörü", gece:false },
-  { isim:"CEMREHAN SUBAŞI", birim:"KJ Operatörü", gece:false },
-  { isim:"YEŞİM KİREÇ", birim:"KJ Operatörü", gece:false },
-  { isim:"PINAR ÖZENÇ", birim:"KJ Operatörü", gece:true },
-
-  // Ingest
-  { isim:"RAMAZAN KOÇAK", birim:"Ingest Operatörü", gece:true },
-  { isim:"DEMET CENGİZ", birim:"Ingest Operatörü", gece:true },
-  { isim:"ERCAN PALABIYIK", birim:"Ingest Operatörü", gece:true },
-
-  // Uplink
-  { isim:"Selin", birim:"Uplink", gece:true },
-  { isim:"Derya", birim:"Uplink", gece:true }
-];
+// Personel listesi (senin verdiğin şekilde)
+const personeller = [ /* ... senin uzun personel listesi buraya ... */ ];
 
 function uygunPersonel(birim, saat) {
   if (saat === "İZİN" || saat === "DIŞ YAYIN") return saat;

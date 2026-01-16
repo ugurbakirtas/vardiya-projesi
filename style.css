@@ -36,16 +36,22 @@ th {
   background: #eee;
 }
 
+caption {
+  font-weight: bold;
+  margin-bottom: 10px;
+  font-size: 16px;
+}
+
 td.editable {
   cursor: pointer;
   white-space: pre-line;
 }
 
 /* Saat bloklarına renkler */
-tr.saat-0630 { background-color: #ffe0e0; }   /* 06:30–16:00 */
-tr.saat-0900 { background-color: #e0ffe0; }   /* 09:00–18:00 */
-tr.saat-1200 { background-color: #e0e0ff; }   /* 12:00–22:00 */
-tr.saat-1600 { background-color: #fff0cc; }   /* 16:00–00:00 */
-tr.saat-0000 { background-color: #f0ccff; }   /* 00:00–07:00 */
-tr.izin      { background-color: #ffcccc; }   /* İZİN */
-tr.disyayin  { background-color: #cce5ff; }   /* DIŞ YAYIN */
+tr.saat-0630 { background-color: #ffe0e0; }
+tr.saat-0900 { background-color: #e0ffe0; }
+tr.saat-1200 { background-color: #e0e0ff; }
+tr.saat-1600 { background-color: #fff0cc; }
+tr.saat-0000 { background-color: #f0ccff; }
+tr.izin      { background-color: #ffcccc; }
+tr.disyayin  { background-color: #cce5ff; }
