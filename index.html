@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PRO-Vardiya v11.5 | Kural Kilidi</title>
+  <title>PRO-Vardiya v11.9 | Adaletli Rotasyon</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -12,8 +12,8 @@
   <div class="app-wrapper">
     <header class="no-print">
       <div class="header-top">
-        <h1>TEKNİK VARDİYA <span>v11.5 KATI KURAL</span></h1>
-        <button onclick="toggleDarkMode()" class="btn-theme" id="themeBtn">🌙 Koyu Mod</button>
+        <h1>TEKNİK VARDİYA <span>v11.9 ROTASYON</span></h1>
+        <button onclick="toggleDarkMode()" class="btn-theme">🌙 Mod</button>
       </div>
       <div class="nav-row">
           <button onclick="haftaDegistir(-7)" class="btn-nav">« Geri</button>
@@ -21,8 +21,8 @@
           <button onclick="haftaDegistir(7)" class="btn-nav">İleri »</button>
       </div>
       <div class="action-row">
-          <button onclick="tabloyuOlustur()" class="btn-primary">⚡ Sabit Planı Oluştur</button>
-          <button onclick="togglePanel('personelPanel')" class="btn-admin">⚙️ Ayarlar</button>
+          <button onclick="tabloyuOlustur()" class="btn-primary">⚡ Adaletli Planı Oluştur</button>
+          <button onclick="temizleHafiza()" class="btn-danger" style="font-size: 10px;">Hafızayı Sıfırla</button>
       </div>
     </header>
 
@@ -32,34 +32,8 @@
         <button onclick="exportPDF()" class="btn-danger">PDF</button>
     </div>
 
-    <section id="personelPanel" class="admin-panel no-print hidden">
-        <div class="panel-grid">
-            <div class="panel-box">
-                <h3>Personel Yönetimi</h3>
-                <div class="add-form">
-                    <input type="text" id="pIsim" placeholder="Ad Soyad">
-                    <select id="pBirim"></select>
-                    <select id="pSabit">
-                        <option value="">Sabit Vardiya Yok</option>
-                        <option value="06:30–16:00">06:30–16:00</option>
-                        <option value="09:00–18:00">09:00–18:00</option>
-                        <option value="12:00–22:00">12:00–22:00</option>
-                        <option value="16:00–00:00">16:00–00:00</option>
-                    </select>
-                    <button onclick="personelEkle()" class="btn-success">Ekle</button>
-                </div>
-                <div id="manageList" class="manage-list"></div>
-            </div>
-            <div class="panel-box">
-                <h3>Haftalık Notlar</h3>
-                <div id="notesForm" class="notes-grid"></div>
-                <button onclick="notlariKaydet()" class="btn-primary" style="width:100%; margin-top:10px;">Kaydet</button>
-            </div>
-        </div>
-    </section>
-
     <section class="checklist-section no-print">
-      <h3>İzinli Personel Seçimi</h3>
+      <h3>Bu Haftaki Manuel İzinler (Raporlu/Yıllık)</h3>
       <div id="personelChecklist" class="checklist-grid"></div>
     </section>
 
@@ -72,7 +46,7 @@
         </table>
       </div>
       <div class="stats-section">
-          <h3>Haftalık Analiz & Güvenlik Kontrolü</h3>
+          <h3>Haftalık Personel Analizi & Hafıza Takibi</h3>
           <div id="ozetTablo"></div>
       </div>
     </main>
