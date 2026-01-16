@@ -1,5 +1,5 @@
-// Günler ve saatler
 const gunler = ["Pazartesi","Salı","Çarşamba","Perşembe","Cuma","Cumartesi","Pazar"];
+
 const saatler = [
   "06:30–16:00","06:30–16:00","06:30–16:00","06:30–16:00",
   "09:00–18:00",
@@ -9,9 +9,17 @@ const saatler = [
   "İZİN","İZİN","İZİN",
   "DIŞ YAYIN","DIŞ YAYIN","DIŞ YAYIN"
 ];
-const birimler = ["Teknik Yönetmen","Ses Operatörü","Playout Operatörü","KJ Operatörü","Ingest Operatörü","Uplink"];
 
-// Personel listesi (kısaltılmış örnek)
+const birimler = [
+  "Teknik Yönetmen",
+  "Ses Operatörü",
+  "Playout Operatörü",
+  "KJ Operatörü",
+  "Ingest Operatörü",
+  "Uplink"
+];
+
+// Personel listesi (kısaltılmış örnek, senin verdiğin isimler buraya tam gelecek)
 const personeller = [
   { isim:"YUNUS EMRE YAYLA", birim:"Teknik Yönetmen", gece:true },
   { isim:"HASAN CAN SAĞLAM", birim:"Teknik Yönetmen", gece:true },
@@ -21,13 +29,21 @@ const personeller = [
   { isim:"BARIŞ İNCE", birim:"Teknik Yönetmen", gece:true },
   { isim:"ZAFER AKAR", birim:"Ses Operatörü", gece:false },
   { isim:"ENES KALE", birim:"Ses Operatörü", gece:false },
+  { isim:"ANIL RİŞVAN", birim:"Ses Operatörü", gece:false },
+  { isim:"ERSAN TİLBE", birim:"Ses Operatörü", gece:false },
+  { isim:"ULVİ MUTLUBAŞ", birim:"Ses Operatörü", gece:false },
+  { isim:"OSMAN DİNÇER", birim:"Ses Operatörü", gece:false },
+  { isim:"DOĞUŞ MALGIL", birim:"Ses Operatörü", gece:false },
+  { isim:"ERDOĞAN KÜÇÜKKAYA", birim:"Ses Operatörü", gece:false },
   { isim:"SENA MİNARECİ", birim:"Playout Operatörü", gece:true },
   { isim:"YUSUF İSLAM TORUN", birim:"KJ Operatörü", gece:false },
   { isim:"RAMAZAN KOÇAK", birim:"Ingest Operatörü", gece:true },
   { isim:"Selin", birim:"Uplink", gece:true }
 ];
 
-// Teknik Yönetmen özel kuralları
+// Sayaçlar
+const izinSayaci = {};
+const oncekiAksam = {};
 function uygunPersonelTeknikYonetmen(saat, gunIndex) {
   const geceMi = saat === "00:00–07:00";
   const sabahMi = saat === "06:30–16:00";
@@ -69,37 +85,67 @@ function uygunPersonelTeknikYonetmen(saat, gunIndex) {
   return secilen.isim;
 }
 
-// Genel personel seçimi
+function uygunPersonelSesOperatoru(saat, gunIndex) {
+  const sabahMi = saat === "06:30–16:00";
+  const aksamMi = saat === "16:00–00:00";
+  const geceMi = saat === "00:00–07:00";
+  const izinMi = saat === "İZİN";
+  const disYayinMi = saat === "DIŞ YAYIN";
+
+  let uygunlar = personeller.filter(p => p.birim === "Ses Operatörü");
+
+  if (geceMi) return ""; // gece boş
+  if (disYayinMi) return ""; // dış yayın boş
+
+  if (izinMi) {
+    const secilenler = [];
+    while (secilenler.length < 2) {
+      const aday = uygunlar[Math.floor(Math.random() * uygunlar.length)];
+      const izinSayisi = izinSayaci[aday.isim] || 0;
+      if (izinSayisi < 2 && !secilenler.includes(aday.isim)) {
+        secilenler.push(aday.isim);
+        izinSayaci[aday.isim] = izinSayisi + 1;
+      }
+    }
+    return secilenler.join(", ");
+  }
+
+  if (aksamMi) {
+    const secilenler = [];
+    while (secilenler.length < 2) {
+      const aday = uygunlar[Math.floor(Math.random() * uygunlar.length)];
+      if (!secilenler.includes(aday.isim)) {
+        secilenler.push(aday.isim);
+        oncekiAksam[gunIndex] = oncekiAksam[gunIndex] || [];
+        oncekiAksam[gunIndex].push(aday.isim);
+      }
+    }
+    return secilenler.join(", ");
+  }
+
+  if (sabahMi) {
+    const secilenler = [];
+    while (secilenler.length < 4) {
+      const aday = uygunlar[Math.floor(Math.random() * uygunlar.length)];
+      const oncekiGun = gunIndex - 1;
+      if (oncekiGun >= 0 && oncekiAksam[oncekiGun] && oncekiAksam[oncekiGun].includes(aday.isim)) {
+        continue; // önceki gün akşam çalışmışsa sabaha gelmesin
+      }
+      if (!secilenler.includes(aday.isim)) {
+        secilenler.push(aday.isim);
+      }
+    }
+    return secilenler.join(", ");
+  }
+
+  return "";
+}
+
 function uygunPersonel(birim, saat, gunIndex) {
-  if (saat === "İZİN" || saat === "DIŞ YAYIN") return saat;
   if (birim === "Teknik Yönetmen") return uygunPersonelTeknikYonetmen(saat, gunIndex);
+  if (birim === "Ses Operatörü") return uygunPersonelSesOperatoru(saat, gunIndex);
+  if (saat === "İZİN" || saat === "DIŞ YAYIN") return saat;
   const geceMi = saat === "00:00–07:00";
   let uygunlar = personeller.filter(p => p.birim === birim && (!geceMi || p.gece));
   if (uygunlar.length === 0) return "İZİN";
   const secilen = uygunlar[Math.floor(Math.random() * uygunlar.length)];
-  return secilen.isim;
-}
-
-// Tablo oluşturma
-function tabloyuOlustur() {
-  const container = document.getElementById("tablolar");
-  birimler.forEach(birim => {
-    const table = document.createElement("table");
-    const caption = document.createElement("caption");
-    caption.textContent = birim;
-    table.appendChild(caption);
-
-    const thead = document.createElement("thead");
-    const trHead = document.createElement("tr");
-    trHead.innerHTML = "<th>Saat</th>" + gunler.map(g => `<th>${g}</th>`).join("");
-    thead.appendChild(trHead);
-    table.appendChild(thead);
-
-    const tbody = document.createElement("tbody");
-    saatler.forEach((saat, sIndex) => {
-      const tr = document.createElement("tr");
-      const tdSaat = document.createElement("td");
-      tdSaat.textContent = saat;
-      tr.appendChild(tdSaat);
-
-      gunler.forEach((gun, gIndex
