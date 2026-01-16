@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PRO-Vardiya v16.0 | Professional</title>
+  <title>PRO-Vardiya v16.0 | Kural Kilitli</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -22,7 +22,7 @@
       </div>
       <div class="mode-controls">
         <button onclick="toggleTheme()" id="themeBtn" class="btn-theme">🌙 Karanlık Mod</button>
-        <button onclick="toggleAdminPanel()" id="adminBtn" class="btn-admin">⚙️ Yönetim</button>
+        <button onclick="toggleAdminPanel()" id="adminBtn" class="btn-admin">⚙️ Birim/Personel Yönetimi</button>
       </div>
       <div class="export-actions">
         <button onclick="whatsappMesajiOlustur()" class="btn-wa">WhatsApp</button>
@@ -32,7 +32,7 @@
       </div>
     </header>
 
-    <section id="adminPanel" class="admin-section no-print hidden">
+    <section id="adminPanel" class="admin-panel no-print hidden">
       <div class="admin-container">
         <div class="admin-box">
           <h3>Personel Ekle</h3>
@@ -41,12 +41,12 @@
           <button onclick="personelEkle()" class="btn-success">Ekle</button>
         </div>
         <div class="admin-box">
-          <h3>Birim Ekle</h3>
+          <h3>Yeni Birim Ekle</h3>
           <input type="text" id="yeniBirimAd" placeholder="Birim Adı">
           <button onclick="birimEkle()" class="btn-primary">Birim Ekle</button>
         </div>
       </div>
-      <div id="yonetimListesi" class="yonetim-grid"></div>
+      <div id="dinamikListe" class="checklist-grid" style="margin-top:10px; border-top:1px solid #ccc; padding-top:10px;"></div>
     </section>
 
     <section class="checklist-area no-print">
@@ -63,7 +63,7 @@
       </div>
       
       <div class="stats-container">
-        <h2 class="stats-title">📊 Personel Mesai & Gece Takibi (Haftalık)</h2>
+        <h2 class="stats-title">📊 Personel Mesai & Gece Takibi</h2>
         <div id="ozetTablo"></div>
       </div>
     </main>
