@@ -18,19 +18,7 @@ const personeller = [
   { isim: "DOĞUŞ MALGIL", birim: "Ses Operatörü", gece: false },
   { isim: "ERDOĞAN KÜÇÜKKAYA", birim: "Ses Operatörü", gece: false },
   { isim: "SENA MİNARECİ", birim: "Playout Operatörü", gece: true },
-  { isim: "MEHMET TUNÇ", birim: "Playout Operatörü", gece: true },
-  { isim: "KADİR ÇAÇAN", birim: "Playout Operatörü", gece: true },
-  { isim: "İBRAHİM SERİNSÖZ", birim: "Playout Operatörü", gece: true },
-  { isim: "YUSUF ALPKILIÇ", birim: "Playout Operatörü", gece: true },
-  { isim: "MUSTAFA ERCÜMENT KILIÇ", birim: "Playout Operatörü", gece: true },
-  { isim: "NEHİR KAYGUSUZ", birim: "Playout Operatörü", gece: true },
   { isim: "YUSUF İSLAM TORUN", birim: "KJ Operatörü", gece: false },
-  { isim: "OĞUZHAN YALAZAN", birim: "KJ Operatörü", gece: false },
-  { isim: "UĞUR AKBABA", birim: "KJ Operatörü", gece: false },
-  { isim: "SENA BAYDAR", birim: "KJ Operatörü", gece: false },
-  { isim: "CEMREHAN SUBAŞI", birim: "KJ Operatörü", gece: false },
-  { isim: "YEŞİM KİREÇ", birim: "KJ Operatörü", gece: false },
-  { isim: "PINAR ÖZENÇ", birim: "KJ Operatörü", gece: false },
   { isim: "RAMAZAN KOÇAK", birim: "Ingest Operatörü", gece: true },
   { isim: "Selin", birim: "Uplink", gece: true }
 ];
@@ -47,7 +35,7 @@ function programiSifirla() {
   haftalikProgram["ZAFER AKAR"][5] = "İZİN";
   haftalikProgram["ZAFER AKAR"][6] = "İZİN";
 
-  // İZİN ATAMA (Birim Bazlı)
+  // İZİN ATAMA
   gunler.forEach((_, gIdx) => {
     birimler.forEach(birim => {
       let adaylar = personeller.filter(p => p.birim === birim);
@@ -76,31 +64,23 @@ function uygunlukKontrol(personel, gunIdx, saat) {
   const isim = personel.isim;
   const program = haftalikProgram[isim];
 
-  // Zafer Akar Sabit Kuralı
   if (isim === "ZAFER AKAR") {
     if (gunIdx < 5) {
       if (saat !== "06:30–16:00") return false;
     } else return false;
   }
 
-  // Zaten atama yapılmış mı?
   if (program[gunIdx] !== null) return false;
 
-  // DİNLENME KURALLARI (Kritik Bölüm)
   if (gunIdx > 0) {
-    const dunkuVardiya = program[gunIdx - 1];
-    
-    // KURAL: 16:00-00:00 çalışan ertesi gün 06:30 gelemez
-    if (saat === "06:30–16:00" && dunkuVardiya === "16:00–00:00") return false;
-    
-    // KURAL: Gece çalışan ertesi gün (izin yapmadan) 06:30 gelemez
-    if (saat === "06:30–16:00" && dunkuVardiya === "00:00–07:00") return false;
+    const dun = program[gunIdx - 1];
+    // 16:00 veya 00:00 sonrası sabah gelemez kuralı
+    if (saat === "06:30–16:00" && (dun === "16:00–00:00" || dun === "00:00–07:00")) return false;
   }
 
-  // Gece Sınırı
   if (saat === "00:00–07:00") {
-    const geceSayisi = program.filter(v => v === "00:00–07:00").length;
-    if (geceSayisi >= 2 || !personel.gece) return false;
+    const gSay = program.filter(v => v === "00:00–07:00").length;
+    if (gSay >= 2 || !personel.gece) return false;
   }
 
   return true;
@@ -114,8 +94,6 @@ function tabloyuOlustur() {
   saatler.forEach(saat => {
     const sCls = saat.split('–')[0].replace(':', '').replace('DIŞ YAYIN', 'disyayin');
     html += `<tr class="saat-${sCls}"><td><strong>${saat}</strong></td>`;
-    
-    const manuelSaatler = ["12:00–22:00", "DIŞ YAYIN"];
 
     gunler.forEach((_, gIdx) => {
       let hucreContent = "";
@@ -124,8 +102,9 @@ function tabloyuOlustur() {
       birimler.forEach(birim => {
         let kapasite = 1;
         const isSesVeyaTY = (birim === "Ses Operatörü" || birim === "Teknik Yönetmen");
+        const isKJveyaPlayout = (birim === "KJ Operatörü" || birim === "Playout Operatörü");
 
-        // Kapasite ve Atama Şartları
+        // KAPASİTE KURALLARI
         if (birim === "Ses Operatörü") {
           if (haftaSonuMu) {
             if (saat === "06:30–16:00") kapasite = 2;
@@ -139,17 +118,23 @@ function tabloyuOlustur() {
           }
         } else if (birim === "Teknik Yönetmen") {
           if (saat === "06:30–16:00" || saat === "16:00–00:00") kapasite = 2;
-          else if (saat === "00:00–07:00") kapasite = 1; // Her gün 1 kişi
+          else if (saat === "00:00–07:00") kapasite = 1;
           else kapasite = 0;
+        } else if (isKJveyaPlayout) {
+          // YENİ KURAL: KJ ve Playout 12-22, Dış Yayın ve Gece vardiyalarında YOK
+          if (saat === "12:00–22:00" || saat === "00:00–07:00" || saat === "DIŞ YAYIN") {
+            kapasite = 0;
+          }
         }
 
-        let otomatikAtamaAktif = (kapasite > 0);
-        // Hafta içi 09:00 vardiyası TY ve Ses için manuel
-        if (!haftaSonuMu && saat === "09:00–18:00" && isSesVeyaTY) otomatikAtamaAktif = false;
+        // OTOMATİK ATAMA KONTROLÜ
+        let otomatikAktif = (kapasite > 0);
+        // Hafta içi 09:00 Ses ve TY için manuel
+        if (!haftaSonuMu && saat === "09:00–18:00" && isSesVeyaTY) otomatikAktif = false;
 
         let atananlar = [];
 
-        // Zafer Akar Sabitleme
+        // Zafer Akar Sabitliği
         if (birim === "Ses Operatörü" && saat === "06:30–16:00" && !haftaSonuMu) {
           if (uygunlukKontrol({isim: "ZAFER AKAR"}, gIdx, saat)) {
              haftalikProgram["ZAFER AKAR"][gIdx] = saat;
@@ -157,7 +142,7 @@ function tabloyuOlustur() {
           }
         }
 
-        if (otomatikAtamaAktif) {
+        if (otomatikAktif) {
           let adaylar = personeller.filter(p => p.birim === birim && p.isim !== "ZAFER AKAR" && uygunlukKontrol(p, gIdx, saat));
           while(atananlar.length < kapasite && adaylar.length > 0) {
             const secilen = adaylar.splice(Math.floor(Math.random() * adaylar.length), 1)[0];
@@ -166,7 +151,9 @@ function tabloyuOlustur() {
           }
         }
 
-        let gosterilecekKutu = (isSesVeyaTY && (saat === "09:00–18:00" && !haftaSonuMu)) ? 1 : Math.max(kapasite, 1);
+        // Manuel alanlar için boş kutu gösterimi
+        let gosterilecekKutu = otomatikAktif ? Math.max(kapasite, 1) : 1;
+        // Eğer birimin o saatte hiç olmaması kesinse ve manuel bile istenmiyorsa kapasite 0 kalır.
         for(let i=0; i < gosterilecekKutu; i++) {
           let isim = atananlar[i] || "-";
           hucreContent += `<div class="birim-card"><span class="birim-tag">${birim}</span><span class="p-isim">${isim}</span></div>`;
