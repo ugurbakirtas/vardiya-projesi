@@ -25,12 +25,20 @@ const personeller = [
     { isim: "OSMAN DİNÇER", birim: "Ses Operatörü" },
     { isim: "DOĞUŞ MALGIL", birim: "Ses Operatörü" },
     { isim: "ERDOĞAN KÜÇÜKKAYA", birim: "Ses Operatörü" },
+    // Playout Ekibi Güncellendi
     { isim: "SENA MİNARECİ", birim: "Playout Operatörü" },
-    { isim: "PERSONEL 2", birim: "Playout Operatörü" },
-    { isim: "PERSONEL 3", birim: "Playout Operatörü" },
-    { isim: "PERSONEL 4", birim: "Playout Operatörü" },
-    { isim: "PERSONEL 5", birim: "Playout Operatörü" },
+    { isim: "MEHMET TUNÇ", birim: "Playout Operatörü" },
+    { isim: "KADİR ÇAÇAN", birim: "Playout Operatörü" },
+    { isim: "İBRAHİM SERİNSÖZ", birim: "Playout Operatörü" },
+    { isim: "YUSUF ALPKILIÇ", birim: "Playout Operatörü" },
+    { isim: "MUSTAFA ERCÜMENT KILIÇ", birim: "Playout Operatörü" },
+    { isim: "NEHİR KAYGUSUZ", birim: "Playout Operatörü" },
+    // KJ Ekibi
     { isim: "YUSUF İSLAM TORUN", birim: "KJ Operatörü" },
+    { isim: "KJ PERSONEL 2", birim: "KJ Operatörü" },
+    { isim: "KJ PERSONEL 3", birim: "KJ Operatörü" },
+    { isim: "KJ PERSONEL 4", birim: "KJ Operatörü" },
+    { isim: "KJ PERSONEL 5", birim: "KJ Operatörü" },
     { isim: "RAMAZAN KOÇAK", birim: "24TV - 360TV INGEST OPERATÖRÜ" },
     { isim: "Selin", birim: "Uplink" },
     { isim: "VOLKAN DEMİRBAŞ", birim: "24TV-360TV BİLGİ İŞLEM" },
@@ -77,7 +85,7 @@ function tabloyuOlustur() {
         haftalikProgram[p.isim] = isSelected ? Array(7).fill("İZİN") : Array(7).fill(null);
     });
 
-    // --- TEKNİK YÖNETMEN KURALLARI ---
+    // --- TEKNİK YÖNETMEN ---
     let barisGeceler = 0;
     while(barisGeceler < 2) {
         let r = Math.floor(Math.random() * 7);
@@ -94,21 +102,28 @@ function tabloyuOlustur() {
         }
     }
 
-    // --- SES OPERATÖRÜ (ZAFER AKAR) ---
+    // --- SES (ZAFER AKAR) ---
     for(let i=0; i<5; i++) haftalikProgram["ZAFER AKAR"][i] = "06:30–16:00";
     haftalikProgram["ZAFER AKAR"][5] = "İZİN";
     haftalikProgram["ZAFER AKAR"][6] = "İZİN";
 
-    // --- PLAYOUT OPERATÖRÜ (DEĞİŞKEN 09:00 KURALI) ---
+    // --- PLAYOUT (DEĞİŞKEN 09:00) ---
     const playoutEkibi = personeller.filter(p => p.birim === "Playout Operatörü");
-    const degiskenSorumlu = playoutEkibi[Math.floor(Math.random() * playoutEkibi.length)];
-    for(let i=0; i<5; i++) haftalikProgram[degiskenSorumlu.isim][i] = "09:00–18:00";
-    haftalikProgram[degiskenSorumlu.isim][5] = "İZİN";
-    haftalikProgram[degiskenSorumlu.isim][6] = "İZİN";
+    const plSorumlu = playoutEkibi[Math.floor(Math.random() * playoutEkibi.length)];
+    for(let i=0; i<5; i++) haftalikProgram[plSorumlu.isim][i] = "09:00–18:00";
+    haftalikProgram[plSorumlu.isim][5] = "İZİN";
+    haftalikProgram[plSorumlu.isim][6] = "İZİN";
 
-    // Genel İzin Atamaları
+    // --- KJ (DEĞİŞKEN 09:00) ---
+    const kjEkibi = personeller.filter(p => p.birim === "KJ Operatörü");
+    const kjSorumlu = kjEkibi[Math.floor(Math.random() * kjEkibi.length)];
+    for(let i=0; i<5; i++) haftalikProgram[kjSorumlu.isim][i] = "09:00–18:00";
+    haftalikProgram[kjSorumlu.isim][5] = "İZİN";
+    haftalikProgram[kjSorumlu.isim][6] = "İZİN";
+
+    // GENEL İZİN ATAMA
     personeller.forEach(p => {
-        if(["BARIŞ İNCE", "ZAFER AKAR", degiskenSorumlu.isim].includes(p.isim)) return;
+        if(["BARIŞ İNCE", "ZAFER AKAR", plSorumlu.isim, kjSorumlu.isim].includes(p.isim)) return;
         let count = haftalikProgram[p.isim].filter(v => v === "İZİN").length;
         while(count < 2) {
             let r = Math.floor(Math.random() * 7);
@@ -116,7 +131,7 @@ function tabloyuOlustur() {
         }
     });
 
-    // MCR Gece
+    // MCR GECE
     for(let i=0; i<7; i++) {
         planlaZorunlu(i, "24TV MCR OPERATÖRÜ", "00:00–07:00", 1);
         planlaZorunlu(i, "360TV MCR OPERATÖRÜ", "00:00–07:00", 1);
@@ -176,7 +191,7 @@ function hucreIcerikGetir(gun, saat) {
             if (!isHS) { kap = (saat === "06:30–16:00") ? 4 : (saat === "16:00–00:00" ? 2 : 0); }
             else { kap = (["06:30–16:00", "09:00–18:00", "16:00–00:00"].includes(saat)) ? 2 : 0; }
         }
-        else if (birim === "Playout Operatörü") {
+        else if (birim === "Playout Operatörü" || birim === "KJ Operatörü") {
             kap = (["06:30–16:00", "16:00–00:00"].includes(saat)) ? 2 : 0;
         }
         else if (birim.includes("MCR")) { kap = (["06:30–16:00", "16:00–00:00"].includes(saat)) ? 1 : 0; }
