@@ -1,51 +1,39 @@
 :root {
     --primary: #0f172a; --blue: #2563eb; --bg: #f1f5f9; --card-bg: #ffffff; 
-    --text: #1e293b; --border: #e2e8f0; --danger: #ef4444; --success: #22c55e;
-    --hs-bg: #fff1f2;
+    --text: #1e293b; --border: #e2e8f0; --hs-bg: #fff1f2;
 }
 body.dark-mode {
     --primary: #1e293b; --blue: #3b82f6; --bg: #0f172a; --card-bg: #1e293b;
     --text: #f8fafc; --border: #334155; --hs-bg: #451a1a;
 }
 body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); margin: 0; font-size: 11px; }
-
-.main-header { display: flex; justify-content: space-between; align-items: center; background: var(--primary); color: white; padding: 10px 20px; border-radius: 8px; margin: 10px; }
+.app-wrapper { padding: 10px; }
+.main-header { display: flex; justify-content: space-between; align-items: center; background: var(--primary); color: white; padding: 10px 20px; border-radius: 8px; margin-bottom: 10px; }
 .btn-main-action { background: var(--blue); color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 700; cursor: pointer; }
-.btn-circle { background: #334155; color: white; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; }
 
-/* Kapasite Paneli Görsel Düzenleme */
-.kapasite-info { margin-bottom: 15px; font-weight: 600; font-size: 12px; }
-.legend-box { display: inline-block; width: 15px; height: 15px; border-radius: 3px; vertical-align: middle; margin-right: 5px; border: 1px solid var(--border); }
-.legend-box.hi { background: var(--card-bg); }
-.legend-box.hs { background: var(--hs-bg); }
-
-.cap-table-header { display: grid; grid-template-columns: 140px repeat(6, 1fr); gap: 5px; margin-bottom: 10px; text-align: center; font-weight: 800; color: var(--blue); }
+/* Kapasite Paneli */
+.cap-table-header { display: grid; grid-template-columns: 140px repeat(6, 1fr); gap: 5px; margin-bottom: 10px; font-weight: 800; color: var(--blue); text-align: center; }
 .cap-row { display: grid; grid-template-columns: 140px repeat(6, 1fr); gap: 5px; align-items: center; margin-bottom: 5px; padding: 5px; background: rgba(0,0,0,0.02); border-radius: 4px; }
-.cap-row strong { font-size: 10px; text-transform: uppercase; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-
 .cap-input-group { display: flex; flex-direction: column; gap: 2px; }
-.cap-input-group input { width: 100%; text-align: center; border: 1px solid var(--border); border-radius: 3px; background: var(--card-bg); color: var(--text); padding: 4px 0; font-weight: bold; }
-.cap-input-group input.input-hs { background: var(--hs-bg) !important; color: var(--text) !important; }
+.cap-input-group input { width: 100%; text-align: center; border: 1px solid var(--border); border-radius: 3px; font-weight: bold; }
+.input-hs { background: var(--hs-bg) !important; }
 
-/* Checklist ve Tablo */
-.checklist-horizontal-grid { display: flex; flex-wrap: wrap; gap: 8px; padding: 10px; background: var(--card-bg); margin: 10px; border-radius: 8px; border: 1px solid var(--border); }
-.check-item { display: flex; align-items: center; gap: 5px; padding: 5px 10px; background: rgba(0,0,0,0.02); border-radius: 4px; border: 1px solid var(--border); cursor: pointer; font-size: 10px; }
-
-.table-card { background: var(--card-bg); padding: 15px; border-radius: 8px; margin: 10px; }
-.table-responsive { overflow-x: auto; border: 1px solid var(--primary); border-radius: 4px; }
+/* Tablo */
+.table-card { background: var(--card-bg); padding: 15px; border-radius: 8px; }
 table { width: 100%; border-collapse: collapse; min-width: 1100px; }
-th { background: var(--primary); color: white; padding: 8px; font-size: 10px; }
+th { background: var(--primary); color: white; padding: 8px; }
 td { border: 1px solid var(--border); padding: 4px; vertical-align: top; }
-td:first-child { font-weight: 800; background: rgba(0,0,0,0.05); text-align: center; width: 80px; }
-.birim-card { border-left: 3px solid var(--blue); padding: 3px; margin-bottom: 2px; background: rgba(37,99,235,0.05); font-size: 9px; }
-.birim-tag { font-size: 7px; color: var(--blue); font-weight: 800; display: block; }
+td:first-child { font-weight: 800; background: rgba(0,0,0,0.05); text-align: center; }
+.birim-card { border-left: 3px solid var(--blue); padding: 3px; margin-bottom: 2px; background: rgba(37,99,235,0.05); border-radius: 3px; }
+.birim-tag { font-size: 7px; color: var(--blue); font-weight: 800; display: block; text-transform: uppercase; }
 
-/* Admin Overlay */
-.admin-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; z-index: 10000; }
-.admin-modal { background: var(--card-bg); color: var(--text); width: 98%; max-width: 1100px; height: 90vh; border-radius: 12px; display: flex; flex-direction: column; }
-.admin-tabs { display: flex; border-bottom: 1px solid var(--border); padding: 0 20px; }
-.tab-btn { padding: 15px; border: none; background: none; color: var(--text); font-weight: 700; opacity: 0.4; cursor: pointer; }
+/* Genel */
+.hidden { display: none !important; }
+.admin-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 9999; }
+.admin-modal { background: var(--card-bg); width: 95%; max-width: 1100px; height: 85vh; border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; }
+.admin-tabs { display: flex; background: rgba(0,0,0,0.05); }
+.tab-btn { padding: 15px; border: none; background: none; color: var(--text); cursor: pointer; font-weight: 700; opacity: 0.5; }
 .tab-btn.active { opacity: 1; border-bottom: 3px solid var(--blue); }
 .admin-body { flex: 1; padding: 20px; overflow-y: auto; }
-
-.hidden { display: none !important; }
+.checklist-horizontal-grid { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 10px; }
+.check-item { background: var(--card-bg); padding: 4px 8px; border: 1px solid var(--border); border-radius: 4px; font-size: 10px; }

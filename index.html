@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PRO-Vardiya v22.0 | Kapasite Yönetimi</title>
+  <title>PRO-Vardiya v22.0 | Tam Otomatik</title>
   <link rel="stylesheet" href="style.css">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -13,7 +13,7 @@
   <div class="app-wrapper">
     <header class="no-print main-header">
       <div class="logo-area">
-        <div class="badge">V22.0</div>
+        <div class="badge">V22.0 AUTO</div>
         <h1>TEKNİK <span>VARDİYA</span></h1>
         <p id="tarihAraligi" class="date-display">Yükleniyor...</p>
       </div>
@@ -31,25 +31,21 @@
     <div id="adminPanel" class="admin-overlay no-print hidden">
       <div class="admin-modal">
         <div class="admin-header">
-          <h2>Gelişmiş Algoritma Ayarları</h2>
+          <h2>Gelişmiş Algoritma ve Kapasite Yönetimi</h2>
           <button onclick="toggleAdminPanel()" class="btn-close">×</button>
         </div>
         <div class="admin-tabs">
           <button onclick="tabDegistir('kapasite')" class="tab-btn active">Kapasiteler</button>
-          <button onclick="tabDegistir('kurallar')" class="tab-btn">Manuel Kurallar</button>
-          <button onclick="tabDegistir('otomatik')" class="tab-btn">Akıllı Dinlenme</button>
+          <button onclick="tabDegistir('kurallar')" class="tab-btn">Manuel Yasaklar</button>
+          <button onclick="tabDegistir('otomatik')" class="tab-btn">Akıllı Koşullar</button>
         </div>
-
         <div class="admin-body">
           <div id="tab-kapasite" class="tab-content">
              <div class="kapasite-info">
-               <span class="legend-box hi"></span> Hafta İçi Personel Sayısı | <span class="legend-box hs"></span> Hafta Sonu Personel Sayısı
+               <span class="legend-box hi"></span> Hafta İçi | <span class="legend-box hs"></span> Hafta Sonu
              </div>
-             <div class="cap-table-wrapper">
-                <div id="kapasiteListesi"></div>
-             </div>
+             <div id="kapasiteListesi"></div>
           </div>
-
           <div id="tab-kurallar" class="tab-content hidden">
             <div class="kural-form">
               <select id="kuralPersonel"></select>
@@ -62,21 +58,20 @@
               <select id="kuralTip"><option value="YASAK">Yasakla</option><option value="ZORUNLU">Sabitle</option></select>
               <button onclick="kuralKaydet()" class="btn-rule">EKLE</button>
             </div>
-            <div id="aktifKurallarListesi" class="rules-grid"></div>
+            <div id="aktifKurallarListesi"></div>
           </div>
-
           <div id="tab-otomatik" class="tab-content hidden">
             <div class="auto-rules-grid">
               <div class="auto-rule-card">
                 <input type="checkbox" id="rule_geceSonrasiIzin" onchange="autoRuleKaydet()">
-                <label for="rule_geceSonrasiIzin"><strong>Gece Dinlenmesi</strong><span>Ertesi gün yasaklanır.</span></label>
+                <label for="rule_geceSonrasiIzin"><strong>Gece Dinlenmesi</strong><span>Gece çalışan ertesi gün izinli olur.</span></label>
               </div>
               <div class="auto-rule-card">
                 <input type="checkbox" id="rule_pesPeseGece" onchange="autoRuleKaydet()">
-                <label for="rule_pesPeseGece"><strong>Gece Yasağı</strong><span>Max 2 gece ve peş peşe olamaz.</span></label>
+                <label for="rule_pesPeseGece"><strong>Gece Sınırı</strong><span>Max 2 gece ve peş peşe yasağı.</span></label>
               </div>
             </div>
-            <button onclick="sifirla()" class="btn-reset" style="margin-top:20px">SİSTEMİ SIFIRLA</button>
+            <button onclick="sifirla()" class="btn-reset">SİSTEMİ SIFIRLA</button>
           </div>
         </div>
       </div>
@@ -93,6 +88,12 @@
             <tbody id="tableBody"></tbody>
           </table>
         </div>
+        <div id="ozetTablo" class="analysis-section"></div>
+      </div>
+      <div class="footer-buttons no-print">
+          <button onclick="whatsappMesajiOlustur()" class="wa-btn">WhatsApp</button>
+          <button onclick="exportExcel()" class="ex-btn">Excel</button>
+          <button onclick="exportPDF()" class="pdf-btn">PDF</button>
       </div>
     </main>
   </div>
