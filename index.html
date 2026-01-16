@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PRO-Vardiya v16.9 | Optimized Layout</title>
+  <title>PRO-Vardiya v17.0 | Kapasite Yönetimi</title>
   <link rel="stylesheet" href="style.css">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -13,7 +13,7 @@
   <div class="app-wrapper">
     <header class="no-print main-header">
       <div class="logo-area">
-        <div class="badge">V16.9 CORE</div>
+        <div class="badge">V17.0 DİNAMİK</div>
         <h1>TEKNİK <span>VARDİYA</span></h1>
         <p id="tarihAraligi" class="date-display">Yükleniyor...</p>
       </div>
@@ -40,24 +40,28 @@
     </section>
 
     <section id="adminPanel" class="admin-panel no-print hidden">
-      <div class="admin-card">
+      <div class="admin-card-large">
         <div class="admin-header">
-          <h3>Sistem Yönetimi</h3>
+          <h3>Kapasite & Personel Yönetimi</h3>
           <button onclick="toggleAdminPanel()" class="btn-close">×</button>
         </div>
-        <div class="admin-body">
-          <div class="input-group">
-            <label>Yeni Birim</label>
-            <input type="text" id="yeniBirim" placeholder="Örn: REJİ">
-            <button onclick="birimEkle()" class="btn-save">Birim Ekle</button>
+        <div class="admin-content-grid">
+          <div class="admin-sub-box">
+             <h4>Personel/Birim Ekle</h4>
+             <input type="text" id="yeniBirim" placeholder="Yeni Birim Adı">
+             <button onclick="birimEkle()" class="btn-save">Birim Ekle</button>
+             <hr>
+             <input type="text" id="yeniIsim" placeholder="Personel Ad Soyad">
+             <select id="birimSec"></select>
+             <button onclick="personelEkle()" class="btn-save">Personel Kaydet</button>
+             <button onclick="sifirla()" class="btn-reset-danger" style="margin-top:20px">Tüm Ayarları Sıfırla</button>
           </div>
-          <div class="input-group">
-            <label>Yeni Personel</label>
-            <input type="text" id="yeniIsim" placeholder="İsim Soyad">
-            <select id="birimSec"></select>
-            <button onclick="personelEkle()" class="btn-save">Kaydet</button>
+          
+          <div class="admin-sub-box capacity-manager">
+             <h4>Birim Bazlı Personel Sayıları (Vardiya Başına)</h4>
+             <p><small>* Hafta içi ve Hafta sonu için vardiyada kaç kişi olacağını belirleyin. 0 yazarsanız o vardiya kapanır.</small></p>
+             <div id="kapasiteAyarlari" class="capacity-scroll"></div>
           </div>
-          <button onclick="sifirla()" class="btn-reset-danger">Sistemi Sıfırla</button>
         </div>
       </div>
     </section>
@@ -70,16 +74,10 @@
             <tbody id="tableBody"></tbody>
           </table>
         </div>
-        
         <div class="analysis-section">
-          <div class="analysis-header">📊 Haftalık Kapasite & Mesai Analizi</div>
+          <div class="analysis-header">📊 Haftalık Analiz</div>
           <div id="ozetTablo"></div>
         </div>
-      </div>
-
-      <div class="bottom-actions no-print">
-          <button onclick="exportExcel()" class="btn-export ex">Excel İndir</button>
-          <button onclick="exportPDF()" class="btn-export pdf">PDF Kaydet</button>
       </div>
     </main>
   </div>

@@ -1,67 +1,34 @@
-:root {
-    --primary: #0f172a; --blue: #2563eb; --blue-dark: #1d4ed8;
-    --success: #10b981; --danger: #ef4444; --warning: #f59e0b;
-    --bg: #f1f5f9; --card-bg: #ffffff; --text: #1e293b; --border: #e2e8f0;
-}
-.dark-mode {
-    --primary: #020617; --bg: #0f172a; --card-bg: #1e293b; --text: #f1f5f9; --border: #334155;
-}
+/* v17.0 Ek Tasarımlar */
+.admin-card-large { background: white; width: 90%; max-width: 1000px; border-radius: 20px; padding: 25px; max-height: 90vh; overflow: hidden; display: flex; flex-direction: column; }
+.admin-content-grid { display: grid; grid-template-columns: 300px 1fr; gap: 20px; overflow: hidden; }
+.admin-sub-box { border: 1px solid #eee; padding: 15px; border-radius: 12px; overflow-y: auto; }
+.capacity-manager h4 { color: var(--blue); margin-top: 0; }
+.capacity-scroll { max-height: 500px; overflow-y: auto; }
 
-body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); margin: 0; font-size: 12px; }
-.app-wrapper { padding: 15px; max-width: 100%; margin: 0 auto; }
+.cap-row { display: grid; grid-template-columns: 150px repeat(6, 1fr); gap: 5px; align-items: center; margin-bottom: 10px; padding-bottom: 5px; border-bottom: 1px solid #f0f0f0; }
+.cap-row label { font-size: 10px; font-weight: 700; }
+.cap-input-group { text-align: center; }
+.cap-input-group span { display: block; font-size: 8px; font-weight: 600; color: #666; }
+.cap-input-group input { width: 35px; padding: 3px; border: 1px solid #ccc; border-radius: 4px; text-align: center; font-weight: 700; }
 
-/* Header */
-.main-header { 
-    display: flex; justify-content: space-between; align-items: center; 
-    background: var(--primary); color: white; padding: 15px 25px; 
-    border-radius: 15px; margin-bottom: 15px; 
-}
-.logo-area h1 { margin: 0; font-size: 18px; }
-.logo-area h1 span { color: var(--blue); }
-.badge { background: var(--blue); font-size: 8px; padding: 2px 6px; border-radius: 4px; display: inline-block; }
+.btn-save { background: var(--blue); color: white; border: none; padding: 8px; border-radius: 6px; width: 100%; margin-top: 5px; cursor: pointer; }
+.btn-reset-danger { background: #fee2e2; color: #b91c1c; border: 1px solid #f87171; width: 100%; padding: 10px; border-radius: 8px; cursor: pointer; }
 
-/* Checklist - Yatay Düzenleme */
-.checklist-section { margin-bottom: 15px; }
-.section-header-compact { display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; background: #f8fafc; border-bottom: 1px solid var(--border); }
-.section-header-compact h3 { margin: 0; font-size: 14px; }
-#personelAra { padding: 5px 12px; border-radius: 6px; border: 1px solid var(--border); width: 250px; }
-
-.checklist-horizontal-grid { 
-    display: grid; 
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); 
-    gap: 10px; 
-    padding: 15px; 
-    max-height: 250px; 
-    overflow-y: auto; 
-    background: var(--card-bg);
-}
-.check-item { 
-    display: flex; align-items: center; 
-    background: #f8fafc; border: 1px solid var(--border); 
-    padding: 8px; border-radius: 8px; cursor: pointer; font-size: 11px;
-}
-.check-item input { margin-right: 8px; accent-color: var(--blue); }
-.birim-label { display: block; font-size: 9px; color: var(--blue); font-weight: 700; }
-
-/* Tablo Alanı */
-.table-card { background: var(--card-bg); border-radius: 12px; padding: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-.table-responsive { overflow-x: auto; border: 2px solid var(--primary); border-radius: 8px; }
+/* Mevcut diğer stiller (v16.9'daki gibi devam eder...) */
+:root { --primary: #0f172a; --blue: #2563eb; --bg: #f1f5f9; --card-bg: #ffffff; --text: #1e293b; --border: #e2e8f0; --danger: #ef4444; }
+body { font-family: 'Poppins', sans-serif; background: var(--bg); margin: 0; }
+.app-wrapper { padding: 15px; }
+.main-header { display: flex; justify-content: space-between; align-items: center; background: var(--primary); color: white; padding: 15px 25px; border-radius: 15px; margin-bottom: 15px; }
+.checklist-horizontal-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; padding: 15px; max-height: 200px; overflow-y: auto; background: #fff; border: 1px solid #ddd; border-radius: 10px; }
+.check-item { display: flex; align-items: center; background: #f8fafc; border: 1px solid var(--border); padding: 8px; border-radius: 8px; cursor: pointer; font-size: 11px; }
+.check-item input { margin-right: 8px; }
+.table-responsive { overflow-x: auto; border: 2px solid var(--primary); border-radius: 8px; background: white; }
 table { width: 100%; border-collapse: collapse; min-width: 1300px; }
-th { background: var(--primary); color: white; padding: 10px; font-size: 11px; }
+th { background: var(--primary); color: white; padding: 10px; }
 td { border: 1px solid var(--border); padding: 6px; vertical-align: top; }
-td:first-child { background: #f1f5f9; font-weight: 800; text-align: center; border-right: 3px solid var(--primary); width: 100px; }
-
-.birim-card { background: #fff; border-left: 4px solid var(--blue); padding: 5px; margin-bottom: 4px; border: 1px solid #e2e8f0; border-radius: 4px; }
-.birim-tag { font-size: 8px; font-weight: 800; color: var(--blue); text-transform: uppercase; }
-.p-isim { font-size: 11px; font-weight: 700; color: #334155; }
-
-/* Buton İyileştirmeleri */
-.btn-step { background: white; border: 1px solid #000; color: black; padding: 8px 15px; border-radius: 8px; font-weight: 700; cursor: pointer; }
-.btn-main-action { background: var(--blue); color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 700; cursor: pointer; }
-
-/* Admin Modalı */
-.admin-panel { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 2000; }
-.admin-card { background: white; width: 450px; border-radius: 15px; padding: 20px; }
+td:first-child { background: #f1f5f9; font-weight: 800; text-align: center; width: 100px; }
+.birim-card { border-left: 4px solid var(--blue); padding: 5px; margin-bottom: 4px; border: 1px solid #e2e8f0; border-radius: 4px; }
+.birim-tag { font-size: 8px; font-weight: 800; color: var(--blue); display: block; }
+.p-isim { font-size: 11px; font-weight: 700; }
 .hidden { display: none !important; }
-
-.uyari-mesai { background: var(--danger); color: white; padding: 2px 8px; border-radius: 10px; font-size: 10px; }
+.admin-panel { position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 2000; }
