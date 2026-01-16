@@ -1,64 +1,61 @@
-let personeller = ["Ahmet", "Ayşe", "Mehmet", "Zeynep", "Ali"];
-const vardiyalar = ["Sabah", "Akşam", "Gece"];
+const personeller = [
+  { isim: "Ahmet", bolum: "Güvenlik", gece: true, sonIzin: 0 },
+  { isim: "Ayşe", bolum: "Muhasebe", gece: false, sonIzin: 0 },
+  { isim: "Mehmet", bolum: "IT", gece: true, sonIzin: 0 },
+  { isim: "Zeynep", bolum: "Güvenlik", gece: true, sonIzin: 0 },
+  { isim: "Ali", bolum: "Muhasebe", gece: false, sonIzin: 0 },
+  { isim: "Selin", bolum: "IT", gece: true, sonIzin: 0 }
+];
 
-function rastgeleVardiya() {
-  return vardiyalar[Math.floor(Math.random() * vardiyalar.length)];
+const bolumler = [
+  { isim: "Güvenlik", gece: true },
+  { isim: "Muhasebe", gece: false },
+  { isim: "IT", gece: true }
+];
+
+const gunler = ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"];
+
+function haftalikVardiyaOlustur() {
+  const hafta = [];
+  for (let gun = 1; gun <= 7; gun++) {
+    const gunluk = {};
+    bolumler.forEach(bolum => {
+      let uygunlar = personeller.filter(p =>
+        p.bolum === bolum.isim &&
+        (!bolum.gece || p.gece) &&
+        (gun - p.sonIzin <= 5)
+      );
+      if (uygunlar.length > 0) {
+        const secilen = uygunlar[Math.floor(Math.random() * uygunlar.length)];
+        gunluk[bolum.isim] = secilen.isim;
+        secilen.sonIzin = gun;
+      } else {
+        gunluk[bolum.isim] = "İzin";
+      }
+    });
+    hafta.push(gunluk);
+  }
+  return hafta;
 }
 
-function tabloyuGuncelle() {
+function tabloyuYazdir() {
   const tbody = document.querySelector("#vardiyaTablosu tbody");
-  tbody.innerHTML = "";
+  const vardiyaListesi = haftalikVardiyaOlustur();
 
-  personeller.forEach(personel => {
+  vardiyaListesi.forEach((gunluk, index) => {
     const tr = document.createElement("tr");
-    const tdIsim = document.createElement("td");
-    tdIsim.textContent = personel;
-    tr.appendChild(tdIsim);
+    const tdGun = document.createElement("td");
+    tdGun.textContent = gunler[index];
+    tr.appendChild(tdGun);
 
-    for (let i = 0; i < 5; i++) {
+    bolumler.forEach(bolum => {
       const td = document.createElement("td");
-      td.textContent = rastgeleVardiya();
+      td.textContent = gunluk[bolum.isim];
       tr.appendChild(td);
-    }
+    });
 
     tbody.appendChild(tr);
   });
 }
 
-document.querySelector("#personelForm").addEventListener("submit", function(e) {
-  e.preventDefault();
-  const yeniPersonel = document.querySelector("#personelInput").value.trim();
-  if (yeniPersonel) {
-    personeller.push(yeniPersonel);
-    document.querySelector("#personelInput").value = "";
-    tabloyuGuncelle();
-  }
-});
-
-// Excel çıktısı
-document.querySelector("#excelBtn").addEventListener("click", () => {
-  const table = document.getElementById("vardiyaTablosu");
-  const wb = XLSX.utils.table_to_book(table, {sheet:"Vardiya"});
-  XLSX.writeFile(wb, "vardiya-listesi.xlsx");
-});
-
-// PDF çıktısı
-document.querySelector("#pdfBtn").addEventListener("click", () => {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-  doc.text("Personel Vardiya Listesi", 10, 10);
-
-  let y = 20;
-  personeller.forEach(personel => {
-    let satir = personel;
-    for (let i = 0; i < 5; i++) {
-      satir += " | " + rastgeleVardiya();
-    }
-    doc.text(satir, 10, y);
-    y += 10;
-  });
-
-  doc.save("vardiya-listesi.pdf");
-});
-
-tabloyuGuncelle();
+tabloyuYazdir();

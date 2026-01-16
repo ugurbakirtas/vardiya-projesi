@@ -1,7 +1,7 @@
 body {
   font-family: Arial, sans-serif;
   text-align: center;
-  background: #f9f9f9;
+  background: #f0f0f0;
 }
 
 h2 {
@@ -9,25 +9,9 @@ h2 {
   color: #333;
 }
 
-form {
-  margin: 20px;
-}
-
-input {
-  padding: 8px;
-  font-size: 14px;
-}
-
-button {
-  padding: 8px 12px;
-  font-size: 14px;
-  margin-left: 5px;
-  cursor: pointer;
-}
-
 table {
   border-collapse: collapse;
-  width: 80%;
+  width: 90%;
   margin: 20px auto;
   background: #fff;
   box-shadow: 0 0 10px rgba(0,0,0,0.1);
