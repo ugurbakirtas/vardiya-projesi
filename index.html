@@ -2,13 +2,20 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <title>01 - 07 Aralık 2026 Teknik Personel Çalışma Listesi</title>
+  <title>Teknik Personel Vardiya Yönetimi</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h2>01 - 07 Aralık 2026 Teknik Personel Çalışma Listesi</h2>
-  <p style="color: #d9534f; font-weight: bold; font-size: 14px;">⚠️ Hücrelere tıklayarak isimleri manuel değiştirebilirsiniz.</p>
-  <button id="excelBtn">📥 Excel Olarak İndir</button>
+  <div class="header-container">
+    <h2>Teknik Personel Vardiya Çizelgesi</h2>
+    <p>01 - 07 Aralık 2026</p>
+    <div class="controls">
+      <button id="excelBtn" class="btn-success">📥 Excel İndir</button>
+      <button onclick="window.print()" class="btn-primary">🖨️ Yazdır (PDF)</button>
+      <button onclick="location.reload()" class="btn-warning">🔄 Listeyi Yeniden Oluştur</button>
+    </div>
+  </div>
+
   <div id="tablolar"></div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
