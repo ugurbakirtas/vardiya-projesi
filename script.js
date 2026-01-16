@@ -41,9 +41,12 @@ let haftalikProgram = {};
 function programiSifirla() {
   haftalikProgram = {};
   personeller.forEach(p => { haftalikProgram[p.isim] = Array(7).fill(null); });
+  
+  // Sabit Kurallar (Zafer Akar)
   haftalikProgram["ZAFER AKAR"][5] = "İZİN";
   haftalikProgram["ZAFER AKAR"][6] = "İZİN";
 
+  // Önce rastgele izinleri dağıt (Haftalık 2 gün)
   gunler.forEach((_, gIdx) => {
     birimler.forEach(birim => {
       let adaylar = personeller.filter(p => p.birim === birim);
@@ -71,9 +74,16 @@ function programiSifirla() {
 function uygunlukKontrol(personel, gunIdx, saat, oncekiHaftaVerisi) {
   const isim = personel.isim;
   const program = haftalikProgram[isim];
-  if (isim === "ZAFER AKAR" && gunIdx < 5 && saat !== "06:30–16:00") return false;
+
+  // Zafer Akar Kontrolü
+  if (isim === "ZAFER AKAR") {
+    if (gunIdx < 5 && saat !== "06:30–16:00") return false;
+    if (gunIdx >= 5) return false;
+  }
+
   if (program[gunIdx] !== null) return false;
 
+  // Vardiya Geçiş Kontrolü (11 Saat Kuralı)
   if (gunIdx === 0 && oncekiHaftaVerisi?.[isim]) {
     const pz = oncekiHaftaVerisi[isim][6];
     if (saat === "06:30–16:00" && (pz === "16:00–00:00" || pz === "00:00–07:00")) return false;
@@ -82,30 +92,13 @@ function uygunlukKontrol(personel, gunIdx, saat, oncekiHaftaVerisi) {
     if (saat === "06:30–16:00" && (dun === "16:00–00:00" || dun === "00:00–07:00")) return false;
   }
 
+  // Gece Vardiyası Sınırı (Haftada maks 2)
   if (saat === "00:00–07:00") {
-    if (program.filter(v => v === "00:00–07:00").length >= 2 || !personel.gece) return false;
+    const geceSayisi = program.filter(v => v === "00:00–07:00").length;
+    if (geceSayisi >= 2 || !personel.gece) return false;
   }
-  return true;
-}
 
-function ozetTabloGuncelle() {
-  let html = `<table class='ozet-tablo'><thead><tr><th>Personel</th><th>Birim</th><th>Çalıştığı Gün</th><th>İzinli Gün</th><th>Gece Vardiyası</th></tr></thead><tbody>`;
-  
-  personeller.forEach(p => {
-    const calisma = haftalikProgram[p.isim].filter(v => v && v !== "İZİN").length;
-    const izin = haftalikProgram[p.isim].filter(v => v === "İZİN").length;
-    const gece = haftalikProgram[p.isim].filter(v => v === "00:00–07:00").length;
-    
-    html += `<tr>
-      <td><strong>${p.isim}</strong></td>
-      <td>${p.birim}</td>
-      <td>${calisma} Gün</td>
-      <td>${izin} Gün</td>
-      <td><span class="${gece > 0 ? 'badge-gece' : ''}">${gece} Gece</span></td>
-    </tr>`;
-  });
-  html += `</tbody></table>`;
-  document.getElementById("ozetTablo").innerHTML = html;
+  return true;
 }
 
 function tabloyuOlustur(devirModu = false) {
@@ -119,7 +112,7 @@ function tabloyuOlustur(devirModu = false) {
 
   programiSifirla();
   const container = document.getElementById("tablolar");
-  let html = `<table><thead><tr><th>Vardiya</th>${gunler.map(g => `<th>${g}</th>`).join('')}</tr></thead><tbody>`;
+  let html = `<table><thead><tr><th>Saat / Gün</th>${gunler.map(g => `<th>${g}</th>`).join('')}</tr></thead><tbody>`;
 
   saatler.forEach(saat => {
     const sCls = saat.split('–')[0].replace(':', '').replace('DIŞ YAYIN', 'disyayin');
@@ -128,27 +121,34 @@ function tabloyuOlustur(devirModu = false) {
     gunler.forEach((_, gIdx) => {
       let hucreContent = "";
       const haftaSonuMu = (gIdx >= 5);
+
       birimler.forEach(birim => {
         let kapasite = 0;
-        const isSesVeyaTY = (birim === "Ses Operatörü" || birim === "Teknik Yönetmen");
         
-        if (birim === "Ses Operatörü") {
+        // --- KAPASİTE MANTIĞI ---
+        if (birim === "Teknik Yönetmen") {
+          if (saat === "00:00–07:00") kapasite = 1; // HER GECE 1 KİŞİ (Düzeltildi)
+          else if (saat === "06:30–16:00" || saat === "16:00–00:00") kapasite = 2;
+        } 
+        else if (birim === "Ses Operatörü") {
           if (haftaSonuMu) {
             if (["06:30–16:00", "09:00–18:00", "16:00–00:00"].includes(saat)) kapasite = 2;
           } else {
             if (saat === "06:30–16:00") kapasite = 4;
             else if (saat === "16:00–00:00") kapasite = 2;
           }
-        } else if (birim === "Teknik Yönetmen") {
-          if (["06:30–16:00", "16:00–00:00"].includes(saat)) kapasite = 2;
-          else if (saat === "00:00–07:00") kapasite = 1;
-        } else if (!["KJ Operatörü", "Playout Operatörü"].includes(birim)) {
-           if (!["12:00–22:00", "00:00–07:00", "DIŞ YAYIN"].includes(saat)) kapasite = 1;
-        } else if (["KJ Operatörü", "Playout Operatörü"].includes(birim)) {
-           if (!["12:00–22:00", "00:00–07:00", "DIŞ YAYIN"].includes(saat)) kapasite = 1;
+        } 
+        else { // Diğer Birimler (KJ, Playout, Ingest, Uplink)
+          const isKisli = ["KJ Operatörü", "Playout Operatörü"].includes(birim);
+          if (isKisli) {
+            if (!["12:00–22:00", "00:00–07:00", "DIŞ YAYIN"].includes(saat)) kapasite = 1;
+          } else {
+            if (saat === "06:30–16:00") kapasite = 1;
+          }
         }
 
         let atananlar = [];
+        // Zafer Akar Sabitleme
         if (birim === "Ses Operatörü" && saat === "06:30–16:00" && !haftaSonuMu) {
           if (uygunlukKontrol({isim: "ZAFER AKAR"}, gIdx, saat, devirModu ? oncekiHaftaVerisi : null)) {
              haftalikProgram["ZAFER AKAR"][gIdx] = saat;
@@ -156,6 +156,7 @@ function tabloyuOlustur(devirModu = false) {
           }
         }
 
+        // Otomatik Atama
         if (kapasite > 0) {
           let adaylar = personeller.filter(p => p.birim === birim && p.isim !== "ZAFER AKAR" && uygunlukKontrol(p, gIdx, saat, devirModu ? oncekiHaftaVerisi : null));
           while(atananlar.length < kapasite && adaylar.length > 0) {
@@ -165,7 +166,13 @@ function tabloyuOlustur(devirModu = false) {
           }
         }
 
-        let kutuSayisi = Math.max(kapasite, 1);
+        // Görselleştirme (Birim başına en az 1 kutu veya kapasite kadar)
+        let kutuSayisi = (birim === "Teknik Yönetmen" && saat === "09:00–18:00") ? 1 : Math.max(kapasite, 0);
+        // Ses ve TY için 09:00 vardiyası hafta içi manuel kalsın diye 1 boş kutu
+        if (!haftaSonuMu && saat === "09:00–18:00" && ["Ses Operatörü", "Teknik Yönetmen"].includes(birim)) {
+            kutuSayisi = 1;
+        }
+
         for(let i=0; i < kutuSayisi; i++) {
           let isim = atananlar[i] || "-";
           hucreContent += `<div class="birim-card"><span class="birim-tag">${birim}</span><span class="p-isim">${isim}</span></div>`;
@@ -176,6 +183,7 @@ function tabloyuOlustur(devirModu = false) {
     html += `</tr>`;
   });
 
+  // İZİN SATIRI
   html += `<tr class="saat-izin-row"><td><strong>İZİN</strong></td>`;
   gunler.forEach((_, gIdx) => {
     let izinIcerik = "";
@@ -191,6 +199,18 @@ function tabloyuOlustur(devirModu = false) {
   localStorage.setItem(storageKey, JSON.stringify(haftalikProgram));
   ozetTabloGuncelle();
   document.querySelectorAll("td.editable").forEach(td => td.addEventListener("input", cakismaKontroluYap));
+}
+
+function ozetTabloGuncelle() {
+  let html = `<table class='ozet-tablo'><thead><tr><th>Personel</th><th>Birim</th><th>Mesai (Gün)</th><th>İzin (Gün)</th><th>Gece Vardiyası</th></tr></thead><tbody>`;
+  personeller.forEach(p => {
+    const calisma = haftalikProgram[p.isim].filter(v => v && v !== "İZİN").length;
+    const izin = haftalikProgram[p.isim].filter(v => v === "İZİN").length;
+    const gece = haftalikProgram[p.isim].filter(v => v === "00:00–07:00").length;
+    html += `<tr><td><strong>${p.isim}</strong></td><td>${p.birim}</td><td>${calisma}</td><td>${izin}</td><td><span class="${gece > 0 ? 'badge-gece' : ''}">${gece} Gece</span></td></tr>`;
+  });
+  html += `</tbody></table>`;
+  document.getElementById("ozetTablo").innerHTML = html;
 }
 
 function cakismaKontroluYap() {
@@ -214,7 +234,7 @@ function cakismaKontroluYap() {
 document.getElementById("prevWeek").onclick = () => { mevcutPazartesi.setDate(mevcutPazartesi.getDate() - 7); tabloyuOlustur(false); };
 document.getElementById("sonrakiHaftaBtn").onclick = () => { mevcutPazartesi.setDate(mevcutPazartesi.getDate() + 7); tabloyuOlustur(true); };
 document.getElementById("yeniListeBtn").onclick = () => { tabloyuOlustur(false); };
-document.getElementById("temizleBtn").onclick = () => { if(confirm("Tüm kayıtlar silinecek. Emin misiniz?")) { localStorage.clear(); location.reload(); } };
+document.getElementById("temizleBtn").onclick = () => { if(confirm("Tüm kayıtlar silinecek?")) { localStorage.clear(); location.reload(); } };
 document.getElementById("excelBtn").onclick = () => { XLSX.writeFile(XLSX.utils.table_to_book(document.querySelector("table")), `Vardiya_${tarihFormatla(mevcutPazartesi)}.xlsx`); };
 
 window.onload = () => { tabloyuOlustur(false); };

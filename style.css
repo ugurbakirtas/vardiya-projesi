@@ -10,9 +10,9 @@ th { background: #2c3e50; color: white; font-weight: 500; text-transform: upperc
 .birim-tag { display: block; font-size: 10px; color: #6c757d; font-weight: bold; margin-bottom: 2px; }
 .p-isim { font-weight: 700; color: #2d3436; }
 tr.saat-0630 { background-color: #fffafa; }
-tr.saat-0000 { background-color: #f8f0fb; }
+tr.saat-0000 { background-color: #f8f0fb; } /* Gece vardiyası rengi */
 tr.saat-izin-row { background-color: #f1f3f5; font-weight: bold; }
-.conflict { background-color: #ffeb3b !important; border: 2px solid #f44336 !important; }
+.conflict { background-color: #fff9c4 !important; border: 2px solid #f44336 !important; }
 .ozet-konteyner { margin-top: 40px; padding: 20px; background: white; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
 .ozet-tablo { width: 100%; font-size: 13px; }
 .badge-gece { background: #6f42c1; color: white; padding: 2px 6px; border-radius: 10px; font-size: 10px; }
