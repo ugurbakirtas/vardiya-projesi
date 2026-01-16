@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PRO-Vardiya v11.0 | Profesyonel Yönetim</title>
+  <title>PRO-Vardiya v11.1 | Tam Sürüm</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -12,7 +12,7 @@
   <div class="app-wrapper">
     <header class="no-print">
       <div class="header-top">
-        <h1>TEKNİK VARDİYA <span>v11.0 PRO</span></h1>
+        <h1>TEKNİK VARDİYA <span>v11.1</span></h1>
         <button onclick="toggleDarkMode()" class="btn-theme" id="themeBtn">🌙 Koyu Mod</button>
       </div>
       <div class="nav-row">
@@ -22,7 +22,7 @@
       </div>
       <div class="action-row">
           <button onclick="tabloyuOlustur()" class="btn-primary">⚡ Otomatik Planla</button>
-          <button onclick="togglePanel('personelPanel')" class="btn-admin">⚙️ Personel & Sabit Vardiya</button>
+          <button onclick="togglePanel('personelPanel')" class="btn-admin">⚙️ Personel & Ayarlar</button>
       </div>
     </header>
 
@@ -35,7 +35,7 @@
     <section id="personelPanel" class="admin-panel no-print hidden">
         <div class="panel-grid">
             <div class="panel-box">
-                <h3>Personel ve Sabit Vardiya</h3>
+                <h3>Personel Yönetimi</h3>
                 <div class="add-form">
                     <input type="text" id="pIsim" placeholder="Ad Soyad">
                     <select id="pBirim"></select>
@@ -51,15 +51,15 @@
                 <div id="manageList" class="manage-list"></div>
             </div>
             <div class="panel-box">
-                <h3>Günlük Notlar</h3>
+                <h3>Haftalık Notlar</h3>
                 <div id="notesForm" class="notes-grid"></div>
-                <button onclick="notlariKaydet()" class="btn-primary" style="width:100%; margin-top:10px;">Kaydet</button>
+                <button onclick="notlariKaydet()" class="btn-primary" style="width:100%; margin-top:10px;">Notları Kaydet</button>
             </div>
         </div>
     </section>
 
     <section class="checklist-section no-print">
-      <h3>İzinlileri Seçin</h3>
+      <h3>İzinli Personeli İşaretle</h3>
       <div id="personelChecklist" class="checklist-grid"></div>
     </section>
 
@@ -73,7 +73,7 @@
       </div>
       
       <div class="stats-section">
-          <h3>Haftalık Adalet ve Mesai Analizi</h3>
+          <h3>Haftalık Analiz ve İstatistikler</h3>
           <div id="ozetTablo"></div>
       </div>
     </main>
