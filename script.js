@@ -1,13 +1,55 @@
+const gunler = ["Pazartesi","Salı","Çarşamba","Perşembe","Cuma","Cumartesi","Pazar"];
+
+const saatler = [
+  "06:30–16:00","06:30–16:00","06:30–16:00","06:30–16:00",
+  "09:00–18:00",
+  "12:00–22:00",
+  "16:00–00:00","16:00–00:00","16:00–00:00",
+  "00:00–07:00","00:00–07:00",
+  "İZİN","İZİN","İZİN",
+  "DIŞ YAYIN","DIŞ YAYIN","DIŞ YAYIN"
+];
+
+const birimler = [
+  "Teknik Yönetmen",
+  "Ses Operatörü",
+  "Playout Operatörü",
+  "KJ Operatörü",
+  "Ingest Operatörü",
+  "Uplink"
+];
+
+// Personel listesi (senin verdiğin isimler burada olacak)
+const personeller = [ 
+  { isim:"YUNUS EMRE YAYLA", birim:"Teknik Yönetmen", gece:true },
+  { isim:"HASAN CAN SAĞLAM", birim:"Teknik Yönetmen", gece:true },
+  { isim:"MEHMET BERKMAN", birim:"Teknik Yönetmen", gece:true },
+  { isim:"EKREM FİDAN", birim:"Teknik Yönetmen", gece:true },
+  { isim:"CAN ŞENTUNALI", birim:"Teknik Yönetmen", gece:true },
+  { isim:"BARIŞ İNCE", birim:"Teknik Yönetmen", gece:true },
+  // ... diğer birim personelleri ...
+];
+
 function uygunPersonelTeknikYonetmen(saat, gunIndex) {
   const geceMi = saat === "00:00–07:00";
   const sabahMi = saat === "06:30–16:00";
   const aksamMi = saat === "16:00–00:00";
 
   let uygunlar = personeller.filter(p => p.birim === "Teknik Yönetmen" && (!geceMi || p.gece));
-
   if (uygunlar.length === 0) return "İZİN";
 
-  // Pazartesi–Cuma sabah vardiyası → 2 kişi
+  if (!uygunPersonelTeknikYonetmen.geceSayaci) uygunPersonelTeknikYonetmen.geceSayaci = {};
+
+  // Gece vardiyası → tek kişi, max 2 gece
+  if (geceMi) {
+    uygunlar = uygunlar.filter(p => (uygunPersonelTeknikYonetmen.geceSayaci[p.isim] || 0) < 2);
+    if (uygunlar.length === 0) return "İZİN";
+    const secilen = uygunlar[Math.floor(Math.random() * uygunlar.length)];
+    uygunPersonelTeknikYonetmen.geceSayaci[secilen.isim] = (uygunPersonelTeknikYonetmen.geceSayaci[secilen.isim] || 0) + 1;
+    return secilen.isim;
+  }
+
+  // Sabah vardiyası → Pazartesi–Cuma 2 kişi
   if (sabahMi && gunIndex < 5) {
     if (uygunlar.length < 2) return uygunlar.map(u => u.isim).join(", ");
     const secilenler = [];
@@ -28,17 +70,6 @@ function uygunPersonelTeknikYonetmen(saat, gunIndex) {
       if (!secilenler.includes(secilen.isim)) secilenler.push(secilen.isim);
     }
     return secilenler.join(", ");
-  }
-
-  // Gece vardiyası → tek kişi, maksimum 2 gece
-  if (geceMi) {
-    // Gece sayacı tutalım
-    if (!uygunPersonelTeknikYonetmen.geceSayaci) uygunPersonelTeknikYonetmen.geceSayaci = {};
-    uygunlar = uygunlar.filter(p => (uygunPersonelTeknikYonetmen.geceSayaci[p.isim] || 0) < 2);
-    if (uygunlar.length === 0) return "İZİN";
-    const secilen = uygunlar[Math.floor(Math.random() * uygunlar.length)];
-    uygunPersonelTeknikYonetmen.geceSayaci[secilen.isim] = (uygunPersonelTeknikYonetmen.geceSayaci[secilen.isim] || 0) + 1;
-    return secilen.isim;
   }
 
   // Diğer saatlerde → tek kişi
@@ -72,25 +103,4 @@ function tabloyuOlustur() {
     thead.appendChild(trHead);
     table.appendChild(thead);
 
-    const tbody = document.createElement("tbody");
-    saatler.forEach((saat, sIndex) => {
-      const tr = document.createElement("tr");
-      const tdSaat = document.createElement("td");
-      tdSaat.textContent = saat;
-      tr.appendChild(tdSaat);
-
-      gunler.forEach((gun, gIndex) => {
-        const td = document.createElement("td");
-        td.classList.add("editable");
-        td.textContent = uygunPersonel(birim, saat, gIndex);
-        td.addEventListener("click", () => elleDegistir(td));
-        tr.appendChild(td);
-      });
-
-      tbody.appendChild(tr);
-    });
-
-    table.appendChild(tbody);
-    container.appendChild(table);
-  });
-}
+    const tbody = document.createElement("
