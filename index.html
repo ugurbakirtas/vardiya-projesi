@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PRO-Vardiya v17.0 | Kapasite Yönetimi</title>
+  <title>PRO-Vardiya v17.5 | Full Control</title>
   <link rel="stylesheet" href="style.css">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -13,58 +13,57 @@
   <div class="app-wrapper">
     <header class="no-print main-header">
       <div class="logo-area">
-        <div class="badge">V17.0 DİNAMİK</div>
+        <div class="badge">V17.5 PREMIUM</div>
         <h1>TEKNİK <span>VARDİYA</span></h1>
         <p id="tarihAraligi" class="date-display">Yükleniyor...</p>
       </div>
       <div class="nav-controls">
         <button onclick="haftaDegistir(-7)" class="btn-step">« GERİ</button>
-        <button onclick="tabloyuOlustur()" class="btn-main-action pulse">OTOMATİK PLANLA</button>
+        <button onclick="tabloyuOlustur()" class="btn-main-action">OTOMATİK PLANLA</button>
         <button onclick="haftaDegistir(7)" class="btn-step">İLERİ »</button>
       </div>
       <div class="utility-controls">
         <button onclick="toggleTheme()" class="btn-circle">🌓</button>
-        <button onclick="toggleAdminPanel()" class="btn-circle">⚙️</button>
-        <button onclick="whatsappMesajiOlustur()" class="btn-wa-icon">WA</button>
+        <button onclick="toggleAdminPanel()" class="btn-circle">⚙️ AYARLAR</button>
       </div>
     </header>
 
     <section class="checklist-section no-print">
       <div class="section-card">
         <div class="section-header-compact">
-          <h3>Haftalık İzinli Personel Seçimi</h3>
-          <input type="text" id="personelAra" placeholder="🔍 Personel Ara..." onkeyup="checklistFiltrele()">
+          <h3>İzinli Personel Seçimi</h3>
+          <input type="text" id="personelAra" placeholder="🔍 İsim Ara..." onkeyup="checklistFiltrele()">
         </div>
         <div id="personelChecklist" class="checklist-horizontal-grid"></div>
       </div>
     </section>
 
-    <section id="adminPanel" class="admin-panel no-print hidden">
-      <div class="admin-card-large">
-        <div class="admin-header">
-          <h3>Kapasite & Personel Yönetimi</h3>
+    <div id="adminPanel" class="admin-overlay no-print hidden">
+      <div class="admin-modal">
+        <div class="admin-modal-header">
+          <h2>Sistem ve Kapasite Yönetimi</h2>
           <button onclick="toggleAdminPanel()" class="btn-close">×</button>
         </div>
-        <div class="admin-content-grid">
-          <div class="admin-sub-box">
-             <h4>Personel/Birim Ekle</h4>
-             <input type="text" id="yeniBirim" placeholder="Yeni Birim Adı">
-             <button onclick="birimEkle()" class="btn-save">Birim Ekle</button>
-             <hr>
-             <input type="text" id="yeniIsim" placeholder="Personel Ad Soyad">
-             <select id="birimSec"></select>
-             <button onclick="personelEkle()" class="btn-save">Personel Kaydet</button>
-             <button onclick="sifirla()" class="btn-reset-danger" style="margin-top:20px">Tüm Ayarları Sıfırla</button>
-          </div>
-          
-          <div class="admin-sub-box capacity-manager">
-             <h4>Birim Bazlı Personel Sayıları (Vardiya Başına)</h4>
-             <p><small>* Hafta içi ve Hafta sonu için vardiyada kaç kişi olacağını belirleyin. 0 yazarsanız o vardiya kapanır.</small></p>
-             <div id="kapasiteAyarlari" class="capacity-scroll"></div>
+        <div class="admin-modal-body">
+          <div class="admin-grid-layout">
+            <div class="admin-sidebar">
+              <h4>Personel/Birim Ekle</h4>
+              <input type="text" id="yeniBirim" placeholder="Yeni Birim Adı">
+              <button onclick="birimEkle()" class="btn-save">Birim Ekle</button>
+              <hr>
+              <input type="text" id="yeniIsim" placeholder="Personel Ad Soyad">
+              <select id="birimSec"></select>
+              <button onclick="personelEkle()" class="btn-save">Personel Kaydet</button>
+              <button onclick="sifirla()" class="btn-danger-outline">Sistemi Sıfırla</button>
+            </div>
+            <div class="admin-main">
+              <h4>Vardiya Başına Personel Sayıları</h4>
+              <div id="kapasiteAyarlari"></div>
+            </div>
           </div>
         </div>
       </div>
-    </section>
+    </div>
 
     <main class="content-area">
       <div class="table-card" id="print-area">
@@ -75,9 +74,13 @@
           </table>
         </div>
         <div class="analysis-section">
-          <div class="analysis-header">📊 Haftalık Analiz</div>
           <div id="ozetTablo"></div>
         </div>
+      </div>
+      <div class="footer-actions no-print">
+         <button onclick="whatsappMesajiOlustur()" class="btn-wa">WhatsApp'a Kopyala</button>
+         <button onclick="exportExcel()" class="btn-ex">Excel</button>
+         <button onclick="exportPDF()" class="btn-pdf">PDF</button>
       </div>
     </main>
   </div>
