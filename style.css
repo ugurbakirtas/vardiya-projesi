@@ -1,56 +1,89 @@
 body {
-  font-family: Arial, sans-serif;
-  background: #f4f4f4;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #f0f2f5;
   text-align: center;
+  margin: 0;
+  padding: 20px;
 }
 
 h2 {
-  margin-top: 20px;
-  color: #333;
+  color: #1a1a1a;
+  margin-bottom: 5px;
 }
 
 button {
-  margin: 15px;
-  padding: 10px 15px;
-  font-size: 14px;
+  margin: 20px;
+  padding: 12px 24px;
+  font-size: 15px;
+  font-weight: bold;
   cursor: pointer;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  transition: all 0.2s;
+}
+
+button:hover {
+  background-color: #218838;
+  transform: translateY(-1px);
 }
 
 table {
   border-collapse: collapse;
-  width: 95%;
-  margin: 30px auto;
+  width: 98%;
+  margin: 20px auto;
   background: #fff;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
 }
 
 th, td {
-  border: 1px solid #999;
-  padding: 8px;
+  border: 1px solid #dee2e6;
+  padding: 12px 8px;
   text-align: center;
   vertical-align: top;
-  min-width: 100px;
+  min-width: 140px;
 }
 
 th {
-  background: #eee;
+  background: #343a40;
+  color: white;
+  text-transform: uppercase;
+  font-size: 13px;
 }
 
-caption {
-  font-weight: bold;
-  margin-bottom: 10px;
-  font-size: 16px;
-}
-
+/* Düzenlenebilir Hücre Efektleri */
 td.editable {
-  cursor: pointer;
-  white-space: pre-line;
+  cursor: cell;
+  font-size: 13px;
+  line-height: 1.5;
+  outline: none;
 }
 
-tr.saat-0630 { background-color: #ffe0e0; }
-tr.saat-0900 { background-color: #e0ffe0; }
-tr.saat-1200 { background-color: #e0e0ff; }
-tr.saat-1600 { background-color: #fff0cc; }
-tr.saat-0000 { background-color: #f0ccff; }
-tr.izin      { background-color: #ffcccc; }
-tr.disyayin  { background-color: #cce5ff; }
+td.editable:focus {
+  background-color: #fff9db !important;
+  box-shadow: inset 0 0 5px #fab005;
+}
+
+.birim-label {
+  font-weight: 800;
+  color: #495057;
+  display: block;
+  font-size: 10px;
+  background: #e9ecef;
+  padding: 2px;
+  margin-bottom: 5px;
+  border-radius: 3px;
+}
+
+/* Vardiya Renkleri */
+tr.saat-0630 { background-color: #fff5f5; }
+tr.saat-0900 { background-color: #f4fce3; }
+tr.saat-1200 { background-color: #f1f3ff; }
+tr.saat-1600 { background-color: #fff9db; }
+tr.saat-0000 { background-color: #f8f0fc; }
+tr.saat-izin { background-color: #ffe3e3; }
+tr.saat-disyayin { background-color: #e7f5ff; }
