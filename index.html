@@ -3,48 +3,49 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PRO-Vardiya v16.3 | v14.5 Core</title>
+  <title>PRO-Vardiya v16.5 | v14.5 Core</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
-<body class="light-mode">
+<body>
   <div class="app-wrapper">
     <header class="no-print">
       <div class="logo-area">
-        <h1>TEKNİK VARDİYA <span>v16.3</span></h1>
+        <h1>TEKNİK VARDİYA <span>v16.5</span></h1>
         <p id="tarihAraligi">Yükleniyor...</p>
       </div>
       <div class="main-actions">
         <button onclick="haftaDegistir(-7)" class="btn-nav">« Geri</button>
-        <button onclick="tabloyuOlustur()" class="btn-primary main-btn pulse">OTOMATİK PLANLA</button>
+        <button onclick="tabloyuOlustur()" class="btn-primary pulse">OTOMATİK PLANLA</button>
         <button onclick="haftaDegistir(7)" class="btn-nav">İleri »</button>
       </div>
       <div class="mode-controls">
-        <button onclick="toggleTheme()" id="themeBtn" class="btn-theme">🌙 Karanlık Mod</button>
-        <button onclick="toggleAdminPanel()" id="adminBtn" class="btn-admin">⚙️ Personel Ekle</button>
+        <button onclick="toggleTheme()" class="btn-theme">🌙 Gece Modu</button>
+        <button onclick="toggleAdminPanel()" class="btn-admin">⚙️ Yönetim</button>
       </div>
       <div class="export-actions">
         <button onclick="whatsappMesajiOlustur()" class="btn-wa">WhatsApp</button>
         <button onclick="exportExcel()" class="btn-success">Excel</button>
         <button onclick="exportPDF()" class="btn-danger">PDF</button>
-        <button onclick="sifirla()" class="btn-warning">Sıfırla</button>
       </div>
     </header>
 
     <section id="adminPanel" class="admin-panel no-print hidden">
-      <div class="admin-container">
-        <div class="admin-box">
-          <h3>Yeni Personel Ekle</h3>
-          <input type="text" id="yeniIsim" placeholder="Ad Soyad">
-          <select id="birimSec"></select>
-          <button onclick="personelEkle()" class="btn-primary">Sisteme Kaydet</button>
-        </div>
+      <div class="admin-box">
+        <h3>Yeni Personel Kaydı</h3>
+        <input type="text" id="yeniIsim" placeholder="İSİM SOYAD">
+        <select id="birimSec"></select>
+        <button onclick="personelEkle()" class="btn-primary">Kaydet</button>
+        <button onclick="sifirla()" class="btn-warning" style="margin-top:10px">Sistemi Sıfırla</button>
       </div>
     </section>
 
     <section class="checklist-area no-print">
-      <h3 class="panel-title">Haftalık İzinli Personel Seçimi (Seçilenler İzinli Sayılır)</h3>
+      <div class="checklist-header">
+        <h3 class="panel-title">İzinli Personel Seçimi</h3>
+        <input type="text" id="personelAra" placeholder="🔍 Personel Ara..." onkeyup="checklistFiltrele()">
+      </div>
       <div id="personelChecklist" class="checklist-grid"></div>
     </section>
 
@@ -57,7 +58,7 @@
       </div>
       
       <div class="stats-container">
-        <h2 class="stats-title">📊 Personel Çalışma Analizi & Gece Kontrolü</h2>
+        <h2 class="stats-title">📊 Haftalık Analiz & Kritik Kontroller</h2>
         <div id="ozetTablo"></div>
       </div>
     </main>

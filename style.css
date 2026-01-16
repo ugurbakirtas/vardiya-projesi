@@ -1,41 +1,47 @@
-/* PRO-Vardiya v16.4 | v14.5 High-Contrast */
+/* PRO-Vardiya v16.5 Style Core */
 :root { 
-    --primary: #0f172a; --blue: #1d4ed8; --danger: #e11d48; --bg: #f8fafc;
+    --primary: #0f172a; --blue: #1d4ed8; --danger: #be123c; --bg: #f1f5f9;
     --border: #475569; --card-bg: #ffffff; --text: #0f172a;
 }
-body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; font-size: 11px; }
+.dark-mode {
+    --primary: #020617; --bg: #0f172a; --card-bg: #1e293b; --text: #f1f5f9; --border: #64748b;
+}
+body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; font-size: 11px; transition: 0.3s; }
 .app-wrapper { max-width: 98%; margin: 0 auto; padding: 15px; }
 
-header { display: flex; justify-content: space-between; align-items: center; background: var(--primary); color: white; padding: 15px; border-radius: 12px; margin-bottom: 20px; }
+header { display: flex; justify-content: space-between; align-items: center; background: var(--primary); color: white; padding: 15px; border-radius: 12px; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
 .hidden { display: none !important; }
 
-/* ANA TABLO */
-.table-container { background: white; border: 3px solid var(--primary); overflow-x: auto; margin-bottom: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); }
+/* Arama ve Checklist */
+.checklist-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+#personelAra { padding: 8px; border-radius: 6px; border: 2px solid var(--blue); width: 250px; background: var(--card-bg); color: var(--text); }
+.checklist-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; max-height: 220px; overflow-y: auto; padding: 10px; background: var(--card-bg); border-radius: 8px; border: 1px solid var(--border); }
+.check-item { background: var(--bg); border: 1px solid var(--border); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.2s; }
+.check-item:hover { border-color: var(--blue); transform: scale(1.02); }
+
+/* ANA TABLO - GÖRSELLEŞTİRME */
+.table-container { background: white; border: 3px solid var(--primary); overflow-x: auto; margin-bottom: 30px; border-radius: 8px; }
 table { width: 100%; border-collapse: collapse; min-width: 1400px; }
 th { background: var(--primary); color: white; padding: 12px; font-weight: 800; border: 1px solid #334155; }
-td { border: 2px solid var(--border); padding: 8px; vertical-align: top; background: #fff; }
-td:first-child { background: #cbd5e1; font-weight: 900; color: #000; width: 120px; text-align: center; vertical-align: middle; border-right: 4px solid var(--primary); }
+td { border: 2px solid var(--border); padding: 8px; vertical-align: top; background: #fff; color: #000; }
+td:first-child { background: #cbd5e1; font-weight: 900; width: 120px; text-align: center; vertical-align: middle; border-right: 4px solid var(--primary); font-size: 12px; }
 
-/* PERSONEL KARTLARI */
-.birim-card { border-left: 5px solid var(--blue); padding: 6px; margin-bottom: 5px; background: #f1f5f9; border: 1px solid #94a3b8; border-radius: 4px; }
-.birim-tag { font-size: 8px; font-weight: 900; color: var(--blue); display: block; text-transform: uppercase; }
-.p-isim { font-size: 10.5px; font-weight: 700; color: #000; }
+/* Personel Kartları */
+.birim-card { border-left: 5px solid var(--blue); padding: 6px; margin-bottom: 6px; background: #f8fafc; border: 1px solid #94a3b8; border-radius: 4px; box-shadow: 2px 2px 5px rgba(0,0,0,0.05); }
+.birim-tag { font-size: 8px; font-weight: 900; color: var(--blue); display: block; text-transform: uppercase; margin-bottom: 2px; }
+.p-isim { font-size: 10.5px; font-weight: 700; }
 
-/* ANALİZ TABLOSU */
-.stats-container { margin-top: 40px; }
-.stats-table { width: 100%; border-collapse: collapse; background: white; border: 3px solid #334155; }
-.stats-table th { background: #334155; color: white; padding: 12px; }
-.stats-table td { padding: 10px; border: 1px solid var(--border); font-weight: 700; font-size: 12px; }
+/* ANALİZ TABLOSU & UYARILAR */
+.stats-table { width: 100%; border-collapse: collapse; background: white; border: 3px solid #000; }
+.stats-table th { background: #334155; color: white; padding: 10px; }
+.stats-table td { padding: 10px; border: 1px solid var(--border); font-weight: 700; }
+.uyari-mesai { background: var(--danger); color: white; padding: 3px 10px; border-radius: 20px; font-weight: 900; animation: blinker 1.5s linear infinite; }
+@keyframes blinker { 50% { opacity: 0.5; } }
 
-/* UYARI ETİKETİ */
-.uyari-mesai { 
-    background: var(--danger); color: white; padding: 4px 10px; border-radius: 20px; 
-    font-weight: 900; animation: flash 1s infinite; display: inline-block;
-}
-@keyframes flash { 50% { background: #9f1239; } }
-
-/* BUTONLAR */
-button { cursor: pointer; border: none; padding: 10px 16px; border-radius: 8px; font-weight: 700; color: white; }
+/* Butonlar */
+button { cursor: pointer; border: none; padding: 10px 16px; border-radius: 8px; font-weight: 700; color: white; transition: 0.2s; }
 .btn-primary { background: var(--blue); }
 .btn-wa { background: #16a34a; }
 .btn-danger { background: var(--danger); }
+.btn-admin { background: var(--accent); }
+.btn-theme { background: #f59e0b; }
