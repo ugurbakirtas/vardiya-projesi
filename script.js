@@ -1,7 +1,7 @@
 const gunler = ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"];
 const saatler = ["06:30–16:00", "09:00–18:00", "12:00–22:00", "16:00–00:00", "00:00–07:00", "DIŞ YAYIN"];
 
-// TALİMATLARA GÖRE GÜNCELLENEN HİYERARŞİ
+// KESİN HİYERARŞİ SIRALAMASI
 const birimSiralamasi = [
     "TEKNİK YÖNETMEN", 
     "SES OPERATÖRÜ", 
@@ -76,16 +76,16 @@ function checklistOlustur() {
     const container = document.getElementById("personelChecklist");
     const sirali = [...personeller].sort((a, b) => birimSiralamasi.indexOf(a.birim) - birimSiralamasi.indexOf(b.birim));
     
-    // Tıklama sorununu çözen yeni yapı
+    // DONMAYI ÖNLEYEN YENİ TIKLAMA MANTIĞI
     container.innerHTML = sirali.map(p => `
-        <div class="check-item" onclick="toggleCheckbox('${p.id}')">
-            <input type="checkbox" id="check_${p.id}" onchange="tabloyuOlustur()" onclick="event.stopPropagation()">
+        <div class="check-item" onclick="toggleCb('${p.id}')">
+            <input type="checkbox" id="check_${p.id}" onclick="event.stopPropagation(); tabloyuOlustur();">
             <label><strong>${p.isim}</strong><br><small>${p.birim}</small></label>
         </div>
     `).join('');
 }
 
-function toggleCheckbox(id) {
+function toggleCb(id) {
     const cb = document.getElementById('check_' + id);
     cb.checked = !cb.checked;
     tabloyuOlustur();
@@ -100,42 +100,16 @@ function tabloyuOlustur() {
         haftalikProgram[p.isim] = isSelected ? Array(7).fill("İZİN") : Array(7).fill(null);
     });
 
-    // MCR ve INGEST Rotaları
+    // MCR / INGEST
     applyMCRRota("24TV MCR OPERATÖRÜ");
     applyMCRRota("360TV MCR OPERATÖRÜ");
     applyIngestRota();
 
-    // Özel Kurallar (Barış/Ekrem/Zafer)
-    if(haftalikProgram["BARIŞ İNCE"] && !haftalikProgram["BARIŞ İNCE"].includes("İZİN")) {
-        let bGec = 0; while(bGec < 2) {
-            let r = Math.floor(Math.random() * 7);
-            if(!haftalikProgram["BARIŞ İNCE"][r]) { haftalikProgram["BARIŞ İNCE"][r] = "00:00–07:00"; bGec++; }
-        }
-    }
-    if(haftalikProgram["EKREM FİDAN"] && !haftalikProgram["EKREM FİDAN"].includes("İZİN")) {
-        for(let i=0; i<7; i++) { 
-            if(haftalikProgram["BARIŞ İNCE"] && haftalikProgram["BARIŞ İNCE"][i] !== "00:00–07:00") 
-                haftalikProgram["EKREM FİDAN"][i] = "00:00–07:00"; 
-        }
-    }
+    // Sabit Kurallar
     if(haftalikProgram["ZAFER AKAR"] && !haftalikProgram["ZAFER AKAR"].includes("İZİN")) {
         for(let i=0; i<5; i++) haftalikProgram["ZAFER AKAR"][i] = "06:30–16:00";
         haftalikProgram["ZAFER AKAR"][5] = "İZİN"; haftalikProgram["ZAFER AKAR"][6] = "İZİN";
     }
-
-    const pS = setDegisken("PLAYOUT OPERATÖRÜ");
-    const kS = setDegisken("KJ OPERATÖRÜ");
-
-    // Genel İzin Atama (2 gün rastgele)
-    personeller.forEach(p => {
-        if(["BARIŞ İNCE", "ZAFER AKAR", pS, kS].includes(p.isim) || p.birim.includes("MCR") || p.birim.includes("INGEST")) return;
-        if(haftalikProgram[p.isim].includes("İZİN")) return;
-        
-        let c = 0; while(c < 2) {
-            let r = Math.floor(Math.random() * 7);
-            if(!haftalikProgram[p.isim][r]) { haftalikProgram[p.isim][r] = "İZİN"; c++; }
-        }
-    });
 
     renderTable();
     ozetTablosuGuncelle();
@@ -169,15 +143,6 @@ function applyMCRRota(birim) {
             haftalikProgram[p.isim][i] = rota[rI];
         }
     });
-}
-
-function setDegisken(birim) {
-    const ekip = personeller.filter(p => p.birim === birim && !haftalikProgram[p.isim].includes("İZİN"));
-    if(ekip.length === 0) return null;
-    const s = ekip[Math.floor(Math.random() * ekip.length)].isim;
-    for(let i=0; i<5; i++) if(haftalikProgram[s]) haftalikProgram[s][i] = "09:00–18:00";
-    if(haftalikProgram[s]) { haftalikProgram[s][5] = "İZİN"; haftalikProgram[s][6] = "İZİN"; }
-    return s;
 }
 
 function renderTable() {
@@ -222,8 +187,7 @@ function hucreDoldur(gun, saat) {
             else kap = (saat === "06:30–16:00") ? 4 : 2;
         }
         else if (["PLAYOUT OPERATÖRÜ", "KJ OPERATÖRÜ"].includes(birim)) {
-            if (isHS) kap = (saat === "06:30–16:00") ? 1 : (saat === "16:00–00:00" ? 2 : 0);
-            else kap = 2;
+            kap = 2;
         }
         else if(birim === "BİLGİ İŞLEM" || birim === "YAYIN SİSTEMLERİ") {
             kap = (saat === "09:00–18:00" ? 1 : 0);
@@ -243,18 +207,21 @@ function hucreDoldur(gun, saat) {
 }
 
 function ozetTablosuGuncelle() {
-    let h = `<table class="stats-table"><thead><tr><th>Personel</th><th>Birim</th><th>Mesai</th><th>Gece</th></tr></thead><tbody>`;
+    let h = `<table class="stats-table"><thead><tr><th>Personel</th><th>Birim</th><th>Mesai</th></tr></thead><tbody>`;
     const siraliP = [...personeller].sort((a, b) => birimSiralamasi.indexOf(a.birim) - birimSiralamasi.indexOf(b.birim));
     siraliP.forEach(p => {
         const mesai = haftalikProgram[p.isim].filter(v => v && v !== "İZİN").length;
-        const gece = haftalikProgram[p.isim].filter(v => v === "00:00–07:00").length;
-        h += `<tr><td><strong>${p.isim}</strong></td><td><small>${p.birim}</small></td><td class="${mesai >= 6 ? 'tehlike-mesai' : ''}">${mesai} G</td><td>${gece} Gece</td></tr>`;
+        h += `<tr><td><strong>${p.isim}</strong></td><td><small>${p.birim}</small></td><td>${mesai} G</td></tr>`;
     });
     document.getElementById("ozetTablo").innerHTML = h + "</tbody></table>";
 }
 
+function haftaDegistir(g) { mevcutPazartesi.setDate(mevcutPazartesi.getDate() + g); tabloyuOlustur(); }
+function exportExcel() { XLSX.writeFile(XLSX.utils.table_to_book(document.getElementById("vardiyaTablosu")), "Vardiya.xlsx"); }
+function exportPDF() { html2pdf().from(document.getElementById('print-area')).save(); }
+function sifirla() { localStorage.clear(); location.reload(); }
 function whatsappMesajiOlustur() {
-    let m = `📋 *HAFTALIK VARDİYA PLANI*\n\n`;
+    let m = `📋 *${mevcutPazartesi.toLocaleDateString('tr-TR')} HAFTALIK VARDİYA*\n\n`;
     gunler.forEach((g, i) => {
         m += `*${g.toUpperCase()}*\n`;
         saatler.forEach(s => {
@@ -266,8 +233,4 @@ function whatsappMesajiOlustur() {
     navigator.clipboard.writeText(m).then(() => alert("Kopyalandı!"));
 }
 
-function haftaDegistir(g) { mevcutPazartesi.setDate(mevcutPazartesi.getDate() + g); tabloyuOlustur(); }
-function exportExcel() { XLSX.writeFile(XLSX.utils.table_to_book(document.getElementById("vardiyaTablosu")), "Vardiya.xlsx"); }
-function exportPDF() { html2pdf().from(document.getElementById('print-area')).save(); }
-function sifirla() { localStorage.clear(); location.reload(); }
 window.onload = () => { checklistOlustur(); tabloyuOlustur(); };
