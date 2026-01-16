@@ -1,6 +1,7 @@
 /**
- * PRO-Vardiya v16.3 | v14.5 Core
- * Personel Mesai Günü ve Gece Kontrolü Sabitlendi.
+ * PRO-Vardiya v16.4 | v14.5 Core
+ * KURAL: Gece vardiyasında (00:00–07:00) SES OPERATÖRÜ OLMAYACAK.
+ * Analiz: Tüm personel haftalık mesai ve gece kontrolü dahil.
  */
 
 const birimSiralamasi = [
@@ -62,7 +63,6 @@ let personeller = [
 
 let ekPersoneller = JSON.parse(localStorage.getItem("ekPersoneller")) || [];
 let tumPersoneller = [...personeller, ...ekPersoneller];
-
 let mevcutPazartesi = getMonday(new Date());
 let haftalikProgram = {};
 
@@ -72,12 +72,10 @@ function getMonday(d) {
     return new Date(d.setDate(diff));
 }
 
-// Admin İşlemleri
 function toggleTheme() { document.body.classList.toggle("dark-mode"); }
 function toggleAdminPanel() {
     document.getElementById("adminPanel").classList.toggle("hidden");
-    const s = document.getElementById("birimSec");
-    s.innerHTML = birimSiralamasi.map(b => `<option value="${b}">${b}</option>`).join('');
+    document.getElementById("birimSec").innerHTML = birimSiralamasi.map(b => `<option value="${b}">${b}</option>`).join('');
 }
 
 function personelEkle() {
@@ -102,8 +100,7 @@ function checklistOlustur() {
 
 function toggleCheckbox(id) {
     const cb = document.getElementById('check_' + id);
-    cb.checked = !cb.checked;
-    tabloyuOlustur();
+    if(cb) { cb.checked = !cb.checked; tabloyuOlustur(); }
 }
 
 function tabloyuOlustur() {
@@ -114,7 +111,7 @@ function tabloyuOlustur() {
         haftalikProgram[p.isim] = isSelected ? Array(7).fill("İZİN") : Array(7).fill(null);
     });
 
-    // v14.5 Özel Kurallar
+    // Barış & Ekrem Özel Gece Kuralları
     if(haftalikProgram["BARIŞ İNCE"] && !haftalikProgram["BARIŞ İNCE"].includes("İZİN")) {
         haftalikProgram["BARIŞ İNCE"][0] = "00:00–07:00"; haftalikProgram["BARIŞ İNCE"][1] = "00:00–07:00";
     }
@@ -125,7 +122,6 @@ function tabloyuOlustur() {
     applyMCRRota("24TV MCR OPERATÖRÜ");
     applyMCRRota("360TV MCR OPERATÖRÜ");
     applyIngestRota();
-
     renderTable();
     ozetGuncelle();
 }
@@ -151,8 +147,15 @@ function hucreDoldur(gun, saat) {
     if(!["12:00–22:00", "DIŞ YAYIN", "İZİN"].includes(saat)) {
         birimSiralamasi.forEach(birim => {
             if(birim.includes("MCR") || birim.includes("INGEST")) return;
+            
             let kap = 0;
-            if(birim === "TEKNİK YÖNETMEN") {
+            // KRİTİK KURAL: Gece (00:00-07:00) vardiyasında SES (kap = 0) olmayacak.
+            if(birim === "SES OPERATÖRÜ") {
+                if(saat === "00:00–07:00") kap = 0; 
+                else if(saat === "09:00–18:00") kap = isHS ? 2 : 0;
+                else kap = isHS ? 2 : (saat === "06:30–16:00" ? 4 : 2);
+            } 
+            else if(birim === "TEKNİK YÖNETMEN") {
                 if(saat === "00:00–07:00") kap = 1;
                 else if(!isHS) {
                     if(saat === "06:30–16:00") kap = 2;
@@ -160,9 +163,6 @@ function hucreDoldur(gun, saat) {
                 } else {
                     if(saat === "06:30–16:00" || saat === "09:00–18:00" || saat === "16:00–00:00") kap = 1;
                 }
-            } else if(birim === "SES OPERATÖRÜ") {
-                if(saat === "09:00–18:00") kap = isHS ? 2 : 0;
-                else kap = isHS ? 2 : (saat === "06:30–16:00" ? 4 : 2);
             } else if(birim === "PLAYOUT OPERATÖRÜ") {
                 if(saat === "06:30–16:00") kap = isHS ? 2 : 3;
                 else if(saat === "16:00–00:00") kap = 2;
@@ -172,82 +172,4 @@ function hucreDoldur(gun, saat) {
                 kap = (!isHS && saat === "09:00–18:00") ? 1 : 0;
             }
 
-            let adaylar = tumPersoneller.filter(p => p.birim === birim && !haftalikProgram[p.isim][gun]);
-            let suan = tumPersoneller.filter(p => p.birim === birim && haftalikProgram[p.isim][gun] === saat).length;
-            for(let k=0; k < (kap-suan); k++) {
-                if(adaylar.length > 0) {
-                    let p = adaylar.splice(Math.floor(Math.random() * adaylar.length), 1)[0];
-                    haftalikProgram[p.isim][gun] = saat;
-                }
-            }
-        });
-    }
-
-    let final = tumPersoneller.filter(p => haftalikProgram[p.isim][gun] === saat);
-    final.sort((a, b) => birimSiralamasi.indexOf(a.birim) - birimSiralamasi.indexOf(b.birim));
-    return final.map(p => `<div class="birim-card"><span class="birim-tag">${p.birim}</span><span class="p-isim">${p.isim}</span></div>`).join('');
-}
-
-function applyIngestRota() {
-    const ekip = tumPersoneller.filter(p => p.birim === "INGEST OPERATÖRÜ");
-    const rota = ["06:30–16:00", "06:30–16:00", "16:00–00:00", "16:00–00:00", "İZİN", "İZİN"];
-    ekip.forEach((p, idx) => {
-        for(let i=0; i<7; i++) {
-            let d = new Date(mevcutPazartesi.getTime() + (i * 86400000));
-            let rI = (Math.floor((d - new Date(2025, 0, 6)) / 86400000) + (idx * 2)) % 6;
-            if(!haftalikProgram[p.isim][i]) haftalikProgram[p.isim][i] = rota[rI < 0 ? rI + 6 : rI];
-        }
-    });
-}
-
-function applyMCRRota(birim) {
-    const ekip = tumPersoneller.filter(p => p.birim === birim);
-    const rota = ["06:30–16:00", "06:30–16:00", "16:00–00:00", "16:00–00:00", "00:00–07:00", "00:00–07:00", "İZİN", "İZİN"];
-    ekip.forEach((p, idx) => {
-        for(let i=0; i<7; i++) {
-            let d = new Date(mevcutPazartesi.getTime() + (i * 86400000));
-            let rI = (Math.floor((d - new Date(2025, 0, 6)) / 86400000) + (idx * 2)) % 8;
-            if(!haftalikProgram[p.isim][i]) haftalikProgram[p.isim][i] = rota[rI < 0 ? rI + 8 : rI];
-        }
-    });
-}
-
-// ANALİZ VE GECE KONTROLÜ
-function ozetGuncelle() {
-    let h = `<table class="stats-table"><thead><tr><th>Personel Adı</th><th>Birim</th><th>Haftalık Mesai</th><th>Gece Vardiyası</th></tr></thead><tbody>`;
-    [...tumPersoneller].sort((a,b) => birimSiralamasi.indexOf(a.birim) - birimSiralamasi.indexOf(b.birim)).forEach(p => {
-        const calisilanGunler = haftalikProgram[p.isim].filter(v => v && v !== "İZİN");
-        const gunSayisi = calisilanGunler.length;
-        const geceSayisi = calisilanGunler.filter(v => v === "00:00–07:00").length;
-
-        const uyariClass = gunSayisi >= 6 ? 'class="uyari-mesai"' : '';
-        const uyariSimge = gunSayisi >= 6 ? '⚠️' : '';
-
-        h += `<tr>
-            <td>${p.isim}</td>
-            <td><small>${p.birim}</small></td>
-            <td><span ${uyariClass}>${gunSayisi} Gün ${uyariSimge}</span></td>
-            <td>${geceSayisi > 0 ? '🌙 ' + geceSayisi : '0'}</td>
-        </tr>`;
-    });
-    document.getElementById("ozetTablo").innerHTML = h + "</tbody></table>";
-}
-
-function haftaDegistir(g) { mevcutPazartesi.setDate(mevcutPazartesi.getDate() + g); tabloyuOlustur(); }
-function exportExcel() { XLSX.writeFile(XLSX.utils.table_to_book(document.getElementById("vardiyaTablosu")), "Vardiya.xlsx"); }
-function exportPDF() { html2pdf().from(document.getElementById('print-area')).save('Vardiya.pdf'); }
-function sifirla() { localStorage.clear(); location.reload(); }
-function whatsappMesajiOlustur() {
-    let m = `📋 *${mevcutPazartesi.toLocaleDateString('tr-TR')} VARDİYA PLANI*\n\n`;
-    gunler.forEach((g, i) => {
-        m += `*${g.toUpperCase()}*\n`;
-        saatler.forEach(s => {
-            let list = tumPersoneller.filter(p => haftalikProgram[p.isim][i] === s);
-            if(list.length > 0) m += `▫️ ${s}: ${list.map(x => x.isim).join(", ")}\n`;
-        });
-        m += `\n`;
-    });
-    navigator.clipboard.writeText(m).then(() => alert("WhatsApp mesajı kopyalandı!"));
-}
-
-window.onload = () => { checklistOlustur(); tabloyuOlustur(); };
+            let adaylar = tumPersoneller.filter(p => p.birim === birim && !haftalikProgram

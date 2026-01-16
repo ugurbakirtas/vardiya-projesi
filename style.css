@@ -1,52 +1,41 @@
+/* PRO-Vardiya v16.4 | v14.5 High-Contrast */
 :root { 
-    --primary: #0f172a; --blue: #1d4ed8; --accent: #7c3aed; 
-    --success: #16a34a; --danger: #dc2626; --bg: #f1f5f9;
-    --border: #64748b; --card-bg: #ffffff; --text: #0f172a;
+    --primary: #0f172a; --blue: #1d4ed8; --danger: #e11d48; --bg: #f8fafc;
+    --border: #475569; --card-bg: #ffffff; --text: #0f172a;
 }
-
-.dark-mode {
-    --primary: #020617; --bg: #0f172a; --card-bg: #1e293b;
-    --text: #f8fafc; --border: #475569; --blue: #3b82f6;
-}
-
 body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); margin: 0; font-size: 11px; }
 .app-wrapper { max-width: 98%; margin: 0 auto; padding: 15px; }
 
 header { display: flex; justify-content: space-between; align-items: center; background: var(--primary); color: white; padding: 15px; border-radius: 12px; margin-bottom: 20px; }
 .hidden { display: none !important; }
 
-/* Checklist ve Admin */
-.admin-panel, .checklist-area { background: var(--card-bg); padding: 15px; border-radius: 10px; border: 1px solid var(--border); margin-bottom: 20px; }
-.checklist-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; max-height: 200px; overflow-y: auto; }
-.check-item { background: var(--bg); border: 1px solid var(--border); padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 8px; }
-
-/* ANA TABLO - YÜKSEK BELİRGİNLİK */
-.table-container { background: white; border: 3px solid var(--primary); overflow-x: auto; margin-bottom: 30px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+/* ANA TABLO */
+.table-container { background: white; border: 3px solid var(--primary); overflow-x: auto; margin-bottom: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); }
 table { width: 100%; border-collapse: collapse; min-width: 1400px; }
-th { background: var(--primary); color: white; padding: 12px; font-weight: 800; border: 1px solid #334155; text-transform: uppercase; }
-td { border: 1px solid var(--border); padding: 8px; vertical-align: top; background: #fff; }
+th { background: var(--primary); color: white; padding: 12px; font-weight: 800; border: 1px solid #334155; }
+td { border: 2px solid var(--border); padding: 8px; vertical-align: top; background: #fff; }
+td:first-child { background: #cbd5e1; font-weight: 900; color: #000; width: 120px; text-align: center; vertical-align: middle; border-right: 4px solid var(--primary); }
 
-/* Saat Sütunu */
-td:first-child { background: #e2e8f0; font-weight: 900; color: var(--primary); width: 120px; text-align: center; vertical-align: middle; border-right: 4px solid var(--primary); }
-
-/* Personel Kartları */
-.birim-card { border-left: 5px solid var(--blue); padding: 5px; margin-bottom: 5px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 4px; }
+/* PERSONEL KARTLARI */
+.birim-card { border-left: 5px solid var(--blue); padding: 6px; margin-bottom: 5px; background: #f1f5f9; border: 1px solid #94a3b8; border-radius: 4px; }
 .birim-tag { font-size: 8px; font-weight: 900; color: var(--blue); display: block; text-transform: uppercase; }
-.p-isim { font-size: 10px; font-weight: 700; color: #000; }
+.p-isim { font-size: 10.5px; font-weight: 700; color: #000; }
 
 /* ANALİZ TABLOSU */
-.stats-table { width: 100%; border-collapse: collapse; background: white; border: 3px solid var(--primary); }
-.stats-table th { background: #334155; color: white; padding: 10px; }
-.stats-table td { padding: 10px; border: 1px solid var(--border); font-weight: 600; }
+.stats-container { margin-top: 40px; }
+.stats-table { width: 100%; border-collapse: collapse; background: white; border: 3px solid #334155; }
+.stats-table th { background: #334155; color: white; padding: 12px; }
+.stats-table td { padding: 10px; border: 1px solid var(--border); font-weight: 700; font-size: 12px; }
 
-/* Uyarı Renkleri */
-.uyari-mesai { color: #fff; background: var(--danger); padding: 3px 8px; border-radius: 4px; font-weight: 800; animation: blink 1s infinite; }
-@keyframes blink { 50% { opacity: 0.7; } }
+/* UYARI ETİKETİ */
+.uyari-mesai { 
+    background: var(--danger); color: white; padding: 4px 10px; border-radius: 20px; 
+    font-weight: 900; animation: flash 1s infinite; display: inline-block;
+}
+@keyframes flash { 50% { background: #9f1239; } }
 
-/* Butonlar */
-button { cursor: pointer; border: none; padding: 8px 15px; border-radius: 6px; font-weight: 700; color: white; transition: 0.2s; }
+/* BUTONLAR */
+button { cursor: pointer; border: none; padding: 10px 16px; border-radius: 8px; font-weight: 700; color: white; }
 .btn-primary { background: var(--blue); }
-.btn-wa { background: #128c7e; }
+.btn-wa { background: #16a34a; }
 .btn-danger { background: var(--danger); }
-.btn-theme { background: #f59e0b; }
-.btn-admin { background: var(--accent); }
