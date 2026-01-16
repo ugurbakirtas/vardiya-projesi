@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>PRO-Vardiya Akıllı v10.4</title>
+  <title>PRO-Vardiya v10.6 - Tam Sürüm</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -12,13 +12,13 @@
   <div class="app-wrapper">
     <header class="no-print">
       <div class="header-top">
-        <h1>TEKNİK VARDİYA <span>v10.4</span></h1>
+        <h1>TEKNİK VARDİYA <span>v10.6</span></h1>
         <button onclick="toggleDarkMode()" class="btn-theme" id="themeBtn">🌙 Koyu Mod</button>
       </div>
       <p id="tarihAraligi">Yükleniyor...</p>
       <div class="nav-row">
           <button onclick="haftaDegistir(-7)" class="btn-nav">« Geri</button>
-          <button onclick="tabloyuOlustur()" class="btn-primary">Otomatik Planla</button>
+          <button onclick="tabloyuOlustur()" class="btn-primary">Planı Yenile</button>
           <button onclick="haftaDegistir(7)" class="btn-nav">İleri »</button>
       </div>
     </header>
@@ -27,13 +27,13 @@
         <button onclick="whatsappMesajiOlustur()" class="btn-wa">WhatsApp</button>
         <button onclick="exportExcel()" class="btn-success">Excel</button>
         <button onclick="exportPDF()" class="btn-danger">PDF</button>
-        <button onclick="togglePanel('personelPanel')" class="btn-admin">⚙️ Personel/Notlar</button>
+        <button onclick="togglePanel('personelPanel')" class="btn-admin">⚙️ Personel & Notlar</button>
     </div>
 
     <section id="personelPanel" class="admin-panel no-print hidden">
         <div class="panel-grid">
             <div class="panel-box">
-                <h3 class="section-title">Personel Ekle</h3>
+                <h3 class="section-title">Personel Listesi</h3>
                 <div class="add-form">
                     <input type="text" id="newPersonelName" placeholder="Ad Soyad">
                     <select id="newPersonelBirim"></select>
@@ -44,13 +44,13 @@
             <div class="panel-box">
                 <h3 class="section-title">Haftalık Notlar</h3>
                 <div id="notesForm" class="notes-grid"></div>
-                <button onclick="notlariKaydet()" class="btn-primary" style="margin-top:10px; width:100%">Notları Kaydet</button>
+                <button onclick="notlariKaydet()" class="btn-primary" style="margin-top:10px; width:100%">Kaydet</button>
             </div>
         </div>
     </section>
 
     <section class="checklist-section no-print">
-      <h3 class="section-title">İzinli Personel Seçimi</h3>
+      <h3 class="section-title">İzinlileri Seçin</h3>
       <div id="personelChecklist" class="checklist-grid"></div>
     </section>
 
@@ -62,10 +62,7 @@
           <tfoot id="tableFooter"></tfoot>
         </table>
       </div>
-      <div class="stats-container">
-        <h2 class="stats-title">Haftalık Performans ve Uyarılar</h2>
-        <div id="ozetTablo" class="table-responsive"></div>
-      </div>
+      <div id="ozetTablo" class="table-responsive" style="margin-top:20px;"></div>
     </main>
   </div>
   <script src="script.js"></script>
