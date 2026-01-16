@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PRO-Vardiya Yönetim Sistemi v9.0</title>
+  <title>PRO-Vardiya Yönetim Sistemi v9.2</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -12,13 +12,13 @@
   <div class="app-wrapper">
     <header class="no-print">
       <div class="logo-area">
-        <h1>TEKNİK VARDİYA <span>v9.0</span></h1>
-        <p id="tarihAraligi">Sistem Hazırlanıyor...</p>
+        <h1>TEKNİK VARDİYA <span>v9.2</span></h1>
+        <p id="tarihAraligi">Yükleniyor...</p>
       </div>
       <div class="main-actions">
-        <button onclick="haftaDegistir(-7)" class="btn-nav">« Önceki</button>
+        <button onclick="haftaDegistir(-7)" class="btn-nav">« Önceki Hafta</button>
         <button onclick="tabloyuOlustur()" class="btn-primary main-btn">Otomatik Planla</button>
-        <button onclick="haftaDegistir(7)" class="btn-accent">Haftayı Devret »</button>
+        <button onclick="haftaDegistir(7)" class="btn-accent">Sonraki Hafta »</button>
       </div>
       <div class="export-actions">
         <button onclick="whatsappMesajiOlustur()" class="btn-wa">WhatsApp</button>
@@ -33,13 +33,17 @@
     </section>
 
     <main id="print-area">
-      <div class="table-responsive">
+      <div class="table-container">
         <table id="vardiyaTablosu">
           <thead><tr id="tableHeader"></tr></thead>
           <tbody id="tableBody"></tbody>
         </table>
       </div>
-      <div id="ozetTablo" class="stats-grid"></div>
+      
+      <div class="stats-container">
+        <h2 class="stats-title">Haftalık Personel Mesai ve Gece Özeti</h2>
+        <div id="ozetTablo"></div>
+      </div>
     </main>
   </div>
   <script src="script.js"></script>

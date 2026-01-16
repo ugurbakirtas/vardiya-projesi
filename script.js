@@ -43,7 +43,7 @@ const personeller = [
     { isim: "Selin", birim: "Uplink" },
     { isim: "VOLKAN DEMİRBAŞ", birim: "24TV-360TV BİLGİ İŞLEM" },
     { isim: "GÖKHAN BAĞIŞ", birim: "24TV-360TV BİLGİ İŞLEM" },
-    { isim: "HAKAN ELİPEK", birim: "24TV-360TV BİLGİ İşLEM" },
+    { isim: "HAKAN ELİPEK", birim: "24TV-360TV BİLGİ İŞLEM" },
     { isim: "ÖZKAN KAYA", birim: "24TV-360TV BİLGİ İŞLEM" },
     { isim: "YİĞİT DAYI", birim: "24TV-360TV YAYIN SİSTEMLERİ" },
     { isim: "FERDİ TOPUZ", birim: "24TV-360TV YAYIN SİSTEMLERİ" },
@@ -85,169 +85,143 @@ function tabloyuOlustur() {
         haftalikProgram[p.isim] = isSelected ? Array(7).fill("İZİN") : Array(7).fill(null);
     });
 
-    // --- ÖZEL ROTASYONLAR ---
+    // --- ÖZEL BİRİM KURALLARI ---
     
-    // 1. Teknik Yönetmen (Gece Kuralı)
-    let barisGeceler = 0;
-    while(barisGeceler < 2) {
-        let r = Math.floor(Math.random() * 7);
-        if(!haftalikProgram["BARIŞ İNCE"][r]) { haftalikProgram["BARIŞ İNCE"][r] = "00:00–07:00"; barisGeceler++; }
-    }
-    let barisIzinler = 0;
-    while(barisIzinler < 2) {
-        let r = Math.floor(Math.random() * 7);
-        if(!haftalikProgram["BARIŞ İNCE"][r]) { haftalikProgram["BARIŞ İNCE"][r] = "İZİN"; barisIzinler++; }
-    }
-    for(let i=0; i<7; i++) {
-        if(haftalikProgram["BARIŞ İNCE"][i] !== "00:00–07:00" && !haftalikProgram["EKREM FİDAN"][i]) {
-            haftalikProgram["EKREM FİDAN"][i] = "00:00–07:00";
-        }
-    }
-
-    // 2. Ses (Zafer Akar Sabit)
-    for(let i=0; i<5; i++) haftalikProgram["ZAFER AKAR"][i] = "06:30–16:00";
-    haftalikProgram["ZAFER AKAR"][5] = "İZİN";
-    haftalikProgram["ZAFER AKAR"][6] = "İZİN";
-
-    // 3. Playout & KJ (Değişken 09:00 Kuralı)
-    const pSorumlu = setDegiskenSorumlu("Playout Operatörü");
-    const kSorumlu = setDegiskenSorumlu("KJ Operatörü");
-
-    // 4. MCR ROTASYONU (2 SABAH, 2 AKŞAM, 2 GECE, 2 İZİN)
+    // 1. MCR (8 Günlük Rotasyon)
     applyMCRRota("24TV MCR OPERATÖRÜ");
     applyMCRRota("360TV MCR OPERATÖRÜ");
 
-    // Genel İzinler
+    // 2. Ses (Zafer Akar Hafta içi 06:30 sabit)
+    for(let i=0; i<5; i++) haftalikProgram["ZAFER AKAR"][i] = "06:30–16:00";
+    haftalikProgram["ZAFER AKAR"][5] = "İZİN"; haftalikProgram["ZAFER AKAR"][6] = "İZİN";
+
+    // 3. Teknik Yönetmen (Gece/İzin Dengesi)
+    let bGec = 0; while(bGec < 2) {
+        let r = Math.floor(Math.random() * 7);
+        if(!haftalikProgram["BARIŞ İNCE"][r]) { haftalikProgram["BARIŞ İNCE"][r] = "00:00–07:00"; bGec++; }
+    }
+    for(let i=0; i<7; i++) { if(haftalikProgram["BARIŞ İNCE"][i] !== "00:00–07:00") haftalikProgram["EKREM FİDAN"][i] = "00:00–07:00"; }
+
+    // 4. Playout & KJ (Değişken 09:00 ve Hafta Sonu Tek Kişi Kuralı)
+    const pS = setDegisken("Playout Operatörü");
+    const kS = setDegisken("KJ Operatörü");
+
+    // Genel İzinler (Kuralı olmayanlar için)
     personeller.forEach(p => {
-        if(["BARIŞ İNCE", "ZAFER AKAR", pSorumlu, kSorumlu].includes(p.isim) || p.birim.includes("MCR")) return;
-        let count = haftalikProgram[p.isim].filter(v => v === "İZİN").length;
-        while(count < 2) {
+        if(["BARIŞ İNCE", "ZAFER AKAR", pS, kS].includes(p.isim) || p.birim.includes("MCR")) return;
+        let c = 0; while(c < 2) {
             let r = Math.floor(Math.random() * 7);
-            if(!haftalikProgram[p.isim][r]) { haftalikProgram[p.isim][r] = "İZİN"; count++; }
+            if(!haftalikProgram[p.isim][r]) { haftalikProgram[p.isim][r] = "İZİN"; c++; }
         }
     });
 
     renderTable();
-    ozetGuncelle();
-}
-
-function setDegiskenSorumlu(birim) {
-    const ekip = personeller.filter(p => p.birim === birim);
-    const s = ekip[Math.floor(Math.random() * ekip.length)].isim;
-    for(let i=0; i<5; i++) haftalikProgram[s][i] = "09:00–18:00";
-    haftalikProgram[s][5] = "İZİN";
-    haftalikProgram[s][6] = "İZİN";
-    return s;
+    ozetTablosuGuncelle();
 }
 
 function applyMCRRota(birim) {
     const ekip = personeller.filter(p => p.birim === birim);
-    const rota = [
-        "06:30–16:00", "06:30–16:00", 
-        "16:00–00:00", "16:00–00:00", 
-        "00:00–07:00", "00:00–07:00", 
-        "İZİN", "İZİN"
-    ];
-    
-    const msPerDay = 24 * 60 * 60 * 1000;
-    const referansTarih = new Date(2025, 0, 6); // Pazartesi
-
+    const rota = ["06:30–16:00", "06:30–16:00", "16:00–00:00", "16:00–00:00", "00:00–07:00", "00:00–07:00", "İZİN", "İZİN"];
+    const ref = new Date(2025, 0, 6);
     ekip.forEach((p, idx) => {
         for(let i=0; i<7; i++) {
-            let gunTarihi = new Date(mevcutPazartesi.getTime() + (i * msPerDay));
-            let fark = Math.floor((gunTarihi - referansTarih) / msPerDay);
-            let rotaIndex = (fark + (idx * 2)) % 8;
-            if(rotaIndex < 0) rotaIndex += 8;
-            haftalikProgram[p.isim][i] = rota[rotaIndex];
+            let d = new Date(mevcutPazartesi.getTime() + (i * 86400000));
+            let f = Math.floor((d - ref) / 86400000);
+            let rI = (f + (idx * 2)) % 8; if(rI < 0) rI += 8;
+            haftalikProgram[p.isim][i] = rota[rI];
         }
     });
+}
+
+function setDegisken(birim) {
+    const ekip = personeller.filter(p => p.birim === birim);
+    const s = ekip[Math.floor(Math.random() * ekip.length)].isim;
+    for(let i=0; i<5; i++) haftalikProgram[s][i] = "09:00–18:00"; // Hafta içi 09:00
+    haftalikProgram[s][5] = "İZİN"; haftalikProgram[s][6] = "İZİN"; // Hafta sonu izinli
+    return s;
 }
 
 function renderTable() {
-    let hHtml = `<th>Saatler</th>` + gunler.map((g, i) => {
+    let h = `<th>SAATLER</th>` + gunler.map((g, i) => {
         let t = new Date(mevcutPazartesi); t.setDate(t.getDate() + i);
-        return `<th>${g}<br><small>${t.toLocaleDateString('tr-TR', {day:'2-digit', month:'2-digit'})}</small></th>`;
+        return `<th>${g}<br><small>${t.toLocaleDateString('tr-TR')}</small></th>`;
     }).join('');
-    document.getElementById("tableHeader").innerHTML = hHtml;
+    document.getElementById("tableHeader").innerHTML = h;
 
-    let bHtml = "";
-    saatler.forEach(saat => {
-        bHtml += `<tr><td><strong>${saat}</strong></td>`;
-        for (let i = 0; i < 7; i++) { bHtml += `<td>${hucreIcerikGetir(i, saat)}</td>`; }
-        bHtml += `</tr>`;
+    let b = "";
+    saatler.forEach(s => {
+        b += `<tr><td>${s}</td>`;
+        for(let i=0; i<7; i++) { b += `<td>${hucreDoldur(i, s)}</td>`; }
+        b += `</tr>`;
     });
-    document.getElementById("tableBody").innerHTML = bHtml;
+    document.getElementById("tableBody").innerHTML = b;
 }
 
-function hucreIcerikGetir(gun, saat) {
-    let html = "";
+function hucreDoldur(gun, saat) {
+    let res = "";
     personeller.forEach(p => {
         if(haftalikProgram[p.isim][gun] === saat) {
-            html += `<div class="birim-card"><span class="birim-tag">${p.birim}</span><span class="p-isim">${p.isim}</span></div>`;
+            res += `<div class="birim-card"><span class="birim-tag">${p.birim}</span><span class="p-isim">${p.isim}</span></div>`;
         }
     });
 
-    if(saat === "00:00–07:00" || saat === "İZİN") return html;
+    if(saat === "00:00–07:00" || saat === "İZİN") return res;
 
     birimSiralamasi.forEach(birim => {
-        if(birim.includes("MCR")) return; // MCR otomatik rotasyonda
-
-        let kap = 0;
-        const isHS = (gun >= 5);
-
-        if (birim === "Teknik Yönetmen") {
-            if (!isHS) { kap = (saat === "06:30–16:00") ? 2 : (saat === "16:00–00:00" ? 1 : 0); }
-            else { kap = (["06:30–16:00", "09:00–18:00", "16:00–00:00"].includes(saat)) ? 1 : 0; }
-        } 
-        else if (birim === "Ses Operatörü") {
-            if (!isHS) { kap = (saat === "06:30–16:00") ? 4 : (saat === "16:00–00:00" ? 2 : 0); }
-            else { kap = (["06:30–16:00", "09:00–18:00", "16:00–00:00"].includes(saat)) ? 2 : 0; }
+        if(birim.includes("MCR")) return;
+        let kap = 0; const isHS = (gun >= 5);
+        
+        // Yeni Kural: Playout/KJ Hafta sonu 09:00 yok, sabah tek kişi
+        if (birim === "Playout Operatörü" || birim === "KJ Operatörü") {
+            if (isHS) {
+                kap = (saat === "06:30–16:00") ? 1 : (saat === "16:00–00:00" ? 2 : 0);
+            } else {
+                kap = (saat === "06:30–16:00" || saat === "16:00–00:00") ? 2 : 0;
+            }
         }
-        else if (birim === "Playout Operatörü" || birim === "KJ Operatörü") {
-            kap = (["06:30–16:00", "16:00–00:00"].includes(saat)) ? 2 : 0;
-        }
-        else if (birim.includes("BİLGİ") || birim.includes("YAYIN")) { kap = (saat === "09:00–18:00") ? 1 : 0; }
-        else if (saat === "06:30–16:00") kap = 1;
+        else if(birim === "Teknik Yönetmen") kap = !isHS ? (saat === "06:30–16:00" ? 2 : (saat === "16:00–00:00" ? 1 : 0)) : 1;
+        else if(birim === "Ses Operatörü") kap = !isHS ? (saat === "06:30–16:00" ? 4 : (saat === "16:00–00:00" ? 2 : 0)) : 2;
+        else if(birim.includes("BİLGİ") || birim.includes("YAYIN")) kap = (saat === "09:00–18:00" ? 1 : 0);
+        else if(saat === "06:30–16:00") kap = 1;
 
         let adaylar = personeller.filter(p => p.birim === birim && !haftalikProgram[p.isim][gun]);
         let suan = personeller.filter(p => p.birim === birim && haftalikProgram[p.isim][gun] === saat).length;
-        
-        for(let k=0; k < (kap - suan); k++) {
+        for(let k=0; k < (kap-suan); k++) {
             if(adaylar.length > 0) {
                 let p = adaylar.splice(Math.floor(Math.random() * adaylar.length), 1)[0];
                 haftalikProgram[p.isim][gun] = saat;
-                html += `<div class="birim-card"><span class="birim-tag">${birim}</span><span class="p-isim">${p.isim}</span></div>`;
+                res += `<div class="birim-card"><span class="birim-tag">${birim}</span><span class="p-isim">${p.isim}</span></div>`;
             }
         }
     });
-    return html;
+    return res;
 }
 
-function ozetGuncelle() {
-    let html = `<table style="width:100%"><thead><tr><th>Personel</th><th>Birim</th><th>Mesai</th></tr></thead><tbody>`;
+function ozetTablosuGuncelle() {
+    let h = `<table class="stats-table"><thead><tr><th>Personel</th><th>Birim</th><th>Mesai</th><th>Gece</th></tr></thead><tbody>`;
     personeller.forEach(p => {
-        const m = haftalikProgram[p.isim].filter(v => v && v !== "İZİN").length;
-        html += `<tr><td>${p.isim}</td><td>${p.birim}</td><td>${m} G</td></tr>`;
+        const mesai = haftalikProgram[p.isim].filter(v => v && v !== "İZİN").length;
+        const gece = haftalikProgram[p.isim].filter(v => v === "00:00–07:00").length;
+        h += `<tr><td><strong>${p.isim}</strong></td><td><small>${p.birim}</small></td><td class="${mesai >= 6 ? 'tehlike-mesai' : ''}">${mesai} G</td><td>${gece} Gece</td></tr>`;
     });
-    document.getElementById("ozetTablo").innerHTML = html + "</tbody></table>";
+    document.getElementById("ozetTablo").innerHTML = h + "</tbody></table>";
 }
 
 function whatsappMesajiOlustur() {
-    let metin = `📋 *HAFTALIK VARDİYA PLANI* \n\n`;
-    gunler.forEach((gun, idx) => {
-        metin += `*${gun.toUpperCase()}*\n`;
+    let m = `📋 *HAFTALIK VARDİYA PLANI*\n\n`;
+    gunler.forEach((g, i) => {
+        m += `*${g.toUpperCase()}*\n`;
         saatler.forEach(s => {
-            let p = personeller.filter(p => haftalikProgram[p.isim][idx] === s).map(x => x.isim);
-            if(p.length > 0) metin += `▪️ ${s}: ${p.join(", ")}\n`;
+            let p = personeller.filter(p => haftalikProgram[p.isim][i] === s).map(x => x.isim);
+            if(p.length > 0) m += `▫️ ${s}: ${p.join(", ")}\n`;
         });
-        metin += `\n`;
+        m += `\n`;
     });
-    navigator.clipboard.writeText(metin).then(() => alert("Kopyalandı!"));
+    navigator.clipboard.writeText(m).then(() => alert("Kopyalandı!"));
 }
 
 function haftaDegistir(g) { mevcutPazartesi.setDate(mevcutPazartesi.getDate() + g); tabloyuOlustur(); }
 function exportExcel() { XLSX.writeFile(XLSX.utils.table_to_book(document.getElementById("vardiyaTablosu")), "Vardiya.xlsx"); }
 function exportPDF() { html2pdf().from(document.getElementById('print-area')).save(); }
 function sifirla() { localStorage.clear(); location.reload(); }
-
 window.onload = () => { checklistOlustur(); tabloyuOlustur(); };
