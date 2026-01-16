@@ -1,6 +1,6 @@
 /**
- * PRO-Vardiya v16.0 | v14.5 Core
- * Kurallar ve Personel Listesi Sabitlenmiştir.
+ * PRO-Vardiya v16.1 | v14.5 Core
+ * Haftalık 6 gün ve üzeri çalışma uyarısı eklendi.
  */
 
 const birimSiralamasi = [
@@ -11,7 +11,6 @@ const birimSiralamasi = [
 const gunler = ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"];
 const saatler = ["06:30–16:00", "09:00–18:00", "12:00–22:00", "16:00–00:00", "00:00–07:00", "DIŞ YAYIN"];
 
-// Orijinal v14.5 Listesi
 let personeller = [
     { id: 1, isim: "YUNUS EMRE YAYLA", birim: "TEKNİK YÖNETMEN" },
     { id: 2, isim: "HASAN CAN SAĞLAM", birim: "TEKNİK YÖNETMEN" },
@@ -61,7 +60,6 @@ let personeller = [
     { id: 47, isim: "BÜKRE YAVUZ", birim: "360TV MCR OPERATÖRÜ" }
 ];
 
-// Eklenenleri LocalStorage'dan yükle
 const ekPersoneller = JSON.parse(localStorage.getItem("ekPersoneller")) || [];
 personeller = [...personeller, ...ekPersoneller];
 
@@ -74,11 +72,7 @@ function getMonday(d) {
     return new Date(d.setDate(diff));
 }
 
-// TEMA VE PANEL FONKSİYONLARI
-function toggleTheme() {
-    document.body.classList.toggle("dark-mode");
-}
-
+function toggleTheme() { document.body.classList.toggle("dark-mode"); }
 function toggleAdminPanel() {
     document.getElementById("adminPanel").classList.toggle("hidden");
     const s = document.getElementById("birimSec");
@@ -90,11 +84,9 @@ function personelEkle() {
     const birim = document.getElementById("birimSec").value;
     if(!isim) return;
     const yeni = { id: Date.now(), isim, birim };
-    ekPersoneller.push(yeni);
-    personeller.push(yeni);
+    ekPersoneller.push(yeni); personeller.push(yeni);
     localStorage.setItem("ekPersoneller", JSON.stringify(ekPersoneller));
-    checklistOlustur();
-    tabloyuOlustur();
+    checklistOlustur(); tabloyuOlustur();
 }
 
 function checklistOlustur() {
@@ -110,8 +102,7 @@ function checklistOlustur() {
 
 function toggleCheckbox(id) {
     const cb = document.getElementById('check_' + id);
-    cb.checked = !cb.checked;
-    tabloyuOlustur();
+    cb.checked = !cb.checked; tabloyuOlustur();
 }
 
 function tabloyuOlustur() {
@@ -122,7 +113,6 @@ function tabloyuOlustur() {
         haftalikProgram[p.isim] = isSelected ? Array(7).fill("İZİN") : Array(7).fill(null);
     });
 
-    // v14.5 Sabit Mantık
     if(haftalikProgram["BARIŞ İNCE"] && !haftalikProgram["BARIŞ İNCE"].includes("İZİN")) {
         haftalikProgram["BARIŞ İNCE"][0] = "00:00–07:00";
         haftalikProgram["BARIŞ İNCE"][1] = "00:00–07:00";
@@ -221,12 +211,22 @@ function applyMCRRota(birim) {
     });
 }
 
+// GÜNCELLENEN ANALİZ FONKSİYONU
 function ozetGuncelle() {
-    let h = `<table class="stats-table"><thead><tr><th>Personel</th><th>Mesai</th><th>Gece</th></tr></thead><tbody>`;
+    let h = `<table class="stats-table"><thead><tr><th>Personel</th><th>Mesai Günü</th><th>Gece Vardiyası</th></tr></thead><tbody>`;
     [...personeller].sort((a,b) => birimSiralamasi.indexOf(a.birim) - birimSiralamasi.indexOf(b.birim)).forEach(p => {
-        const mesai = haftalikProgram[p.isim].filter(v => v && v !== "İZİN").length;
-        const gece = haftalikProgram[p.isim].filter(v => v === "00:00–07:00").length;
-        h += `<tr><td><strong>${p.isim}</strong> <small>(${p.birim})</small></td><td>${mesai} Gün</td><td>${gece} Gece</td></tr>`;
+        const mesaiSayisi = haftalikProgram[p.isim].filter(v => v && v !== "İZİN").length;
+        const geceSayisi = haftalikProgram[p.isim].filter(v => v === "00:00–07:00").length;
+        
+        // 6 Gün ve üzeri uyarısı
+        const mesaiStili = mesaiSayisi >= 6 ? 'class="uyari-mesai"' : '';
+        const uyariSimge = mesaiSayisi >= 6 ? '⚠️' : '';
+
+        h += `<tr>
+                <td><strong>${p.isim}</strong> <small>(${p.birim})</small></td>
+                <td><span ${mesaiStili}>${mesaiSayisi} Gün ${uyariSimge}</span></td>
+                <td>${geceSayisi} Gece</td>
+              </tr>`;
     });
     document.getElementById("ozetTablo").innerHTML = h + "</tbody></table>";
 }
