@@ -28,20 +28,15 @@ th, td {
   border: 1px solid #999;
   padding: 8px;
   text-align: center;
-  min-width: 100px;
+  vertical-align: top;
 }
 
 th {
   background: #eee;
 }
 
-caption {
-  font-weight: bold;
-  margin-bottom: 10px;
-  font-size: 16px;
-}
-
 td.editable {
   cursor: pointer;
   background: #f9f9f9;
+  white-space: pre-line; /* hücre içinde alt satırları göstermek için */
 }
