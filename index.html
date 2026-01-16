@@ -3,51 +3,41 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PRO-Vardiya v11.9 | Adaletli Rotasyon</title>
+  <title>PRO-Vardiya v12.0 | Klasik Görünüm</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
-<body class="light-mode">
-  <div class="app-wrapper">
+<body>
+  <div class="container">
     <header class="no-print">
-      <div class="header-top">
-        <h1>TEKNİK VARDİYA <span>v11.9 ROTASYON</span></h1>
-        <button onclick="toggleDarkMode()" class="btn-theme">🌙 Mod</button>
+      <h1>TEKNİK VARDİYA SİSTEMİ</h1>
+      <div class="nav-controls">
+        <button onclick="haftaDegistir(-7)" class="btn-side">« Geri</button>
+        <h2 id="tarihAraligi">Yükleniyor...</h2>
+        <button onclick="haftaDegistir(7)" class="btn-side">İleri »</button>
       </div>
-      <div class="nav-row">
-          <button onclick="haftaDegistir(-7)" class="btn-nav">« Geri</button>
-          <div class="date-display" id="tarihAraligi">Yükleniyor...</div>
-          <button onclick="haftaDegistir(7)" class="btn-nav">İleri »</button>
-      </div>
-      <div class="action-row">
-          <button onclick="tabloyuOlustur()" class="btn-primary">⚡ Adaletli Planı Oluştur</button>
-          <button onclick="temizleHafiza()" class="btn-danger" style="font-size: 10px;">Hafızayı Sıfırla</button>
+      <div class="main-actions">
+        <button onclick="tabloyuOlustur()" class="btn-generate">⚡ PLAN OLUŞTUR</button>
+        <button onclick="exportPDF()" class="btn-export">PDF İndir</button>
+        <button onclick="whatsappMesajiOlustur()" class="btn-wa">WhatsApp'a Kopyala</button>
       </div>
     </header>
 
-    <div class="export-bar no-print">
-        <button onclick="whatsappMesajiOlustur()" class="btn-wa">WhatsApp</button>
-        <button onclick="exportExcel()" class="btn-success">Excel</button>
-        <button onclick="exportPDF()" class="btn-danger">PDF</button>
+    <div class="checklist-container no-print">
+      <h3>Manuel İzinli Personel Seçimi</h3>
+      <div id="personelChecklist" class="checklist"></div>
     </div>
 
-    <section class="checklist-section no-print">
-      <h3>Bu Haftaki Manuel İzinler (Raporlu/Yıllık)</h3>
-      <div id="personelChecklist" class="checklist-grid"></div>
-    </section>
-
     <main id="print-area">
-      <div class="table-responsive">
-        <table id="vardiyaTablosu">
-          <thead><tr id="tableHeader"></tr></thead>
-          <tbody id="tableBody"></tbody>
-          <tfoot id="tableFooter"></tfoot>
-        </table>
-      </div>
-      <div class="stats-section">
-          <h3>Haftalık Personel Analizi & Hafıza Takibi</h3>
-          <div id="ozetTablo"></div>
+      <table id="vardiyaTablosu">
+        <thead><tr id="tableHeader"></tr></thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+      
+      <div class="stats-container">
+        <h3>Haftalık Çalışma Özeti (2 İzin Takibi)</h3>
+        <div id="ozetTablo"></div>
       </div>
     </main>
   </div>
