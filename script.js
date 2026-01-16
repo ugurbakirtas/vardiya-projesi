@@ -25,7 +25,6 @@ const personeller = [
     { isim: "OSMAN DİNÇER", birim: "Ses Operatörü" },
     { isim: "DOĞUŞ MALGIL", birim: "Ses Operatörü" },
     { isim: "ERDOĞAN KÜÇÜKKAYA", birim: "Ses Operatörü" },
-    // Playout Ekibi Güncellendi
     { isim: "SENA MİNARECİ", birim: "Playout Operatörü" },
     { isim: "MEHMET TUNÇ", birim: "Playout Operatörü" },
     { isim: "KADİR ÇAÇAN", birim: "Playout Operatörü" },
@@ -33,12 +32,14 @@ const personeller = [
     { isim: "YUSUF ALPKILIÇ", birim: "Playout Operatörü" },
     { isim: "MUSTAFA ERCÜMENT KILIÇ", birim: "Playout Operatörü" },
     { isim: "NEHİR KAYGUSUZ", birim: "Playout Operatörü" },
-    // KJ Ekibi
+    // KJ Ekibi İsimleri Güncellendi
     { isim: "YUSUF İSLAM TORUN", birim: "KJ Operatörü" },
-    { isim: "KJ PERSONEL 2", birim: "KJ Operatörü" },
-    { isim: "KJ PERSONEL 3", birim: "KJ Operatörü" },
-    { isim: "KJ PERSONEL 4", birim: "KJ Operatörü" },
-    { isim: "KJ PERSONEL 5", birim: "KJ Operatörü" },
+    { isim: "OĞUZHAN YALAZAN", birim: "KJ Operatörü" },
+    { isim: "UĞUR AKBABA", birim: "KJ Operatörü" },
+    { isim: "SENA BAYDAR", birim: "KJ Operatörü" },
+    { isim: "CEMREHAN SUBAŞI", birim: "KJ Operatörü" },
+    { isim: "YEŞİM KİREÇ", birim: "KJ Operatörü" },
+    { isim: "PINAR ÖZENÇ", birim: "KJ Operatörü" },
     { isim: "RAMAZAN KOÇAK", birim: "24TV - 360TV INGEST OPERATÖRÜ" },
     { isim: "Selin", birim: "Uplink" },
     { isim: "VOLKAN DEMİRBAŞ", birim: "24TV-360TV BİLGİ İŞLEM" },
@@ -138,7 +139,7 @@ function tabloyuOlustur() {
     }
 
     renderTable();
-    ozetGuncelle();
+    ozzGuncelle();
 }
 
 function planlaZorunlu(gun, birim, saat, kapasite) {
