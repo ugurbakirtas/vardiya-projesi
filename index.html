@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PRO-Vardiya v16.6 | v14.5 Core</title>
+  <title>PRO-Vardiya v16.7 | Liste Düzeni</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -12,7 +12,7 @@
   <div class="app-wrapper">
     <header class="no-print">
       <div class="logo-area">
-        <h1>TEKNİK VARDİYA <span>v16.6</span></h1>
+        <h1>TEKNİK VARDİYA <span>v16.7</span></h1>
         <p id="tarihAraligi">Yükleniyor...</p>
       </div>
       <div class="main-actions">
@@ -22,7 +22,7 @@
       </div>
       <div class="mode-controls">
         <button onclick="toggleTheme()" class="btn-theme">🌙 Gece Modu</button>
-        <button onclick="toggleAdminPanel()" class="btn-admin">⚙️ Yönetim Paneli</button>
+        <button onclick="toggleAdminPanel()" class="btn-admin">⚙️ Yönetim</button>
       </div>
       <div class="export-actions">
         <button onclick="whatsappMesajiOlustur()" class="btn-wa">WhatsApp</button>
@@ -36,24 +36,24 @@
         <div class="admin-box">
           <h3>Yeni Birim Ekle</h3>
           <input type="text" id="yeniBirim" placeholder="Birim Adı (Örn: REJİ)">
-          <button onclick="birimEkle()" class="btn-accent">Birimi Listeye Ekle</button>
+          <button onclick="birimEkle()" class="btn-accent">Birimi Ekle</button>
         </div>
         <div class="admin-box">
           <h3>Yeni Personel Kaydı</h3>
           <input type="text" id="yeniIsim" placeholder="İsim Soyad">
           <select id="birimSec"></select>
-          <button onclick="personelEkle()" class="btn-primary">Sisteme Kaydet</button>
+          <button onclick="personelEkle()" class="btn-primary">Kaydet</button>
         </div>
       </div>
-      <button onclick="sifirla()" class="btn-warning" style="margin-top:15px; width:100%">Sistemi ve Belleği Sıfırla</button>
+      <button onclick="sifirla()" class="btn-warning" style="margin-top:10px; width:100%">Sistemi Sıfırla</button>
     </section>
 
     <section class="checklist-area no-print">
       <div class="checklist-header">
-        <h3 class="panel-title">İzinli Personel Seçimi</h3>
+        <h3 class="panel-title">Haftalık İzinli Personel Seçimi (LİSTE)</h3>
         <input type="text" id="personelAra" placeholder="🔍 Personel Ara..." onkeyup="checklistFiltrele()">
       </div>
-      <div id="personelChecklist" class="checklist-grid"></div>
+      <div id="personelChecklist" class="checklist-vertical"></div>
     </section>
 
     <main id="print-area">
