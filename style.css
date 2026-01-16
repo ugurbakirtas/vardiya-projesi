@@ -1,7 +1,7 @@
 body {
   font-family: Arial, sans-serif;
+  background: #f4f4f4;
   text-align: center;
-  background: #f0f0f0;
 }
 
 h2 {
@@ -9,17 +9,24 @@ h2 {
   color: #333;
 }
 
+button {
+  margin: 15px;
+  padding: 10px 15px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
 table {
   border-collapse: collapse;
-  width: 90%;
+  width: 95%;
   margin: 20px auto;
   background: #fff;
   box-shadow: 0 0 10px rgba(0,0,0,0.1);
 }
 
 th, td {
-  border: 1px solid #333;
-  padding: 10px;
+  border: 1px solid #999;
+  padding: 8px;
   text-align: center;
 }
 
