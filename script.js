@@ -1,6 +1,5 @@
 const gunler = ["Pazartesi","Salı","Çarşamba","Perşembe","Cuma","Cumartesi","Pazar"];
 
-// Saat blokları senin istediğin şekilde
 const saatler = [
   "06:30–16:00","06:30–16:00","06:30–16:00","06:30–16:00",
   "09:00–18:00",
@@ -48,10 +47,13 @@ function tabloyuOlustur() {
   const tbody = document.querySelector("#vardiyaTablosu tbody");
   saatler.forEach((saat) => {
     const tr = document.createElement("tr");
+
+    // Saat hücresi
     const tdSaat = document.createElement("td");
     tdSaat.textContent = saat;
     tr.appendChild(tdSaat);
 
+    // Gün hücreleri
     gunler.forEach((gun) => {
       const td = document.createElement("td");
       td.classList.add("editable");
@@ -66,6 +68,15 @@ function tabloyuOlustur() {
       td.addEventListener("click", () => elleDegistir(td));
       tr.appendChild(td);
     });
+
+    // Renk sınıfları
+    if (saat.startsWith("06:30")) tr.classList.add("saat-0630");
+    else if (saat.startsWith("09:00")) tr.classList.add("saat-0900");
+    else if (saat.startsWith("12:00")) tr.classList.add("saat-1200");
+    else if (saat.startsWith("16:00")) tr.classList.add("saat-1600");
+    else if (saat.startsWith("00:00")) tr.classList.add("saat-0000");
+    else if (saat === "İZİN") tr.classList.add("izin");
+    else if (saat === "DIŞ YAYIN") tr.classList.add("disyayin");
 
     tbody.appendChild(tr);
   });

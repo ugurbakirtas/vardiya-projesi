@@ -1,0 +1,51 @@
+body {
+  font-family: Arial, sans-serif;
+  background: #f4f4f4;
+  text-align: center;
+}
+
+h2 {
+  margin-top: 20px;
+  color: #333;
+}
+
+button {
+  margin: 15px;
+  padding: 10px 15px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+table {
+  border-collapse: collapse;
+  width: 95%;
+  margin: 30px auto;
+  background: #fff;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+th, td {
+  border: 1px solid #999;
+  padding: 8px;
+  text-align: center;
+  vertical-align: top;
+  min-width: 100px;
+}
+
+th {
+  background: #eee;
+}
+
+td.editable {
+  cursor: pointer;
+  white-space: pre-line;
+}
+
+/* Saat bloklarına renkler */
+tr.saat-0630 { background-color: #ffe0e0; }   /* 06:30–16:00 */
+tr.saat-0900 { background-color: #e0ffe0; }   /* 09:00–18:00 */
+tr.saat-1200 { background-color: #e0e0ff; }   /* 12:00–22:00 */
+tr.saat-1600 { background-color: #fff0cc; }   /* 16:00–00:00 */
+tr.saat-0000 { background-color: #f0ccff; }   /* 00:00–07:00 */
+tr.izin      { background-color: #ffcccc; }   /* İZİN */
+tr.disyayin  { background-color: #cce5ff; }   /* DIŞ YAYIN */
