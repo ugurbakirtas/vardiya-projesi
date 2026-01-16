@@ -31,11 +31,11 @@ function programiSifirla() {
     haftalikProgram[p.isim] = Array(7).fill(null);
   });
 
-  // ÖZEL KURAL: Zafer Akar Cumartesi-Pazar İzinli
+  // Zafer Akar Hafta Sonu İzin
   haftalikProgram["ZAFER AKAR"][5] = "İZİN";
   haftalikProgram["ZAFER AKAR"][6] = "İZİN";
 
-  // İZİN ATAMA
+  // İZİN ATAMA (Birim Bazlı)
   gunler.forEach((_, gIdx) => {
     birimler.forEach(birim => {
       let adaylar = personeller.filter(p => p.birim === birim);
@@ -64,24 +64,31 @@ function uygunlukKontrol(personel, gunIdx, saat) {
   const isim = personel.isim;
   const program = haftalikProgram[isim];
 
+  // Zafer Akar Sabit Kuralı
   if (isim === "ZAFER AKAR") {
     if (gunIdx < 5) {
       if (saat !== "06:30–16:00") return false;
     } else return false;
   }
 
+  // Zaten atama yapılmış mı?
   if (program[gunIdx] !== null) return false;
 
+  // DİNLENME KURALLARI (Kritik Bölüm)
   if (gunIdx > 0) {
-    const dun = program[gunIdx - 1];
-    // Dinlenme kuralı: Gece veya akşam sonrası sabah gelemez
-    if (saat === "06:30–16:00" && (dun === "16:00–00:00" || dun === "00:00–07:00")) return false;
+    const dunkuVardiya = program[gunIdx - 1];
+    
+    // KURAL: 16:00-00:00 çalışan ertesi gün 06:30 gelemez
+    if (saat === "06:30–16:00" && dunkuVardiya === "16:00–00:00") return false;
+    
+    // KURAL: Gece çalışan ertesi gün (izin yapmadan) 06:30 gelemez
+    if (saat === "06:30–16:00" && dunkuVardiya === "00:00–07:00") return false;
   }
 
+  // Gece Sınırı
   if (saat === "00:00–07:00") {
-    const gSay = program.filter(v => v === "00:00–07:00").length;
-    // Haftada max 2 gece ve sadece gece çalışabilenler
-    if (gSay >= 2 || !personel.gece) return false;
+    const geceSayisi = program.filter(v => v === "00:00–07:00").length;
+    if (geceSayisi >= 2 || !personel.gece) return false;
   }
 
   return true;
@@ -105,8 +112,8 @@ function tabloyuOlustur() {
       birimler.forEach(birim => {
         let kapasite = 1;
         const isSesVeyaTY = (birim === "Ses Operatörü" || birim === "Teknik Yönetmen");
-        
-        // Kapasite Kuralları
+
+        // Kapasite ve Atama Şartları
         if (birim === "Ses Operatörü") {
           if (haftaSonuMu) {
             if (saat === "06:30–16:00") kapasite = 2;
@@ -116,20 +123,21 @@ function tabloyuOlustur() {
           } else {
             if (saat === "06:30–16:00") kapasite = 4;
             else if (saat === "16:00–00:00") kapasite = 2;
-            else kapasite = 0; // Hafta içi 09:00, 12:00, Gece, Dış Yayın Manuel
+            else kapasite = 0;
           }
         } else if (birim === "Teknik Yönetmen") {
           if (saat === "06:30–16:00" || saat === "16:00–00:00") kapasite = 2;
-          else if (saat === "00:00–07:00") kapasite = 1; // HER GÜN ZORUNLU 1 KİŞİ
-          else kapasite = 0; // TY için 09:00, 12:00 ve Dış yayın Manuel
+          else if (saat === "00:00–07:00") kapasite = 1; // Her gün 1 kişi
+          else kapasite = 0;
         }
 
         let otomatikAtamaAktif = (kapasite > 0);
+        // Hafta içi 09:00 vardiyası TY ve Ses için manuel
         if (!haftaSonuMu && saat === "09:00–18:00" && isSesVeyaTY) otomatikAtamaAktif = false;
 
         let atananlar = [];
 
-        // Zafer Akar Sabit (Hafta içi sabah)
+        // Zafer Akar Sabitleme
         if (birim === "Ses Operatörü" && saat === "06:30–16:00" && !haftaSonuMu) {
           if (uygunlukKontrol({isim: "ZAFER AKAR"}, gIdx, saat)) {
              haftalikProgram["ZAFER AKAR"][gIdx] = saat;
@@ -157,7 +165,7 @@ function tabloyuOlustur() {
     html += `</tr>`;
   });
 
-  // İZİN Satırı (Birim detaylı)
+  // İZİN Satırı
   html += `<tr class="saat-izin-row"><td><strong>İZİN</strong></td>`;
   gunler.forEach((_, gIdx) => {
     let izinIcerik = "";
