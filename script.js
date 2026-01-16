@@ -24,30 +24,36 @@ const personeller = [
 ];
 
 let haftalikProgram = {}; 
-let geceSayaci = {};
-let sesIzinSayaci = {};
+let birimIzinSayaci = {};
 
 function programiSifirla() {
   haftalikProgram = {};
-  geceSayaci = {};
-  sesIzinSayaci = {};
+  birimIzinSayaci = {};
   personeller.forEach(p => {
     haftalikProgram[p.isim] = Array(7).fill(null);
-    sesIzinSayaci[p.isim] = 0;
   });
 
-  // Ses Operatörü İzin Kuralı: Her gün 2 kişi izinli, max 2 gün
+  // Her gün her birimden rastgele izin atama (Ses için 2, diğerleri için gerekirse)
   gunler.forEach((_, gIdx) => {
-    let sesciler = personeller.filter(p => p.birim === "Ses Operatörü");
-    let izinliSayisi = 0;
-    while(izinliSayisi < 2) {
-      let aday = sesciler[Math.floor(Math.random() * sesciler.length)];
-      if(haftalikProgram[aday.isim][gIdx] === null && sesIzinSayaci[aday.isim] < 2) {
-        haftalikProgram[aday.isim][gIdx] = "İZİN";
-        sesIzinSayaci[aday.isim]++;
-        izinliSayisi++;
+    birimler.forEach(birim => {
+      let adaylar = personeller.filter(p => p.birim === birim);
+      let limit = (birim === "Ses Operatörü") ? 2 : 2; // Ses için 2 izin, diğerleri için 2 izin
+      let atanan = 0;
+      
+      // Shuffle adaylar
+      adaylar.sort(() => Math.random() - 0.5);
+
+      for (let p of adaylar) {
+        if (atanan < limit) {
+          // Haftalık max izin kontrolü (örneğin herkes haftada en az 1 gün izinli)
+          const toplamIzin = haftalikProgram[p.isim].filter(v => v === "İZİN").length;
+          if (toplamIzin < 2) { // Haftada max 2 izin
+             haftalikProgram[p.isim][gIdx] = "İZİN";
+             atanan++;
+          }
+        }
       }
-    }
+    });
   });
 }
 
@@ -55,13 +61,11 @@ function uygunlukKontrol(personel, gunIdx, saat) {
   const isim = personel.isim;
   if (haftalikProgram[isim][gunIdx] !== null) return false;
 
-  // 11 Saat Kuralı
   if (gunIdx > 0 && saat === "06:30–16:00") {
     const dun = haftalikProgram[isim][gunIdx - 1];
     if (dun === "16:00–00:00" || dun === "00:00–07:00") return false;
   }
 
-  // Gece Kuralı
   if (saat === "00:00–07:00") {
     const gSay = haftalikProgram[isim].filter(v => v === "00:00–07:00").length;
     if (gSay >= 2 || !personel.gece) return false;
@@ -85,10 +89,8 @@ function tabloyuOlustur() {
       let hucreContent = "";
       birimler.forEach(birim => {
         let kapasite = 1;
-        // Özel Kapasite Tanımları
         if(birim === "Teknik Yönetmen") {
-           if(saat === "06:30–16:00") kapasite = 2;
-           if(saat === "16:00–00:00") kapasite = 2; 
+           if(saat === "06:30–16:00" || saat === "16:00–00:00") kapasite = 2;
         } else if(birim === "Ses Operatörü") {
            if(saat === "06:30–16:00") kapasite = 4;
            if(saat === "16:00–00:00") kapasite = 2;
@@ -115,11 +117,20 @@ function tabloyuOlustur() {
     html += `</tr>`;
   });
 
-  // İzin Satırı
-  html += `<tr style="background:#eee"><td><strong>İZİNLİLER (Ses)</strong></td>`;
+  // İZİN Satırı (Birim bazlı detaylı)
+  html += `<tr class="saat-izin-row"><td><strong>İZİN</strong></td>`;
   gunler.forEach((_, gIdx) => {
-    const izinliler = personeller.filter(p => p.birim === "Ses Operatörü" && haftalikProgram[p.isim][gIdx] === "İZİN").map(p => p.isim).join(', ');
-    html += `<td>${izinliler}</td>`;
+    let izinIcerik = "";
+    birimler.forEach(birim => {
+      const izinliler = personeller.filter(p => p.birim === birim && haftalikProgram[p.isim][gIdx] === "İZİN");
+      if(izinliler.length > 0) {
+        izinIcerik += `<div class="birim-card" style="border-color:#ccc; background:#fff">
+          <span class="birim-tag" style="color:#2980b9">${birim}</span>
+          ${izinliler.map(p => p.isim).join('<br>')}
+        </div>`;
+      }
+    });
+    html += `<td>${izinIcerik || "Çalışan Yok"}</td>`;
   });
   html += `</tr></tbody></table>`;
 
@@ -138,8 +149,14 @@ function cakismaKontroluYap() {
       if(!hucre) return;
       hucre.classList.remove("conflict");
       const isimler = Array.from(hucre.querySelectorAll(".p-isim")).map(el => el.innerText.trim());
-      isimler.forEach(m => { if(m !== "-" && m !== "") isimSayaci[m] = (isimSayaci[m] || 0) + 1; });
+      // İzin satırındaki isimleri de hesaba katmak için düz metin kontrolü
+      const izinIsimleri = hucre.innerText.split('\n').filter(t => t.trim().length > 3 && !birimler.includes(t.trim()));
+      
+      [...isimler, ...izinIsimleri].forEach(m => { 
+        if(m !== "-" && m !== "") isimSayaci[m] = (isimSayaci[m] || 0) + 1; 
+      });
     });
+
     satirlar.forEach(satir => {
       const hucre = satir.cells[gIdx];
       if(!hucre) return;
@@ -150,6 +167,6 @@ function cakismaKontroluYap() {
 }
 
 document.getElementById("excelBtn").onclick = () => {
-  XLSX.writeFile(XLSX.utils.table_to_book(document.querySelector("table")), "Teknik_Vardiya_Listesi.xlsx");
+  XLSX.writeFile(XLSX.utils.table_to_book(document.querySelector("table")), "Teknik_Vardiya_Programi.xlsx");
 };
 window.onload = tabloyuOlustur;
