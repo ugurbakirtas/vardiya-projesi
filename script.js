@@ -1,14 +1,18 @@
 /**
- * PRO-Vardiya v16.0
- * v14.5 TÜM KURALLAR VE PERSONEL LİSTESİ KORUNARAK GÜNCELLENMİŞTİR.
+ * PRO-Vardiya v16.0 | v14.5 Core
+ * Kurallar ve Personel Listesi Sabitlenmiştir.
  */
 
-// v14.5 SABİT LİSTE
-const anaBirimler = ["TEKNİK YÖNETMEN", "SES OPERATÖRÜ", "PLAYOUT OPERATÖRÜ", "KJ OPERATÖRÜ", "INGEST OPERATÖRÜ", "BİLGİ İŞLEM", "YAYIN SİSTEMLERİ", "24TV MCR OPERATÖRÜ", "360TV MCR OPERATÖRÜ"];
-let ekBirimler = JSON.parse(localStorage.getItem("ekBirimler")) || [];
-let birimSiralamasi = [...anaBirimler, ...ekBirimler];
+const birimSiralamasi = [
+    "TEKNİK YÖNETMEN", "SES OPERATÖRÜ", "PLAYOUT OPERATÖRÜ", "KJ OPERATÖRÜ", 
+    "INGEST OPERATÖRÜ", "BİLGİ İŞLEM", "YAYIN SİSTEMLERİ", "24TV MCR OPERATÖRÜ", "360TV MCR OPERATÖRÜ"
+];
 
-const anaPersoneller = [
+const gunler = ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"];
+const saatler = ["06:30–16:00", "09:00–18:00", "12:00–22:00", "16:00–00:00", "00:00–07:00", "DIŞ YAYIN"];
+
+// Orijinal v14.5 Listesi
+let personeller = [
     { id: 1, isim: "YUNUS EMRE YAYLA", birim: "TEKNİK YÖNETMEN" },
     { id: 2, isim: "HASAN CAN SAĞLAM", birim: "TEKNİK YÖNETMEN" },
     { id: 3, isim: "MEHMET BERKMAN", birim: "TEKNİK YÖNETMEN" },
@@ -57,11 +61,9 @@ const anaPersoneller = [
     { id: 47, isim: "BÜKRE YAVUZ", birim: "360TV MCR OPERATÖRÜ" }
 ];
 
-let ekPersoneller = JSON.parse(localStorage.getItem("ekPersoneller")) || [];
-let personeller = [...anaPersoneller, ...ekPersoneller];
-
-const gunler = ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"];
-const saatler = ["06:30–16:00", "09:00–18:00", "12:00–22:00", "16:00–00:00", "00:00–07:00", "DIŞ YAYIN"];
+// Eklenenleri LocalStorage'dan yükle
+const ekPersoneller = JSON.parse(localStorage.getItem("ekPersoneller")) || [];
+personeller = [...personeller, ...ekPersoneller];
 
 let mevcutPazartesi = getMonday(new Date());
 let haftalikProgram = {};
@@ -72,73 +74,85 @@ function getMonday(d) {
     return new Date(d.setDate(diff));
 }
 
-// --- YÖNETİM VE TEMA ---
+// TEMA VE PANEL FONKSİYONLARI
 function toggleTheme() {
     document.body.classList.toggle("dark-mode");
-    document.getElementById("themeBtn").innerText = document.body.classList.contains("dark-mode") ? "☀️ Aydınlık Mod" : "🌙 Karanlık Mod";
 }
 
 function toggleAdminPanel() {
     document.getElementById("adminPanel").classList.toggle("hidden");
-    adminPanelGuncelle();
-}
-
-function birimEkle() {
-    const ad = document.getElementById("yeniBirimAd").value.toUpperCase();
-    if(!ad) return;
-    ekBirimler.push(ad);
-    birimSiralamasi = [...anaBirimler, ...ekBirimler];
-    localStorage.setItem("ekBirimler", JSON.stringify(ekBirimler));
-    adminPanelGuncelle();
+    const s = document.getElementById("birimSec");
+    s.innerHTML = birimSiralamasi.map(b => `<option value="${b}">${b}</option>`).join('');
 }
 
 function personelEkle() {
     const isim = document.getElementById("yeniIsim").value.toUpperCase();
     const birim = document.getElementById("birimSec").value;
     if(!isim) return;
-    ekPersoneller.push({ id: Date.now(), isim, birim });
-    personeller = [...anaPersoneller, ...ekPersoneller];
+    const yeni = { id: Date.now(), isim, birim };
+    ekPersoneller.push(yeni);
+    personeller.push(yeni);
     localStorage.setItem("ekPersoneller", JSON.stringify(ekPersoneller));
     checklistOlustur();
     tabloyuOlustur();
 }
 
-function adminPanelGuncelle() {
-    document.getElementById("birimSec").innerHTML = birimSiralamasi.map(b => `<option value="${b}">${b}</option>`).join('');
+function checklistOlustur() {
+    const container = document.getElementById("personelChecklist");
+    const sirali = [...personeller].sort((a, b) => birimSiralamasi.indexOf(a.birim) - birimSiralamasi.indexOf(b.birim));
+    container.innerHTML = sirali.map(p => `
+        <div class="check-item" onclick="toggleCheckbox('${p.id}')">
+            <input type="checkbox" id="check_${p.id}" onchange="tabloyuOlustur()">
+            <label><strong>${p.isim}</strong><br><small>${p.birim}</small></label>
+        </div>
+    `).join('');
 }
 
-// --- HAFTALIK KAYIT VE TAKİP ---
+function toggleCheckbox(id) {
+    const cb = document.getElementById('check_' + id);
+    cb.checked = !cb.checked;
+    tabloyuOlustur();
+}
+
 function tabloyuOlustur() {
-    const haftaKey = "data_" + mevcutPazartesi.toISOString().split('T')[0];
     document.getElementById("tarihAraligi").innerText = `${mevcutPazartesi.toLocaleDateString('tr-TR')} Haftası`;
-    
-    const localSaved = localStorage.getItem(haftaKey);
-    if(localSaved) {
-        haftalikProgram = JSON.parse(localSaved);
-    } else {
-        haftalikProgram = {};
-        personeller.forEach(p => {
-            const isSelected = document.getElementById(`check_${p.id}`)?.checked;
-            haftalikProgram[p.isim] = isSelected ? Array(7).fill("İZİN") : Array(7).fill(null);
-        });
+    haftalikProgram = {};
+    personeller.forEach(p => {
+        const isSelected = document.getElementById(`check_${p.id}`)?.checked;
+        haftalikProgram[p.isim] = isSelected ? Array(7).fill("İZİN") : Array(7).fill(null);
+    });
 
-        // v14.5 Sabit Atamalar
-        if(!haftalikProgram["BARIŞ İNCE"].includes("İZİN")) {
-            haftalikProgram["BARIŞ İNCE"][0] = "00:00–07:00";
-            haftalikProgram["BARIŞ İNCE"][1] = "00:00–07:00";
-        }
-        if(!haftalikProgram["EKREM FİDAN"].includes("İZİN")) {
-            for(let i=2; i<7; i++) haftalikProgram["EKREM FİDAN"][i] = "00:00–07:00";
-        }
-
-        applyMCRRota("24TV MCR OPERATÖRÜ");
-        applyMCRRota("360TV MCR OPERATÖRÜ");
-        applyIngestRota();
+    // v14.5 Sabit Mantık
+    if(haftalikProgram["BARIŞ İNCE"] && !haftalikProgram["BARIŞ İNCE"].includes("İZİN")) {
+        haftalikProgram["BARIŞ İNCE"][0] = "00:00–07:00";
+        haftalikProgram["BARIŞ İNCE"][1] = "00:00–07:00";
     }
+    if(haftalikProgram["EKREM FİDAN"] && !haftalikProgram["EKREM FİDAN"].includes("İZİN")) {
+        for(let i=2; i<7; i++) haftalikProgram["EKREM FİDAN"][i] = "00:00–07:00";
+    }
+
+    applyMCRRota("24TV MCR OPERATÖRÜ");
+    applyMCRRota("360TV MCR OPERATÖRÜ");
+    applyIngestRota();
 
     renderTable();
     ozetGuncelle();
-    localStorage.setItem(haftaKey, JSON.stringify(haftalikProgram));
+}
+
+function renderTable() {
+    const header = document.getElementById("tableHeader");
+    header.innerHTML = `<th>SAATLER</th>` + gunler.map((g, i) => {
+        let t = new Date(mevcutPazartesi); t.setDate(t.getDate() + i);
+        return `<th>${g}<br><small>${t.toLocaleDateString('tr-TR')}</small></th>`;
+    }).join('');
+
+    let b = "";
+    saatler.forEach(s => {
+        b += `<tr><td>${s}</td>`;
+        for(let i=0; i<7; i++) { b += `<td>${hucreDoldur(i, s)}</td>`; }
+        b += `</tr>`;
+    });
+    document.getElementById("tableBody").innerHTML = b;
 }
 
 function hucreDoldur(gun, saat) {
@@ -147,7 +161,6 @@ function hucreDoldur(gun, saat) {
         birimSiralamasi.forEach(birim => {
             if(birim.includes("MCR") || birim.includes("INGEST")) return;
             let kap = 0;
-            // v14.5 Kapasite Mantığı
             if(birim === "TEKNİK YÖNETMEN") {
                 if(saat === "00:00–07:00") kap = 1;
                 else if(!isHS) {
@@ -179,44 +192,18 @@ function hucreDoldur(gun, saat) {
         });
     }
 
-    let list = personeller.filter(p => haftalikProgram[p.isim][gun] === saat);
-    list.sort((a, b) => birimSiralamasi.indexOf(a.birim) - birimSiralamasi.indexOf(b.birim));
-    return list.map(p => `<div class="birim-card"><span class="birim-tag">${p.birim}</span><span class="p-isim">${p.isim}</span></div>`).join('');
+    let finalListe = personeller.filter(p => haftalikProgram[p.isim][gun] === saat);
+    finalListe.sort((a, b) => birimSiralamasi.indexOf(a.birim) - birimSiralamasi.indexOf(b.birim));
+    return finalListe.map(p => `<div class="birim-card"><span class="birim-tag">${p.birim}</span><span class="p-isim">${p.isim}</span></div>`).join('');
 }
 
-function renderTable() {
-    const h = document.getElementById("tableHeader");
-    h.innerHTML = `<th>SAATLER</th>` + gunler.map((g, i) => {
-        let t = new Date(mevcutPazartesi); t.setDate(t.getDate() + i);
-        return `<th>${g}<br><small>${t.toLocaleDateString('tr-TR')}</small></th>`;
-    }).join('');
-    let b = "";
-    saatler.forEach(s => {
-        b += `<tr><td>${s}</td>`;
-        for(let i=0; i<7; i++) b += `<td>${hucreDoldur(i, s)}</td>`;
-        b += `</tr>`;
-    });
-    document.getElementById("tableBody").innerHTML = b;
-}
-
-function ozetGuncelle() {
-    let h = `<table class="stats-table"><thead><tr><th>Personel</th><th>Birim</th><th>Top. Gün</th><th>Gece</th></tr></thead><tbody>`;
-    personeller.sort((a,b) => birimSiralamasi.indexOf(a.birim) - birimSiralamasi.indexOf(b.birim)).forEach(p => {
-        const mesai = haftalikProgram[p.isim].filter(v => v && v !== "İZİN").length;
-        const gece = haftalikProgram[p.isim].filter(v => v === "00:00–07:00").length;
-        h += `<tr><td>${p.isim}</td><td><small>${p.birim}</small></td><td>${mesai} Gün</td><td>${gece} Gece</td></tr>`;
-    });
-    document.getElementById("ozetTablo").innerHTML = h + "</tbody></table>";
-}
-
-// v14.5 Rota Mantığı
 function applyIngestRota() {
     const ekip = personeller.filter(p => p.birim === "INGEST OPERATÖRÜ");
     const rota = ["06:30–16:00", "06:30–16:00", "16:00–00:00", "16:00–00:00", "İZİN", "İZİN"];
     ekip.forEach((p, idx) => {
         for(let i=0; i<7; i++) {
             let d = new Date(mevcutPazartesi.getTime() + (i * 86400000));
-            let rI = (Math.floor((d - new Date(2025,0,6)) / 86400000) + (idx * 2)) % 6;
+            let rI = (Math.floor((d - new Date(2025, 0, 6)) / 86400000) + (idx * 2)) % 6;
             if(!haftalikProgram[p.isim][i]) haftalikProgram[p.isim][i] = rota[rI < 0 ? rI + 6 : rI];
         }
     });
@@ -228,25 +215,20 @@ function applyMCRRota(birim) {
     ekip.forEach((p, idx) => {
         for(let i=0; i<7; i++) {
             let d = new Date(mevcutPazartesi.getTime() + (i * 86400000));
-            let rI = (Math.floor((d - new Date(2025,0,6)) / 86400000) + (idx * 2)) % 8;
+            let rI = (Math.floor((d - new Date(2025, 0, 6)) / 86400000) + (idx * 2)) % 8;
             if(!haftalikProgram[p.isim][i]) haftalikProgram[p.isim][i] = rota[rI < 0 ? rI + 8 : rI];
         }
     });
 }
 
-function checklistOlustur() {
-    const container = document.getElementById("personelChecklist");
-    container.innerHTML = personeller.sort((a,b) => birimSiralamasi.indexOf(a.birim) - birimSiralamasi.indexOf(b.birim)).map(p => `
-        <div class="check-item" onclick="toggleCheckbox('${p.id}')">
-            <input type="checkbox" id="check_${p.id}" onchange="tabloyuOlustur()">
-            <label><strong>${p.isim}</strong><br><small>${p.birim}</small></label>
-        </div>
-    `).join('');
-}
-
-function toggleCheckbox(id) {
-    const cb = document.getElementById('check_' + id);
-    if(cb) { cb.checked = !cb.checked; tabloyuOlustur(); }
+function ozetGuncelle() {
+    let h = `<table class="stats-table"><thead><tr><th>Personel</th><th>Mesai</th><th>Gece</th></tr></thead><tbody>`;
+    [...personeller].sort((a,b) => birimSiralamasi.indexOf(a.birim) - birimSiralamasi.indexOf(b.birim)).forEach(p => {
+        const mesai = haftalikProgram[p.isim].filter(v => v && v !== "İZİN").length;
+        const gece = haftalikProgram[p.isim].filter(v => v === "00:00–07:00").length;
+        h += `<tr><td><strong>${p.isim}</strong> <small>(${p.birim})</small></td><td>${mesai} Gün</td><td>${gece} Gece</td></tr>`;
+    });
+    document.getElementById("ozetTablo").innerHTML = h + "</tbody></table>";
 }
 
 function haftaDegistir(g) { mevcutPazartesi.setDate(mevcutPazartesi.getDate() + g); tabloyuOlustur(); }
@@ -258,8 +240,8 @@ function whatsappMesajiOlustur() {
     gunler.forEach((g, i) => {
         m += `*${g.toUpperCase()}*\n`;
         saatler.forEach(s => {
-            let l = personeller.filter(p => haftalikProgram[p.isim][i] === s);
-            if(l.length > 0) m += `▫️ ${s}: ${l.map(x => x.isim).join(", ")}\n`;
+            let list = personeller.filter(p => haftalikProgram[p.isim][i] === s);
+            if(list.length > 0) m += `▫️ ${s}: ${list.map(x => x.isim).join(", ")}\n`;
         });
         m += `\n`;
     });
