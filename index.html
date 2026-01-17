@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PRO-Vardiya v22.0 | Tam Otomatik</title>
+  <title>PRO-Vardiya v23.0 | AI Asistan</title>
   <link rel="stylesheet" href="style.css">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -13,74 +13,32 @@
   <div class="app-wrapper">
     <header class="no-print main-header">
       <div class="logo-area">
-        <div class="badge">V22.0 AUTO</div>
+        <div class="badge">V23.0 AI</div>
         <h1>TEKNİK <span>VARDİYA</span></h1>
         <p id="tarihAraligi" class="date-display">Yükleniyor...</p>
       </div>
       <div class="nav-controls">
         <button onclick="haftaDegistir(-7)" class="btn-step">« GERİ</button>
-        <button onclick="tabloyuOlustur()" class="btn-main-action pulse">OTOMATİK PLANLA</button>
+        <button onclick="tabloyuOlustur()" class="btn-main-action pulse">AKILLI PLANLA</button>
         <button onclick="haftaDegistir(7)" class="btn-step">İLERİ »</button>
       </div>
       <div class="utility-controls">
-        <button onclick="toggleTheme()" class="btn-circle" id="themeBtn">🌙</button>
-        <button onclick="toggleAdminPanel()" class="btn-circle">⚙️ YÖNETİM</button>
+        <button onclick="toggleTheme()" class="btn-circle">🌙</button>
+        <button onclick="toggleAdminPanel()" class="btn-circle">⚙️</button>
       </div>
     </header>
 
-    <div id="adminPanel" class="admin-overlay no-print hidden">
-      <div class="admin-modal">
-        <div class="admin-header">
-          <h2>Gelişmiş Algoritma ve Kapasite Yönetimi</h2>
-          <button onclick="toggleAdminPanel()" class="btn-close">×</button>
-        </div>
-        <div class="admin-tabs">
-          <button onclick="tabDegistir('kapasite')" class="tab-btn active">Kapasiteler</button>
-          <button onclick="tabDegistir('kurallar')" class="tab-btn">Manuel Yasaklar</button>
-          <button onclick="tabDegistir('otomatik')" class="tab-btn">Akıllı Koşullar</button>
-        </div>
-        <div class="admin-body">
-          <div id="tab-kapasite" class="tab-content">
-             <div class="kapasite-info">
-               <span class="legend-box hi"></span> Hafta İçi | <span class="legend-box hs"></span> Hafta Sonu
-             </div>
-             <div id="kapasiteListesi"></div>
-          </div>
-          <div id="tab-kurallar" class="tab-content hidden">
-            <div class="kural-form">
-              <select id="kuralPersonel"></select>
-              <select id="kuralGun">
-                <option value="Hepsi">Tüm Günler</option>
-                <option value="0">Pazartesi</option><option value="1">Salı</option><option value="2">Çarşamba</option>
-                <option value="3">Perşembe</option><option value="4">Cuma</option><option value="5">Cumartesi</option><option value="6">Pazar</option>
-              </select>
-              <select id="kuralSaat"></select>
-              <select id="kuralTip"><option value="YASAK">Yasakla</option><option value="ZORUNLU">Sabitle</option></select>
-              <button onclick="kuralKaydet()" class="btn-rule">EKLE</button>
-            </div>
-            <div id="aktifKurallarListesi"></div>
-          </div>
-          <div id="tab-otomatik" class="tab-content hidden">
-            <div class="auto-rules-grid">
-              <div class="auto-rule-card">
-                <input type="checkbox" id="rule_geceSonrasiIzin" onchange="autoRuleKaydet()">
-                <label for="rule_geceSonrasiIzin"><strong>Gece Dinlenmesi</strong><span>Gece çalışan ertesi gün izinli olur.</span></label>
-              </div>
-              <div class="auto-rule-card">
-                <input type="checkbox" id="rule_pesPeseGece" onchange="autoRuleKaydet()">
-                <label for="rule_pesPeseGece"><strong>Gece Sınırı</strong><span>Max 2 gece ve peş peşe yasağı.</span></label>
-              </div>
-            </div>
-            <button onclick="sifirla()" class="btn-reset">SİSTEMİ SIFIRLA</button>
-          </div>
-        </div>
-      </div>
-    </div>
+    <div id="uyariPaneli" class="alert-box hidden no-print"></div>
 
     <main class="content-area">
-      <section class="checklist-section no-print">
-        <div id="personelChecklist" class="checklist-horizontal-grid"></div>
+      <section class="heatmap-section no-print">
+        <div id="heatmapContainer" class="heatmap-grid"></div>
       </section>
+
+      <section class="checklist-section no-print">
+         <div id="personelChecklist" class="checklist-horizontal-grid"></div>
+      </section>
+
       <div class="table-card" id="print-area">
         <div class="table-responsive">
           <table id="vardiyaTablosu">
@@ -88,14 +46,46 @@
             <tbody id="tableBody"></tbody>
           </table>
         </div>
-        <div id="ozetTablo" class="analysis-section"></div>
       </div>
+      
+      <div id="ozetTablo" class="analysis-section no-print"></div>
+
       <div class="footer-buttons no-print">
           <button onclick="whatsappMesajiOlustur()" class="wa-btn">WhatsApp</button>
           <button onclick="exportExcel()" class="ex-btn">Excel</button>
           <button onclick="exportPDF()" class="pdf-btn">PDF</button>
       </div>
     </main>
+
+    <div id="adminPanel" class="admin-overlay no-print hidden">
+      <div class="admin-modal">
+        <div class="admin-tabs">
+            <button onclick="tabDegistir('kapasite')" class="tab-btn active">Kapasiteler</button>
+            <button onclick="tabDegistir('kurallar')" class="tab-btn">Yasaklar</button>
+            <button onclick="tabDegistir('otomatik')" class="tab-btn">AI Ayarlar</button>
+        </div>
+        <div class="admin-body">
+            <div id="tab-kapasite" class="tab-content"> <div id="kapasiteListesi"></div> </div>
+            <div id="tab-kurallar" class="tab-content hidden">
+                 <div class="kural-form">
+                    <select id="kuralPersonel"></select>
+                    <select id="kuralGun"><option value="Hepsi">Her Gün</option><option value="0">Pzt</option><option value="1">Sal</option><option value="2">Çar</option><option value="3">Per</option><option value="4">Cum</option><option value="5">Cmt</option><option value="6">Paz</option></select>
+                    <select id="kuralSaat"></select>
+                    <select id="kuralTip"><option value="YASAK">Yasak</option><option value="ZORUNLU">Sabit</option></select>
+                    <button onclick="kuralKaydet()">EKLE</button>
+                 </div>
+                 <div id="aktifKurallarListesi"></div>
+            </div>
+            <div id="tab-otomatik" class="tab-content hidden">
+                <div class="auto-rule-card">
+                    <input type="checkbox" id="rule_adaletPuani" checked onchange="autoRuleKaydet()">
+                    <label><strong>Adalet Puanı Sistemi</strong><span>Geçen hafta çok çalışanları bu hafta dinlendir.</span></label>
+                </div>
+                <button onclick="sifirla()" class="btn-reset">Tüm Verileri Sıfırla</button>
+            </div>
+        </div>
+      </div>
+    </div>
   </div>
   <script src="script.js"></script>
 </body>
