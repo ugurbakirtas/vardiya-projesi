@@ -1,6 +1,6 @@
 /**
  * PRO-Vardiya v22.0 | Tam Otomatik Akıllı Motor
- * GÜNCELLEME: 7 gün çalışma yasağı, Teknik Yönetmen kesin rotasyonu ve boş geçilemez kuralı.
+ * GÜNCELLEME: 7 Gün Çalışma Yasağı + Boş Geçilemez + Teknik Yönetmen Gece Rotasyonu
  */
 
 const birimSiralamasi = [
@@ -81,7 +81,7 @@ function baslat() {
         }
     });
 
-    // Teknik Yönetmen Kapasiteleri
+    // Teknik Yönetmen Kapasiteleri (Kesin Talimat)
     if (kapasiteAyarlari["TEKNİK YÖNETMEN"]) {
         kapasiteAyarlari["TEKNİK YÖNETMEN"]["06:30–16:00"].haftaici = 2;
         kapasiteAyarlari["TEKNİK YÖNETMEN"]["16:00–00:00"].haftaici = 1;
@@ -184,14 +184,14 @@ function tabloyuOlustur() {
 function applyTeknikYonetmenRota() {
     const baris = "BARIŞ İNCE";
     const ekrem = "EKREM FİDAN";
-    const weekNum = Math.floor(mevcutPazartesi.getTime() / (7 * 24 * 60 * 60 * 1000));
-    const geceSorumlusu = (weekNum % 2 === 0) ? baris : ekrem;
+    const w = Math.floor(mevcutPazartesi.getTime() / (7 * 24 * 60 * 60 * 1000));
+    const geceSorumlusu = (w % 2 === 0) ? baris : ekrem;
 
     if(haftalikProgram[geceSorumlusu]) {
-        haftalikProgram[geceSorumlusu][0] = "00:00–07:00";
-        haftalikProgram[geceSorumlusu][1] = "00:00–07:00";
-        haftalikProgram[geceSorumlusu][2] = "İZİN";
-        haftalikProgram[geceSorumlusu][3] = "İZİN";
+        if(haftalikProgram[geceSorumlusu][0] === null) haftalikProgram[geceSorumlusu][0] = "00:00–07:00";
+        if(haftalikProgram[geceSorumlusu][1] === null) haftalikProgram[geceSorumlusu][1] = "00:00–07:00";
+        if(haftalikProgram[geceSorumlusu][2] === null) haftalikProgram[geceSorumlusu][2] = "İZİN";
+        if(haftalikProgram[geceSorumlusu][3] === null) haftalikProgram[geceSorumlusu][3] = "İZİN";
     }
 }
 
@@ -220,26 +220,21 @@ function hucreDoldur(gun, saat) {
         if(kapasiteAyarlari[birim] && kapasiteAyarlari[birim][saat]) {
             kap = isHS ? kapasiteAyarlari[birim][saat].haftasonu : kapasiteAyarlari[birim][saat].haftaici;
         }
-        
-        if(birim === "SES OPERATÖRÜ" && saat === "00:00–07:00") kap = 0;
 
         let adaylar = sabitPersoneller.filter(p => {
             if(p.birim !== birim || haftalikProgram[p.isim][gun] !== null) return false;
             
-            // 7 GÜN ÇALIŞMA YASAĞI KONTROLÜ
-            let calisilanGunSayisi = haftalikProgram[p.isim].filter(v => v !== null && v !== "İZİN").length;
-            if (calisilanGunSayisi >= 6) return false;
+            // KURAL: 7 GÜN ÇALIŞMA YASAĞI
+            let calisilan = haftalikProgram[p.isim].filter(v => v !== null && v !== "İZİN").length;
+            if(calisilan >= 6) return false;
 
+            // KURAL: TEKNİK YÖNETMEN GECE YASAĞI
             if(birim === "TEKNİK YÖNETMEN" && saat === "00:00–07:00") {
                 if(p.isim !== "BARIŞ İNCE" && p.isim !== "EKREM FİDAN") return false;
             }
 
             if(algoritmaKurallari.some(k => k.personel === p.isim && k.tip === 'YASAK' && (k.gun === 'Hepsi' || parseInt(k.gun) === gun) && (k.saat === 'Hepsi' || k.saat === saat))) return false;
             if(autoRules.geceSonrasiIzin && gun > 0 && haftalikProgram[p.isim][gun-1] === "00:00–07:00") return false;
-            if(autoRules.pesPeseGece && saat === "00:00–07:00") {
-                if(haftalikProgram[p.isim].filter(v => v === "00:00–07:00").length >= 2) return false;
-                if(gun > 0 && haftalikProgram[p.isim][gun-1] === "00:00–07:00") return false;
-            }
             return true;
         });
 
@@ -280,9 +275,18 @@ function applyMCRRota(birim) {
     });
 }
 
+// PERSONEL LİSTESİ (CHECKBOX) OLUŞTURUCU
 function checklistOlustur() {
     const s = [...sabitPersoneller].sort((a,b) => birimSiralamasi.indexOf(a.birim) - birimSiralamasi.indexOf(b.birim));
-    document.getElementById("personelChecklist").innerHTML = s.map(p => `<div class="check-item"><input type="checkbox" id="check_${p.id}" onchange="tabloyuOlustur()"> <strong>${p.isim}</strong></div>`).join('');
+    const container = document.getElementById("personelChecklist");
+    if(container) {
+        container.innerHTML = s.map(p => `
+            <div class="check-item">
+                <input type="checkbox" id="check_${p.id}" onchange="tabloyuOlustur()"> 
+                <label for="check_${p.id}"><strong>${p.isim}</strong> <small>(${p.birim})</small></label>
+            </div>
+        `).join('');
+    }
 }
 
 function toggleTheme() { 
@@ -292,7 +296,8 @@ function toggleTheme() {
 }
 
 function updateThemeIcon() { 
-    document.getElementById("themeBtn").innerText = document.body.classList.contains("dark-mode") ? "☀️" : "🌙"; 
+    const btn = document.getElementById("themeBtn");
+    if(btn) btn.innerText = document.body.classList.contains("dark-mode") ? "☀️" : "🌙"; 
 }
 
 function haftaDegistir(g) { 
