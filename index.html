@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PRO-Vardiya v24.6 | Tüm Kurallar Aktif</title>
+  <title>PRO-Vardiya v23.0 | Yönetim Paneli</title>
   <link rel="stylesheet" href="style.css">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -13,65 +13,84 @@
   <div class="app-wrapper">
     <header class="no-print main-header">
       <div class="logo-area">
-        <div class="badge">V24.6 ULTIMATE</div>
+        <div class="badge">V23.0 DYNAMİC</div>
         <h1>TEKNİK <span>VARDİYA</span></h1>
         <p id="tarihAraligi" class="date-display">Yükleniyor...</p>
       </div>
       <div class="nav-controls">
         <button onclick="haftaDegistir(-7)" class="btn-step">« GERİ</button>
-        <button onclick="tabloyuOlustur()" class="btn-main-action pulse">AKILLI PLANLA</button>
+        <button onclick="tabloyuOlustur()" class="btn-main-action pulse">VARDİYA OLUŞTUR</button>
         <button onclick="haftaDegistir(7)" class="btn-step">İLERİ »</button>
-      </div>
-      <div class="utility-controls">
-        <button onclick="toggleTheme()" class="btn-circle">🌙</button>
-        <button onclick="toggleAdminPanel()" class="btn-circle">⚙️ AYARLAR</button>
+        <button onclick="toggleAdminPanel()" class="btn-admin">⚙️ YÖNETİM</button>
+        <button id="themeBtn" onclick="toggleTheme()" class="btn-theme">🌙</button>
       </div>
     </header>
 
-    <div id="uyariPaneli" class="alert-box hidden no-print"></div>
-
-    <main class="content-area">
-      <div class="table-card" id="print-area">
-        <div class="table-responsive">
-          <table id="vardiyaTablosu">
-            <thead><tr id="tableHeader"></tr></thead>
-            <tbody id="tableBody"></tbody>
-          </table>
-        </div>
-      </div>
-
-      <section class="checklist-section no-print">
-         <div id="personelChecklist" class="checklist-horizontal-grid"></div>
-      </section>
-
-      <div class="footer-buttons no-print">
-          <button onclick="whatsappMesajiOlustur()" class="wa-btn">WhatsApp</button>
-          <button onclick="exportExcel()" class="ex-btn">Excel</button>
-          <button onclick="exportPDF()" class="pdf-btn">PDF</button>
-      </div>
-    </main>
-
-    <div id="adminPanel" class="admin-overlay no-print hidden">
+    <div id="adminPanel" class="admin-overlay hidden">
       <div class="admin-modal">
-        <div class="admin-top-bar">
-            <h2>Sistem Yönetimi</h2>
-            <button onclick="toggleAdminPanel()" class="admin-exit-btn">PANELİ KAPAT ×</button>
-        </div>
         <div class="admin-tabs">
-            <button onclick="tabDegistir('kapasite')" class="tab-btn active">Kapasiteler</button>
-            <button onclick="tabDegistir('sistem')" class="tab-btn">Sistem</button>
+          <button class="tab-btn active" onclick="tabDegistir('kapasite')">Kapasite & Saat</button>
+          <button class="tab-btn" onclick="tabDegistir('birim')">Birim Yönetimi</button>
+          <button class="tab-btn" onclick="tabDegistir('personel')">Personel Yönetimi</button>
+          <button class="tab-btn" onclick="tabDegistir('kurallar')">Genel Ayarlar</button>
+          <button onclick="toggleAdminPanel()" class="btn-close-modal">✖</button>
         </div>
-        <div class="admin-body">
-            <div id="tab-kapasite" class="tab-content">
-                <div id="kapasiteListesi"></div>
+
+        <div class="admin-content">
+          <div id="tab-kapasite" class="tab-content">
+            <h3>Vardiya Kapasiteleri (Haftaiçi / Haftasonu)</h3>
+            <div id="kapasiteListesi" class="cap-grid-container"></div>
+          </div>
+
+          <div id="tab-birim" class="tab-content hidden">
+            <h3>Birim Ekle / Sil</h3>
+            <div class="input-group">
+              <input type="text" id="yeniBirimAd" placeholder="Yeni Birim Adı (Örn: REJİ)">
+              <button onclick="birimEkle()" class="btn-add">Birim Ekle</button>
             </div>
-            <div id="tab-sistem" class="tab-content hidden">
-                <button onclick="sifirla()" class="btn-reset">SİSTEMİ SIFIRLA</button>
+            <div id="birimYonetimListesi" class="admin-list"></div>
+          </div>
+
+          <div id="tab-personel" class="tab-content hidden">
+            <h3>Personel Ekle / Sil</h3>
+            <div class="input-group">
+              <input type="text" id="yeniPersIsim" placeholder="Personel Adı Soyadı">
+              <select id="yeniPersBirim"></select>
+              <button onclick="personelEkle()" class="btn-add">Personel Ekle</button>
             </div>
+            <div id="personelYonetimListesi" class="admin-list"></div>
+          </div>
+
+          <div id="tab-kurallar" class="tab-content hidden">
+            <h3>Algoritma Kuralları</h3>
+            <div class="auto-rules-grid">
+              <div class="rule-card">
+                <input type="checkbox" id="rule_geceSonrasiIzin" onchange="autoRuleKaydet()">
+                <label>Gece sonrası dinlenme verilsin.</label>
+              </div>
+              <button onclick="sifirla()" class="btn-reset">TÜM VERİLERİ SIFIRLA</button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
+
+    <main class="content-area">
+      <section class="checklist-section no-print">
+        <div id="personelChecklist" class="checklist-horizontal-grid"></div>
+      </section>
+      <div class="table-card" id="print-area">
+        <table id="vardiyaTablosu">
+          <thead><tr id="tableHeader"></tr></thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+      <div class="footer-buttons no-print">
+          <button onclick="whatsappMesajiOlustur()" class="wa-btn">WhatsApp</button>
+          <button onclick="exportExcel()" class="ex-btn">Excel</button>
+          <button onclick="exportPDF()" class="pdf-btn">PDF İndir</button>
+      </div>
+    </main>
   </div>
-  <script src="script.js"></script>
 </body>
 </html>
