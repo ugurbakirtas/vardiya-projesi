@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PRO-Vardiya v23.0 | Yönetim Paneli</title>
+  <title>PRO-Vardiya v23.0 | Dinamik Sistem</title>
   <link rel="stylesheet" href="style.css">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -32,7 +32,7 @@
           <button class="tab-btn active" onclick="tabDegistir('kapasite')">Kapasite & Saat</button>
           <button class="tab-btn" onclick="tabDegistir('birim')">Birim Yönetimi</button>
           <button class="tab-btn" onclick="tabDegistir('personel')">Personel Yönetimi</button>
-          <button class="tab-btn" onclick="tabDegistir('kurallar')">Genel Ayarlar</button>
+          <button class="tab-btn" onclick="tabDegistir('kurallar')">Ayarlar</button>
           <button onclick="toggleAdminPanel()" class="btn-close-modal">✖</button>
         </div>
 
@@ -43,32 +43,30 @@
           </div>
 
           <div id="tab-birim" class="tab-content hidden">
-            <h3>Birim Ekle / Sil</h3>
-            <div class="input-group">
-              <input type="text" id="yeniBirimAd" placeholder="Yeni Birim Adı (Örn: REJİ)">
-              <button onclick="birimEkle()" class="btn-add">Birim Ekle</button>
+            <h3>Birim Ekle</h3>
+            <div class="admin-input-group">
+              <input type="text" id="yeniBirimAd" placeholder="Örn: REJİ">
+              <button onclick="birimEkle()" class="btn-add">Ekle</button>
             </div>
             <div id="birimYonetimListesi" class="admin-list"></div>
           </div>
 
           <div id="tab-personel" class="tab-content hidden">
-            <h3>Personel Ekle / Sil</h3>
-            <div class="input-group">
-              <input type="text" id="yeniPersIsim" placeholder="Personel Adı Soyadı">
+            <h3>Personel Ekle</h3>
+            <div class="admin-input-group">
+              <input type="text" id="yeniPersIsim" placeholder="Ad Soyad">
               <select id="yeniPersBirim"></select>
-              <button onclick="personelEkle()" class="btn-add">Personel Ekle</button>
+              <button onclick="personelEkle()" class="btn-add">Ekle</button>
             </div>
             <div id="personelYonetimListesi" class="admin-list"></div>
           </div>
 
           <div id="tab-kurallar" class="tab-content hidden">
-            <h3>Algoritma Kuralları</h3>
-            <div class="auto-rules-grid">
-              <div class="rule-card">
-                <input type="checkbox" id="rule_geceSonrasiIzin" onchange="autoRuleKaydet()">
-                <label>Gece sonrası dinlenme verilsin.</label>
-              </div>
-              <button onclick="sifirla()" class="btn-reset">TÜM VERİLERİ SIFIRLA</button>
+            <h3>Genel Ayarlar</h3>
+            <div class="auto-rules-container">
+               <label><input type="checkbox" id="rule_geceSonrasiIzin" onchange="autoRuleKaydet()"> Gece çalışan ertesi gün izinli olsun</label>
+               <hr>
+               <button onclick="sifirla()" class="btn-reset">TÜM SİSTEMİ SIFIRLA</button>
             </div>
           </div>
         </div>

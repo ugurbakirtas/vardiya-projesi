@@ -1,6 +1,6 @@
 :root {
     --primary: #0f172a; --blue: #2563eb; --bg: #f1f5f9; --card-bg: #ffffff; 
-    --text: #1e293b; --border: #e2e8f0; --hs-bg: #fff1f2; --danger: #ef4444;
+    --text: #1e293b; --border: #e2e8f0; --hs-bg: #fff1f2; --danger: #ef4444; --success: #22c55e;
 }
 
 body.dark-mode {
@@ -10,35 +10,44 @@ body.dark-mode {
 
 body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); margin: 0; font-size: 11px; }
 
-.main-header { display: flex; justify-content: space-between; align-items: center; background: var(--primary); color: white; padding: 10px 20px; border-radius: 8px; margin-bottom: 10px; }
+.app-wrapper { padding: 15px; }
 
-/* Admin Modal */
-.admin-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: flex; align-items: center; justify-content: center; z-index: 9999; }
-.admin-modal { background: var(--card-bg); width: 95%; max-width: 1200px; height: 85vh; border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; }
-.admin-tabs { display: flex; background: #e2e8f0; padding: 5px; gap: 5px; }
-.tab-btn { padding: 10px 20px; border: none; cursor: pointer; border-radius: 6px; font-weight: 600; }
+/* Header */
+.main-header { display: flex; justify-content: space-between; align-items: center; background: var(--primary); color: white; padding: 12px 24px; border-radius: 12px; margin-bottom: 15px; }
+.btn-main-action { background: var(--blue); color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 700; cursor: pointer; }
+.btn-admin { background: #64748b; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; }
+
+/* Modal & Tabs */
+.admin-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 9999; }
+.admin-modal { background: var(--card-bg); width: 95%; max-width: 1100px; height: 85vh; border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; }
+.admin-tabs { display: flex; background: #e2e8f0; padding: 8px; gap: 8px; }
+.tab-btn { border: none; padding: 10px 18px; border-radius: 8px; cursor: pointer; font-weight: 600; }
 .tab-btn.active { background: var(--blue); color: white; }
-.admin-content { padding: 20px; flex: 1; overflow-y: auto; }
+.admin-content { padding: 25px; flex: 1; overflow-y: auto; }
 
-/* Kapasite Izgarası */
-.cap-grid-container { display: flex; flex-direction: column; gap: 10px; }
-.cap-table-header { display: grid; grid-template-columns: 150px repeat(6, 1fr); font-weight: bold; padding: 10px; background: var(--bg); border-radius: 5px; }
-.cap-row { display: grid; grid-template-columns: 150px repeat(6, 1fr); gap: 5px; align-items: center; border-bottom: 1px solid var(--border); padding: 5px 0; }
-.cap-input-group { display: flex; gap: 2px; }
-.cap-input-group input { width: 40px; padding: 4px; border: 1px solid var(--border); border-radius: 4px; text-align: center; }
-.input-hs { background: var(--hs-bg); }
+/* Kapasite Gridi */
+.cap-table-header { display: grid; grid-template-columns: 180px repeat(6, 1fr); font-weight: bold; background: var(--bg); padding: 12px; border-radius: 8px; text-align: center; }
+.cap-row { display: grid; grid-template-columns: 180px repeat(6, 1fr); gap: 8px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); }
+.cap-input-group { display: flex; justify-content: center; gap: 4px; }
+.cap-input-group input { width: 35px; text-align: center; border: 1px solid var(--border); border-radius: 4px; padding: 5px; }
+.input-hs { background: var(--hs-bg); border-color: #fca5a5 !important; }
 
-/* Listeler */
-.admin-list { margin-top: 15px; border: 1px solid var(--border); border-radius: 8px; }
-.admin-list-item { display: flex; justify-content: space-between; padding: 8px 15px; border-bottom: 1px solid var(--border); align-items: center; }
-.btn-sm-danger { background: var(--danger); color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; }
+/* Admin Listeleri */
+.admin-input-group { display: flex; gap: 10px; margin-bottom: 20px; }
+.admin-input-group input, .admin-input-group select { padding: 8px; border: 1px solid var(--border); border-radius: 6px; flex: 1; }
+.btn-add { background: var(--success); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; }
+.admin-list-item { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid var(--border); }
 
-/* Vardiya Tablosu */
-table { width: 100%; border-collapse: collapse; background: var(--card-bg); border-radius: 8px; overflow: hidden; }
-th { background: var(--primary); color: white; padding: 10px; }
-td { border: 1px solid var(--border); padding: 5px; vertical-align: top; width: 13%; }
-.birim-card { border-left: 3px solid var(--blue); padding: 5px; margin-bottom: 3px; background: rgba(37,99,235,0.05); border-radius: 4px; font-weight: 600; }
-.birim-tag { font-size: 8px; opacity: 0.7; display: block; }
+/* Tablo */
+#vardiyaTablosu { width: 100%; border-collapse: collapse; background: var(--card-bg); border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+th { background: var(--primary); color: white; padding: 12px; }
+td { border: 1px solid var(--border); padding: 8px; vertical-align: top; width: 13%; }
+.birim-card { border-left: 4px solid var(--blue); padding: 6px; margin-bottom: 4px; background: rgba(37,99,235,0.05); border-radius: 6px; }
+.birim-tag { font-size: 8px; color: var(--blue); font-weight: 700; display: block; margin-bottom: 2px; }
+
+/* Personel Seçimi */
+.checklist-horizontal-grid { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px; padding: 10px; background: var(--card-bg); border-radius: 10px; }
+.check-item { display: flex; align-items: center; gap: 5px; background: var(--bg); padding: 5px 10px; border-radius: 6px; border: 1px solid var(--border); }
 
 .hidden { display: none !important; }
-.no-print { display: flex; }
+.btn-reset { background: var(--danger); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; margin-top: 20px; }

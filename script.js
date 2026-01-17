@@ -1,8 +1,8 @@
 /**
  * PRO-Vardiya v23.0 | Dinamik Motor
- * Özellikler: Birim/Pers Ekleme, Haftaiçi/Haftasonu Ayrı Kapasite, 7 Gün Yasağı.
  */
 
+// LocalStorage Verilerini Yükle
 let birimSiralamasi = JSON.parse(localStorage.getItem("birimSiralamasi")) || [
     "TEKNİK YÖNETMEN", "SES OPERATÖRÜ", "PLAYOUT OPERATÖRÜ", "KJ OPERATÖRÜ", 
     "INGEST OPERATÖRÜ", "BİLGİ İŞLEM", "YAYIN SİSTEMLERİ", "24TV MCR OPERATÖRÜ", "360TV MCR OPERATÖRÜ"
@@ -23,21 +23,23 @@ let mevcutPazartesi = getMonday(new Date());
 let haftalikProgram = {};
 
 function baslat() {
+    // Kapasite verilerini ilklendir
     birimSiralamasi.forEach(b => {
         if(!kapasiteAyarlari[b]) {
             kapasiteAyarlari[b] = {};
             saatler.forEach(s => { kapasiteAyarlari[b][s] = { haftaici: 0, haftasonu: 0 }; });
         }
     });
-    
+
     if(localStorage.getItem("theme") === "dark") document.body.classList.add("dark-mode");
+    updateThemeIcon();
     checklistOlustur();
     tabloyuOlustur();
 }
 
 function getMonday(d) { d = new Date(d); let day = d.getDay(), diff = d.getDate() - day + (day == 0 ? -6 : 1); return new Date(d.setDate(diff)); }
 
-// --- PANEL YÖNETİMİ ---
+// --- ADMIN PANELİ FONKSİYONLARI ---
 function toggleAdminPanel() { 
     const p = document.getElementById("adminPanel"); 
     p.classList.toggle("hidden"); 
@@ -53,7 +55,7 @@ function tabDegistir(tab) {
 
 function kapasitePaneliniCiz() {
     const cont = document.getElementById("kapasiteListesi");
-    let html = `<div class="cap-table-header"><div>Birimler (H.içi/H.sonu)</div>${saatler.map(s => `<div>${s.split('–')[0]}</div>`).join('')}</div>`;
+    let html = `<div class="cap-table-header"><div>Birimler (H.içi / H.sonu)</div>${saatler.map(s => `<div>${s.split('–')[0]}</div>`).join('')}</div>`;
     birimSiralamasi.forEach(b => {
         html += `<div class="cap-row"><strong>${b}</strong>`;
         saatler.forEach(s => {
@@ -67,7 +69,10 @@ function kapasitePaneliniCiz() {
     cont.innerHTML = html;
 }
 
-function guncelleK(b, s, t, v) { kapasiteAyarlari[b][s][t] = parseInt(v) || 0; localStorage.setItem("kapasiteAyarlari", JSON.stringify(kapasiteAyarlari)); }
+function guncelleK(b, s, t, v) { 
+    kapasiteAyarlari[b][s][t] = parseInt(v) || 0; 
+    localStorage.setItem("kapasiteAyarlari", JSON.stringify(kapasiteAyarlari)); 
+}
 
 function birimEkle() {
     const ad = document.getElementById("yeniBirimAd").value.trim().toUpperCase();
@@ -75,6 +80,7 @@ function birimEkle() {
         birimSiralamasi.push(ad);
         localStorage.setItem("birimSiralamasi", JSON.stringify(birimSiralamasi));
         baslat(); birimYonetimiCiz();
+        document.getElementById("yeniBirimAd").value = "";
     }
 }
 
@@ -83,7 +89,11 @@ function birimYonetimiCiz() {
         <div class="admin-list-item"><span>${b}</span><button onclick="birimSil('${b}')" class="btn-sm-danger">Sil</button></div>`).join('');
 }
 
-function birimSil(b) { birimSiralamasi = birimSiralamasi.filter(x => x !== b); localStorage.setItem("birimSiralamasi", JSON.stringify(birimSiralamasi)); baslat(); birimYonetimiCiz(); }
+function birimSil(b) {
+    birimSiralamasi = birimSiralamasi.filter(x => x !== b);
+    localStorage.setItem("birimSiralamasi", JSON.stringify(birimSiralamasi));
+    baslat(); birimYonetimiCiz();
+}
 
 function personelEkle() {
     const isim = document.getElementById("yeniPersIsim").value.trim().toUpperCase();
@@ -92,6 +102,7 @@ function personelEkle() {
         sabitPersoneller.push({ id: Date.now(), isim, birim });
         localStorage.setItem("sabitPersoneller", JSON.stringify(sabitPersoneller));
         checklistOlustur(); personelYonetimiCiz();
+        document.getElementById("yeniPersIsim").value = "";
     }
 }
 
@@ -101,7 +112,11 @@ function personelYonetimiCiz() {
         <div class="admin-list-item"><span>${p.isim} (${p.birim})</span><button onclick="personelSil(${p.id})" class="btn-sm-danger">Sil</button></div>`).join('');
 }
 
-function personelSil(id) { sabitPersoneller = sabitPersoneller.filter(p => p.id !== id); localStorage.setItem("sabitPersoneller", JSON.stringify(sabitPersoneller)); checklistOlustur(); personelYonetimiCiz(); }
+function personelSil(id) {
+    sabitPersoneller = sabitPersoneller.filter(p => p.id !== id);
+    localStorage.setItem("sabitPersoneller", JSON.stringify(sabitPersoneller));
+    checklistOlustur(); personelYonetimiCiz();
+}
 
 // --- ALGORİTMA ---
 function tabloyuOlustur() {
@@ -117,8 +132,8 @@ function tabloyuOlustur() {
 }
 
 function applyTeknikYonetmenRota() {
-    const w = Math.floor(mevcutPazartesi.getTime() / (7 * 24 * 60 * 60 * 1000));
-    const sorumlu = (w % 2 === 0) ? "BARIŞ İNCE" : "EKREM FİDAN";
+    const weekNum = Math.floor(mevcutPazartesi.getTime() / (7 * 24 * 60 * 60 * 1000));
+    const sorumlu = (weekNum % 2 === 0) ? "BARIŞ İNCE" : "EKREM FİDAN";
     if(haftalikProgram[sorumlu]) {
         haftalikProgram[sorumlu][0] = "00:00–07:00";
         haftalikProgram[sorumlu][1] = "00:00–07:00";
@@ -134,31 +149,30 @@ function renderTable() {
         return `<th>${g}<br><small>${t.toLocaleDateString('tr-TR')}</small></th>`;
     }).join('');
 
-    let html = "";
+    let bBody = "";
     saatler.forEach(s => {
-        html += `<tr><td>${s}</td>`;
-        for(let i=0; i<7; i++) html += `<td>${hucreDoldur(i, s)}</td>`;
-        html += `</tr>`;
+        bBody += `<tr><td>${s}</td>`;
+        for(let i=0; i<7; i++) bBody += `<td>${hucreDoldur(i, s)}</td>`;
+        bBody += `</tr>`;
     });
-    document.getElementById("tableBody").innerHTML = html;
+    document.getElementById("tableBody").innerHTML = bBody;
 }
 
 function hucreDoldur(gun, saat) {
     const isHS = (gun >= 5);
     birimSiralamasi.forEach(birim => {
-        let kap = kapasiteAyarlari[birim][saat][isHS ? 'haftasonu' : 'haftaici'];
+        let kap = 0;
+        if(kapasiteAyarlari[birim] && kapasiteAyarlari[birim][saat]) {
+            kap = isHS ? kapasiteAyarlari[birim][saat].haftasonu : kapasiteAyarlari[birim][saat].haftaici;
+        }
         
         let adaylar = sabitPersoneller.filter(p => {
             if(p.birim !== birim || haftalikProgram[p.isim][gun] !== null) return false;
-            
-            // 7 GÜN ÇALIŞMA YASAĞI
             if(haftalikProgram[p.isim].filter(v => v !== null && v !== "İZİN").length >= 6) return false;
-
-            // TEKNİK YÖNETMEN GECE YASAĞI
+            
             if(birim === "TEKNİK YÖNETMEN" && saat === "00:00–07:00") {
                 if(p.isim !== "BARIŞ İNCE" && p.isim !== "EKREM FİDAN") return false;
             }
-            
             if(autoRules.geceSonrasiIzin && gun > 0 && haftalikProgram[p.isim][gun-1] === "00:00–07:00") return false;
             return true;
         });
@@ -179,15 +193,15 @@ function hucreDoldur(gun, saat) {
 function checklistOlustur() {
     const s = [...sabitPersoneller].sort((a,b) => birimSiralamasi.indexOf(a.birim) - birimSiralamasi.indexOf(b.birim));
     document.getElementById("personelChecklist").innerHTML = s.map(p => `
-        <div class="check-item"><input type="checkbox" id="check_${p.id}" onchange="tabloyuOlustur()"> <strong>${p.isim}</strong></div>`).join('');
+        <div class="check-item"><input type="checkbox" id="check_${p.id}" onchange="tabloyuOlustur()"> <label for="check_${p.id}"><strong>${p.isim}</strong></label></div>`).join('');
 }
 
-// Yardımcı Fonksiyonlar
-function toggleTheme() { document.body.classList.toggle("dark-mode"); localStorage.setItem("theme", document.body.classList.contains("dark-mode") ? "dark" : "light"); }
+function toggleTheme() { document.body.classList.toggle("dark-mode"); localStorage.setItem("theme", document.body.classList.contains("dark-mode") ? "dark" : "light"); updateThemeIcon(); }
+function updateThemeIcon() { document.getElementById("themeBtn").innerText = document.body.classList.contains("dark-mode") ? "☀️" : "🌙"; }
 function haftaDegistir(g) { mevcutPazartesi.setDate(mevcutPazartesi.getDate() + g); tabloyuOlustur(); }
 function exportExcel() { XLSX.writeFile(XLSX.utils.table_to_book(document.getElementById("vardiyaTablosu")), "Vardiya.xlsx"); }
 function exportPDF() { html2pdf().from(document.getElementById('print-area')).save('Vardiya.pdf'); }
-function sifirla() { if(confirm("Tüm sistem sıfırlanacak!")) { localStorage.clear(); location.reload(); } }
+function sifirla() { if(confirm("Tüm veriler temizlenecek!")) { localStorage.clear(); location.reload(); } }
 function autoRuleKaydet() { autoRules.geceSonrasiIzin = document.getElementById("rule_geceSonrasiIzin").checked; localStorage.setItem("autoRules", JSON.stringify(autoRules)); }
 
 window.onload = baslat;
