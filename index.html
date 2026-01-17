@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PRO-Vardiya v24.1 | Stabil Full</title>
+  <title>PRO-Vardiya v24.5 | Teknik Yönetmen Özel Kurallı</title>
   <link rel="stylesheet" href="style.css">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -13,32 +13,24 @@
   <div class="app-wrapper">
     <header class="no-print main-header">
       <div class="logo-area">
-        <div class="badge">V24.1 STABIL</div>
+        <div class="badge">V24.5 PRO</div>
         <h1>TEKNİK <span>VARDİYA</span></h1>
         <p id="tarihAraligi" class="date-display">Yükleniyor...</p>
       </div>
       <div class="nav-controls">
         <button onclick="haftaDegistir(-7)" class="btn-step">« GERİ</button>
-        <button onclick="tabloyuOlustur()" class="btn-main-action pulse">OTOMATİK PLANLA</button>
+        <button onclick="tabloyuOlustur()" class="btn-main-action pulse">AKILLI PLANLA</button>
         <button onclick="haftaDegistir(7)" class="btn-step">İLERİ »</button>
       </div>
       <div class="utility-controls">
-        <button onclick="toggleTheme()" class="btn-circle" id="themeBtn">🌙</button>
-        <button onclick="toggleAdminPanel()" class="btn-circle">⚙️ YÖNETİM</button>
+        <button onclick="toggleTheme()" class="btn-circle">🌙</button>
+        <button onclick="toggleAdminPanel()" class="btn-circle">⚙️ AYARLAR</button>
       </div>
     </header>
 
     <div id="uyariPaneli" class="alert-box hidden no-print"></div>
 
     <main class="content-area">
-      <section class="heatmap-section no-print">
-        <div id="heatmapContainer" class="heatmap-grid"></div>
-      </section>
-
-      <section class="checklist-section no-print">
-         <div id="personelChecklist" class="checklist-horizontal-grid"></div>
-      </section>
-
       <div class="table-card" id="print-area">
         <div class="table-responsive">
           <table id="vardiyaTablosu">
@@ -48,6 +40,10 @@
         </div>
       </div>
 
+      <section class="checklist-section no-print">
+         <div id="personelChecklist" class="checklist-horizontal-grid"></div>
+      </section>
+
       <div class="footer-buttons no-print">
           <button onclick="whatsappMesajiOlustur()" class="wa-btn">WhatsApp</button>
           <button onclick="exportExcel()" class="ex-btn">Excel</button>
@@ -55,36 +51,22 @@
       </div>
     </main>
 
-    <div id="personelCardModal" class="admin-overlay no-print hidden">
-      <div class="card-modal">
-        <div class="card-header">
-          <h2 id="cardPersonelName">Personel</h2>
-          <button onclick="closeCard()" class="btn-close">×</button>
-        </div>
-        <div class="card-body" id="cardContent"></div>
-        <div class="card-footer">
-          <button onclick="exportToCalendar()" class="cal-btn">📅 Takvime Ekle</button>
-          <button onclick="closeCard()" class="btn-close-card">Kapat</button>
-        </div>
-      </div>
-    </div>
-
     <div id="adminPanel" class="admin-overlay no-print hidden">
       <div class="admin-modal">
-        <div class="admin-header">
-            <h2>Sistem Ayarları</h2>
-            <button onclick="toggleAdminPanel()" class="btn-close-panel">×</button>
+        <div class="admin-top-bar">
+            <h2>Sistem Yönetimi</h2>
+            <button onclick="toggleAdminPanel()" class="admin-exit-btn">PANELİ KAPAT ×</button>
         </div>
         <div class="admin-tabs">
             <button onclick="tabDegistir('kapasite')" class="tab-btn active">Kapasiteler</button>
-            <button onclick="tabDegistir('ayarlar')" class="tab-btn">Algoritma</button>
+            <button onclick="tabDegistir('sistem')" class="tab-btn">Sistem</button>
         </div>
         <div class="admin-body">
             <div id="tab-kapasite" class="tab-content">
                 <div id="kapasiteListesi"></div>
             </div>
-            <div id="tab-ayarlar" class="tab-content hidden">
-                <button onclick="sifirla()" class="btn-reset">TÜM VERİLERİ SIFIRLA</button>
+            <div id="tab-sistem" class="tab-content hidden">
+                <button onclick="sifirla()" class="btn-reset">SİSTEMİ SIFIRLA</button>
             </div>
         </div>
       </div>
