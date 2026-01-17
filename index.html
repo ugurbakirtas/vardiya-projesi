@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PRO-Vardiya v24.0 | AI & Personal Card</title>
+  <title>PRO-Vardiya v24.1 | Stabil Full</title>
   <link rel="stylesheet" href="style.css">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -13,18 +13,18 @@
   <div class="app-wrapper">
     <header class="no-print main-header">
       <div class="logo-area">
-        <div class="badge">V24.0 AI</div>
+        <div class="badge">V24.1 STABIL</div>
         <h1>TEKNİK <span>VARDİYA</span></h1>
         <p id="tarihAraligi" class="date-display">Yükleniyor...</p>
       </div>
       <div class="nav-controls">
         <button onclick="haftaDegistir(-7)" class="btn-step">« GERİ</button>
-        <button onclick="tabloyuOlustur()" class="btn-main-action pulse">AKILLI PLANLA</button>
+        <button onclick="tabloyuOlustur()" class="btn-main-action pulse">OTOMATİK PLANLA</button>
         <button onclick="haftaDegistir(7)" class="btn-step">İLERİ »</button>
       </div>
       <div class="utility-controls">
         <button onclick="toggleTheme()" class="btn-circle" id="themeBtn">🌙</button>
-        <button onclick="toggleAdminPanel()" class="btn-circle">⚙️</button>
+        <button onclick="toggleAdminPanel()" class="btn-circle">⚙️ YÖNETİM</button>
       </div>
     </header>
 
@@ -58,12 +58,12 @@
     <div id="personelCardModal" class="admin-overlay no-print hidden">
       <div class="card-modal">
         <div class="card-header">
-          <h2 id="cardPersonelName">Personel İsmi</h2>
+          <h2 id="cardPersonelName">Personel</h2>
           <button onclick="closeCard()" class="btn-close">×</button>
         </div>
         <div class="card-body" id="cardContent"></div>
         <div class="card-footer">
-          <button onclick="exportToCalendar()" class="cal-btn">📅 Telefon Takvimine Ekle</button>
+          <button onclick="exportToCalendar()" class="cal-btn">📅 Takvime Ekle</button>
           <button onclick="closeCard()" class="btn-close-card">Kapat</button>
         </div>
       </div>
@@ -71,21 +71,20 @@
 
     <div id="adminPanel" class="admin-overlay no-print hidden">
       <div class="admin-modal">
+        <div class="admin-header">
+            <h2>Sistem Ayarları</h2>
+            <button onclick="toggleAdminPanel()" class="btn-close-panel">×</button>
+        </div>
         <div class="admin-tabs">
             <button onclick="tabDegistir('kapasite')" class="tab-btn active">Kapasiteler</button>
-            <button onclick="tabDegistir('otomatik')" class="tab-btn">AI Ayarlar</button>
+            <button onclick="tabDegistir('ayarlar')" class="tab-btn">Algoritma</button>
         </div>
         <div class="admin-body">
             <div id="tab-kapasite" class="tab-content">
-                <div class="legend-info"><span class="box-hi"></span> Hafta İçi | <span class="box-hs"></span> Hafta Sonu</div>
                 <div id="kapasiteListesi"></div>
             </div>
-            <div id="tab-otomatik" class="tab-content hidden">
-                <div class="auto-rule-card">
-                    <input type="checkbox" id="rule_adaletPuani" checked onchange="autoRuleKaydet()">
-                    <label><strong>Adalet Puanı</strong><span>Geçmiş verilere göre dengeli dağıt.</span></label>
-                </div>
-                <button onclick="sifirla()" class="btn-reset" style="margin-top:20px">SİSTEMİ SIFIRLA</button>
+            <div id="tab-ayarlar" class="tab-content hidden">
+                <button onclick="sifirla()" class="btn-reset">TÜM VERİLERİ SIFIRLA</button>
             </div>
         </div>
       </div>

@@ -1,8 +1,13 @@
 /**
- * PRO-Vardiya v24.0 | AI & Digital Card System
+ * PRO-Vardiya v24.1 | Stabil Full Algorithm
  */
 
-const birimSiralamasi = ["TEKNİK YÖNETMEN", "SES OPERATÖRÜ", "PLAYOUT OPERATÖRÜ", "KJ OPERATÖRÜ", "INGEST OPERATÖRÜ", "BİLGİ İŞLEM", "YAYIN SİSTEMLERİ", "24TV MCR OPERATÖRÜ", "360TV MCR OPERATÖRÜ"];
+const birimSiralamasi = [
+    "TEKNİK YÖNETMEN", "SES OPERATÖRÜ", "PLAYOUT OPERATÖRÜ", 
+    "KJ OPERATÖRÜ", "INGEST OPERATÖRÜ", "BİLGİ İŞLEM", 
+    "YAYIN SİSTEMLERİ", "24TV MCR OPERATÖRÜ", "360TV MCR OPERATÖRÜ"
+];
+
 const gunler = ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"];
 const saatler = ["06:30–16:00", "09:00–18:00", "12:00–22:00", "16:00–00:00", "00:00–07:00", "DIŞ YAYIN"];
 
@@ -56,8 +61,6 @@ const sabitPersoneller = [
 ];
 
 let kapasiteAyarlari = JSON.parse(localStorage.getItem("kapasiteAyarlari")) || {};
-let adaletVerisi = JSON.parse(localStorage.getItem("adaletVerisi")) || {};
-let autoRules = JSON.parse(localStorage.getItem("autoRules")) || { adaletPuani: true };
 let mevcutPazartesi = getMonday(new Date());
 let haftalikProgram = {};
 
@@ -68,8 +71,8 @@ function baslat() {
             saatler.forEach(s => { kapasiteAyarlari[b][s] = { haftaici: 0, haftasonu: 0 }; });
         }
     });
-    tabloyuOlustur();
     checklistOlustur();
+    tabloyuOlustur();
 }
 
 function getMonday(d) { d = new Date(d); let day = d.getDay(), diff = d.getDate() - day + (day == 0 ? -6 : 1); return new Date(d.setDate(diff)); }
@@ -77,14 +80,41 @@ function getMonday(d) { d = new Date(d); let day = d.getDay(), diff = d.getDate(
 function tabloyuOlustur() {
     document.getElementById("tarihAraligi").innerText = `${mevcutPazartesi.toLocaleDateString('tr-TR')} Haftası`;
     haftalikProgram = {};
+    
+    // Temizle ve İzinlileri İşle
     sabitPersoneller.forEach(p => {
         haftalikProgram[p.isim] = Array(7).fill(null);
         if(document.getElementById(`check_${p.id}`)?.checked) haftalikProgram[p.isim].fill("İZİN");
     });
     
+    // 1. Rotalı Birimleri Önce Yerleştir (MCR ve INGEST)
     applyMCRRota("24TV MCR OPERATÖRÜ");
     applyMCRRota("360TV MCR OPERATÖRÜ");
     applyIngestRota();
+    
+    // 2. Diğer Birimleri Kapasiteye Göre Doldur (Önemli: Bu işlem render sırasında değil burada yapılır)
+    for(let i=0; i<7; i++) {
+        const isHS = (i >= 5);
+        saatler.forEach(s => {
+            birimSiralamasi.forEach(birim => {
+                if(birim.includes("MCR") || birim.includes("INGEST")) return;
+                
+                let kap = kapasiteAyarlari[birim]?.[s]?.[isHS ? 'haftasonu' : 'haftaici'] || 0;
+                if(birim === "SES OPERATÖRÜ" && s === "00:00–07:00") kap = 0;
+
+                let adaylar = sabitPersoneller.filter(p => p.birim === birim && haftalikProgram[p.isim][i] === null);
+                let suan = sabitPersoneller.filter(p => p.birim === birim && haftalikProgram[p.isim][i] === s).length;
+                
+                for(let k=0; k < (kap-suan); k++) {
+                    if(adaylar.length > 0) {
+                        let p = adaylar.splice(Math.floor(Math.random() * adaylar.length), 1)[0];
+                        haftalikProgram[p.isim][i] = s;
+                    }
+                }
+            });
+        });
+    }
+
     renderTable();
     asistanAnalizYap();
     isiHaritasiCiz();
@@ -100,54 +130,23 @@ function renderTable() {
     let b = "";
     saatler.forEach(s => {
         b += `<tr><td>${s}</td>`;
-        for(let i=0; i<7; i++) b += `<td ondragover="event.preventDefault()" ondrop="handleDrop(event, ${i}, '${s}')">${hucreDoldur(i, s)}</td>`;
+        for(let i=0; i<7; i++) {
+            let list = sabitPersoneller.filter(p => haftalikProgram[p.isim][i] === s)
+                                     .sort((a,b) => birimSiralamasi.indexOf(a.birim) - birimSiralamasi.indexOf(b.birim));
+            
+            let cells = list.map(p => `
+                <div class="birim-card" onclick="openPersonelCard('${p.isim}')">
+                    <span class="birim-tag">${p.birim}</span>${p.isim}
+                </div>
+            `).join('');
+            b += `<td>${cells}</td>`;
+        }
         b += `</tr>`;
     });
     document.getElementById("tableBody").innerHTML = b;
 }
 
-function hucreDoldur(gun, saat) {
-    const isHS = (gun >= 5);
-    birimSiralamasi.forEach(birim => {
-        if(birim.includes("MCR") || birim.includes("INGEST")) return;
-        let kap = kapasiteAyarlari[birim]?.[saat]?.[isHS ? 'haftasonu' : 'haftaici'] || 0;
-        if(birim === "SES OPERATÖRÜ" && saat === "00:00–07:00") kap = 0;
-
-        let adaylar = sabitPersoneller.filter(p => p.birim === birim && haftalikProgram[p.isim][gun] === null);
-        if(autoRules.adaletPuani) adaylar.sort((a,b) => (adaletVerisi[a.isim] || 0) - (adaletVerisi[b.isim] || 0));
-
-        let suan = sabitPersoneller.filter(p => p.birim === birim && haftalikProgram[p.isim][gun] === saat).length;
-        for(let k=0; k < (kap-suan); k++) {
-            if(adaylar.length > 0) {
-                let p = adaylar.shift();
-                haftalikProgram[p.isim][gun] = saat;
-                adaletVerisi[p.isim] = (adaletVerisi[p.isim] || 0) + 1;
-            }
-        }
-    });
-    
-    let list = sabitPersoneller.filter(p => haftalikProgram[p.isim][gun] === saat).sort((a,b) => birimSiralamasi.indexOf(a.birim) - birimSiralamasi.indexOf(b.birim));
-    return list.map(p => `
-        <div class="birim-card" draggable="true" ondragstart="handleDragStart(event, '${p.isim}', ${gun}, '${saat}')" onclick="openPersonelCard('${p.isim}')">
-            <span class="birim-tag">${p.birim}</span>${p.isim}
-            <span class="adalet-badge">${adaletVerisi[p.isim] || 0}</span>
-        </div>
-    `).join('');
-}
-
-// DRAG DROP
-let draggedPerson = null; let sG = null; let sS = null;
-function handleDragStart(e, n, g, s) { draggedPerson = n; sG = g; sS = s; }
-function handleDrop(e, tG, tS) {
-    if(draggedPerson) {
-        haftalikProgram[draggedPerson][sG] = null;
-        haftalikProgram[draggedPerson][tG] = tS;
-        renderTable();
-        asistanAnalizYap();
-    }
-}
-
-// CARD SYSTEM
+// PERSONEL KARTI SİSTEMİ
 function openPersonelCard(isim) {
     const modal = document.getElementById("personelCardModal");
     const content = document.getElementById("cardContent");
@@ -157,11 +156,12 @@ function openPersonelCard(isim) {
     let html = "";
     gunler.forEach((g, i) => {
         let v = haftalikProgram[isim][i] || "İZİN";
-        html += `<div class="vardiya-gun-row"><span>${g}</span><span class="saat-değeri">${v}</span></div>`;
+        html += `<div class="vardiya-gun-row"><strong>${g}</strong><span class="saat-değeri">${v}</span></div>`;
     });
     content.innerHTML = html;
     modal.classList.remove("hidden");
 }
+
 function closeCard() { document.getElementById("personelCardModal").classList.add("hidden"); }
 
 function exportToCalendar() {
@@ -183,7 +183,23 @@ function exportToCalendar() {
     link.click();
 }
 
-// HEATMAP & ANALİZ
+// ANALİZ VE GÖRSELLER
+function asistanAnalizYap() {
+    const pan = document.getElementById("uyariPaneli");
+    let errs = [];
+    gunler.forEach((g, i) => {
+        saatler.forEach(s => {
+            birimSiralamasi.filter(b => !b.includes("MCR") && !b.includes("INGEST")).forEach(b => {
+                let kap = kapasiteAyarlari[b]?.[s]?.[i >= 5 ? 'haftasonu' : 'haftaici'] || 0;
+                let suan = sabitPersoneller.filter(p => p.birim === b && haftalikProgram[p.isim][i] === s).length;
+                if(suan < kap) errs.push(`⚠️ ${g} ${s}: ${b} eksik!`);
+            });
+        });
+    });
+    pan.innerHTML = errs.length ? `<strong>Kapasite Uyarıları:</strong><br>${errs.join('<br>')}` : "";
+    pan.classList.toggle("hidden", errs.length === 0);
+}
+
 function isiHaritasiCiz() {
     const cont = document.getElementById("heatmapContainer");
     cont.innerHTML = gunler.map((g, i) => {
@@ -193,28 +209,29 @@ function isiHaritasiCiz() {
     }).join('');
 }
 
-function asistanAnalizYap() {
-    const pan = document.getElementById("uyariPaneli");
-    let errs = [];
-    gunler.forEach((g, i) => {
-        saatler.forEach(s => {
-            birimSiralamasi.filter(b => !b.includes("MCR") && !b.includes("INGEST")).forEach(b => {
-                let kap = kapasiteAyarlari[b]?.[s]?.[i >= 5 ? 'haftasonu' : 'haftaici'] || 0;
-                let suan = sabitPersoneller.filter(p => p.birim === b && haftalikProgram[p.isim][i] === s).length;
-                if(suan < kap) errs.push(`⚠️ ${g} ${s}: ${b} (${kap - suan} eksik)`);
-            });
-        });
-    });
-    pan.innerHTML = errs.length ? `<strong>Kapasite Uyarıları:</strong><br>${errs.join('<br>')}` : "";
-    pan.classList.toggle("hidden", errs.length === 0);
+// YARDIMCI FONKSİYONLAR
+function checklistOlustur() {
+    const s = [...sabitPersoneller].sort((a,b) => birimSiralamasi.indexOf(a.birim) - birimSiralamasi.indexOf(b.birim));
+    document.getElementById("personelChecklist").innerHTML = s.map(p => `
+        <div class="check-item">
+            <input type="checkbox" id="check_${p.id}" onchange="tabloyuOlustur()"> ${p.isim}
+        </div>`).join('');
 }
 
-// ADMIN & UI
-function toggleAdminPanel() { 
-    const p = document.getElementById("adminPanel"); 
-    p.classList.toggle("hidden"); 
-    if(!p.classList.contains("hidden")) kapasitePaneliniCiz(); 
+function applyIngestRota() {
+    const ekip = sabitPersoneller.filter(p => p.birim === "INGEST OPERATÖRÜ");
+    const rota = ["06:30–16:00", "06:30–16:00", "16:00–00:00", "16:00–00:00", "İZİN", "İZİN"];
+    ekip.forEach((p, idx) => { for(let i=0; i<7; i++) { let d = new Date(mevcutPazartesi.getTime() + (i * 86400000)); let rI = (Math.floor((d - new Date(2025, 0, 6)) / 86400000) + (idx * 2)) % 6; if(!haftalikProgram[p.isim][i]) haftalikProgram[p.isim][i] = rota[rI < 0 ? rI + 6 : rI]; } });
 }
+
+function applyMCRRota(birim) {
+    const ekip = sabitPersoneller.filter(p => p.birim === birim);
+    const rota = ["06:30–16:00", "06:30–16:00", "16:00–00:00", "16:00–00:00", "00:00–07:00", "00:00–07:00", "İZİN", "İZİN"];
+    ekip.forEach((p, idx) => { for(let i=0; i<7; i++) { let d = new Date(mevcutPazartesi.getTime() + (i * 86400000)); let rI = (Math.floor((d - new Date(2025, 0, 6)) / 86400000) + (idx * 2)) % 8; if(!haftalikProgram[p.isim][i]) haftalikProgram[p.isim][i] = rota[rI < 0 ? rI + 8 : rI]; } });
+}
+
+// UI YÖNETİMİ
+function toggleAdminPanel() { document.getElementById("adminPanel").classList.toggle("hidden"); kapasitePaneliniCiz(); }
 function tabDegistir(t) {
     document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -223,13 +240,13 @@ function tabDegistir(t) {
 }
 function kapasitePaneliniCiz() {
     const cont = document.getElementById("kapasiteListesi");
-    let html = `<div class="cap-table-header"><div>Birimler</div>${saatler.map(s => `<div>${s.split('–')[0]}</div>`).join('')}</div>`;
+    let html = `<div class="cap-table-header" style="display:grid; grid-template-columns: 140px repeat(6, 1fr); gap:5px; font-weight:bold"><div>Birimler</div>${saatler.map(s => `<div>${s.split('–')[0]}</div>`).join('')}</div>`;
     birimSiralamasi.filter(b => !b.includes("MCR") && !b.includes("INGEST")).forEach(b => {
-        html += `<div class="cap-row"><strong>${b}</strong>`;
+        html += `<div class="cap-row" style="display:grid; grid-template-columns: 140px repeat(6, 1fr); gap:5px; margin-top:5px"><strong>${b}</strong>`;
         saatler.forEach(s => {
-            html += `<div class="cap-input-group">
-                <input type="number" value="${kapasiteAyarlari[b][s].haftaici}" onchange="gK('${b}','${s}','haftaici',this.value)">
-                <input type="number" class="input-hs" value="${kapasiteAyarlari[b][s].haftasonu}" onchange="gK('${b}','${s}','haftasonu',this.value)">
+            html += `<div class="cap-group">
+                <input type="number" style="width:100%" value="${kapasiteAyarlari[b][s].haftaici}" onchange="gK('${b}','${s}','haftaici',this.value)">
+                <input type="number" style="width:100%; background:#ffecec" value="${kapasiteAyarlari[b][s].haftasonu}" onchange="gK('${b}','${s}','haftasonu',this.value)">
             </div>`;
         });
         html += `</div>`;
@@ -237,23 +254,8 @@ function kapasitePaneliniCiz() {
     cont.innerHTML = html;
 }
 function gK(b, s, t, v) { kapasiteAyarlari[b][s][t] = parseInt(v) || 0; localStorage.setItem("kapasiteAyarlari", JSON.stringify(kapasiteAyarlari)); }
-function autoRuleKaydet() { autoRules.adaletPuani = document.getElementById("rule_adaletPuani").checked; localStorage.setItem("autoRules", JSON.stringify(autoRules)); }
-function toggleTheme() { document.body.classList.toggle("dark-mode"); localStorage.setItem("theme", document.body.classList.contains("dark-mode") ? "dark" : "light"); }
+function toggleTheme() { document.body.classList.toggle("dark-mode"); }
 function haftaDegistir(g) { mevcutPazartesi.setDate(mevcutPazartesi.getDate() + g); tabloyuOlustur(); }
-function checklistOlustur() {
-    const s = [...sabitPersoneller].sort((a,b) => birimSiralamasi.indexOf(a.birim) - birimSiralamasi.indexOf(b.birim));
-    document.getElementById("personelChecklist").innerHTML = s.map(p => `<div class="check-item"><input type="checkbox" id="check_${p.id}" onchange="tabloyuOlustur()"> ${p.isim}</div>`).join('');
-}
-function applyIngestRota() {
-    const ekip = sabitPersoneller.filter(p => p.birim === "INGEST OPERATÖRÜ");
-    const rota = ["06:30–16:00", "06:30–16:00", "16:00–00:00", "16:00–00:00", "İZİN", "İZİN"];
-    ekip.forEach((p, idx) => { for(let i=0; i<7; i++) { let d = new Date(mevcutPazartesi.getTime() + (i * 86400000)); let rI = (Math.floor((d - new Date(2025, 0, 6)) / 86400000) + (idx * 2)) % 6; if(!haftalikProgram[p.isim][i]) haftalikProgram[p.isim][i] = rota[rI < 0 ? rI + 6 : rI]; } });
-}
-function applyMCRRota(birim) {
-    const ekip = sabitPersoneller.filter(p => p.birim === birim);
-    const rota = ["06:30–16:00", "06:30–16:00", "16:00–00:00", "16:00–00:00", "00:00–07:00", "00:00–07:00", "İZİN", "İZİN"];
-    ekip.forEach((p, idx) => { for(let i=0; i<7; i++) { let d = new Date(mevcutPazartesi.getTime() + (i * 86400000)); let rI = (Math.floor((d - new Date(2025, 0, 6)) / 86400000) + (idx * 2)) % 8; if(!haftalikProgram[p.isim][i]) haftalikProgram[p.isim][i] = rota[rI < 0 ? rI + 8 : rI]; } });
-}
 function whatsappMesajiOlustur() {
     let m = `📋 *HAFTALIK VARDİYA PLANI*\n\n`;
     gunler.forEach((g, i) => {
@@ -264,11 +266,10 @@ function whatsappMesajiOlustur() {
         });
         m += `\n`;
     });
-    m += `\n💡 *Özel Not:* İsminize tıklayarak telefon takviminize ekleyebilirsiniz.`;
-    navigator.clipboard.writeText(m).then(() => alert("WhatsApp Mesajı Kopyalandı!"));
+    navigator.clipboard.writeText(m).then(() => alert("Kopyalandı!"));
 }
 function exportExcel() { XLSX.writeFile(XLSX.utils.table_to_book(document.getElementById("vardiyaTablosu")), "Vardiya.xlsx"); }
 function exportPDF() { html2pdf().from(document.getElementById('print-area')).save('Vardiya.pdf'); }
-function sifirla() { if(confirm("Tüm veriler silinecek?")) { localStorage.clear(); location.reload(); } }
+function sifirla() { if(confirm("Tüm veriler silinsin mi?")) { localStorage.clear(); location.reload(); } }
 
 window.onload = baslat;

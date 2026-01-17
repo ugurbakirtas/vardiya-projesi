@@ -8,59 +8,46 @@ body.dark-mode {
 }
 body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); margin: 0; font-size: 11px; }
 
-.main-header { display: flex; justify-content: space-between; align-items: center; background: var(--primary); color: white; padding: 12px 20px; border-radius: 0 0 12px 12px; margin-bottom: 10px; }
+.main-header { display: flex; justify-content: space-between; align-items: center; background: var(--primary); color: white; padding: 12px 20px; border-radius: 0 0 12px 12px; }
+.logo-area h1 { margin: 0; font-size: 18px; }
+.logo-area h1 span { color: var(--blue); }
 .btn-main-action { background: var(--blue); color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 700; cursor: pointer; }
 
 /* Isı Haritası */
 .heatmap-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin: 10px; background: var(--card-bg); padding: 10px; border-radius: 8px; border: 1px solid var(--border); }
 .heatmap-day { text-align: center; padding: 5px; border-radius: 4px; border-bottom: 3px solid #ccc; }
 
-/* Uyarı Paneli */
-.alert-box { background: #fee2e2; border: 1px solid #fca5a5; color: #991b1b; padding: 10px; margin: 10px; border-radius: 8px; font-size: 10px; }
+/* Uyarılar */
+.alert-box { background: #fee2e2; border: 1px solid #fca5a5; color: #991b1b; padding: 10px; margin: 10px; border-radius: 8px; }
 
-/* Tablo ve Kartlar */
-.table-card { background: var(--card-bg); padding: 15px; border-radius: 12px; margin: 10px; overflow-x: auto; }
+/* Tablo */
+.table-card { background: var(--card-bg); padding: 15px; border-radius: 12px; margin: 10px; border: 1px solid var(--border); }
 table { width: 100%; border-collapse: collapse; min-width: 1100px; }
-th { background: var(--primary); color: white; padding: 8px; font-size: 10px; }
-td { border: 1px solid var(--border); padding: 4px; vertical-align: top; width: 13.5%; }
-td:first-child { background: var(--primary); color: white; width: 80px; text-align: center; font-weight: bold; vertical-align: middle; }
+th { background: var(--primary); color: white; padding: 10px; font-size: 10px; }
+td { border: 1px solid var(--border); padding: 5px; vertical-align: top; width: 13.5%; }
+td:first-child { background: var(--primary); color: white; text-align: center; font-weight: bold; vertical-align: middle; width: 85px; }
 
 .birim-card { 
     background: var(--card-bg); border-left: 4px solid var(--blue); padding: 5px; 
-    margin-bottom: 3px; border-radius: 4px; font-size: 9px; cursor: pointer; 
-    position: relative; border: 1px solid var(--border);
+    margin-bottom: 4px; border-radius: 4px; font-size: 9px; cursor: pointer; 
+    border: 1px solid var(--border); box-shadow: 0 1px 2px rgba(0,0,0,0.05);
 }
-.birim-tag { font-size: 7px; color: var(--blue); font-weight: 800; display: block; }
-.adalet-badge { position: absolute; top: 2px; right: 2px; font-size: 7px; opacity: 0.6; }
+.birim-tag { font-size: 7px; color: var(--blue); font-weight: 800; display: block; text-transform: uppercase; }
 
-/* Personel Kart Modalı */
-.card-modal { background: var(--card-bg); width: 90%; max-width: 350px; border-radius: 15px; overflow: hidden; animation: zoomIn 0.3s; }
-.card-header { background: var(--blue); color: white; padding: 15px; text-align: center; position: relative; }
-.card-body { padding: 15px; }
-.vardiya-gun-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed var(--border); }
-.cal-btn { width: 100%; background: #4285f4; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: 700; cursor: pointer; margin-bottom: 10px; }
-.btn-close-card { width: 100%; background: #64748b; color: white; border: none; padding: 8px; border-radius: 8px; cursor: pointer; }
-
-/* Kapasite Giriş */
-.cap-table-header { display: grid; grid-template-columns: 140px repeat(6, 1fr); gap: 5px; font-weight: 800; text-align: center; color: var(--blue); }
-.cap-row { display: grid; grid-template-columns: 140px repeat(6, 1fr); gap: 5px; align-items: center; margin-bottom: 5px; }
-.cap-input-group input { width: 100%; text-align: center; border: 1px solid var(--border); border-radius: 4px; padding: 3px 0; font-weight: bold; }
-.input-hs { background: var(--hs-bg) !important; }
+/* Modal & Kartlar */
+.admin-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+.card-modal { background: var(--card-bg); width: 90%; max-width: 350px; border-radius: 15px; overflow: hidden; position: relative; }
+.card-header { background: var(--blue); color: white; padding: 20px; text-align: center; }
+.vardiya-gun-row { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px dashed var(--border); }
+.saat-değeri { background: var(--blue-light); padding: 2px 6px; border-radius: 4px; font-weight: 700; color: var(--blue); }
 
 /* Checkbox Alanı */
-.checklist-horizontal-grid { display: flex; flex-wrap: wrap; gap: 5px; padding: 10px; }
-.check-item { background: var(--card-bg); padding: 3px 6px; border-radius: 4px; border: 1px solid var(--border); font-size: 10px; display: flex; align-items: center; gap: 4px; }
+.checklist-horizontal-grid { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px; }
+.check-item { background: var(--card-bg); padding: 4px 8px; border-radius: 4px; border: 1px solid var(--border); display: flex; align-items: center; gap: 5px; }
 
-.admin-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-.admin-modal { background: var(--card-bg); width: 95%; max-width: 1000px; height: 80vh; border-radius: 12px; display: flex; flex-direction: column; }
-.admin-tabs { display: flex; border-bottom: 1px solid var(--border); }
-.tab-btn { padding: 15px; border: none; background: none; color: var(--text); font-weight: 700; opacity: 0.4; cursor: pointer; }
-.tab-btn.active { opacity: 1; border-bottom: 3px solid var(--blue); }
-.admin-body { flex: 1; padding: 15px; overflow-y: auto; }
-
-.footer-buttons { display: flex; gap: 10px; justify-content: center; margin-bottom: 20px; }
+/* Butonlar */
+.footer-buttons { display: flex; gap: 10px; justify-content: center; margin: 20px 0; }
 .wa-btn { background: #25d366; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; }
-
-@keyframes zoomIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-.hidden { display: none !important; }
 .btn-close { position: absolute; right: 10px; top: 10px; background: none; border: none; color: white; font-size: 20px; cursor: pointer; }
+
+.hidden { display: none !important; }
