@@ -1,88 +1,66 @@
-/* * PRO-Vardiya v23.0 | Global Stiller
- */
-
 :root {
-    --primary: #0f172a;
-    --blue: #2563eb;
-    --blue-light: #dbeafe;
-    --bg: #f1f5f9;
-    --card-bg: #ffffff;
-    --text: #1e293b;
-    --border: #e2e8f0;
-    --danger: #ef4444;
-    --warning: #f59e0b;
-    --success: #10b981;
-    --hs-bg: #fff1f2; /* Hafta sonu soft kırmızı */
+    --primary: #0f172a; --blue: #2563eb; --blue-light: #dbeafe; --bg: #f1f5f9; 
+    --card-bg: #ffffff; --text: #1e293b; --border: #e2e8f0; --hs-bg: #fff1f2;
 }
-
 body.dark-mode {
-    --primary: #1e293b;
-    --blue: #3b82f6;
-    --bg: #0f172a;
-    --card-bg: #1e293b;
-    --text: #f8fafc;
-    --border: #334155;
-    --hs-bg: #451a1a;
+    --primary: #1e293b; --blue: #3b82f6; --bg: #0f172a; --card-bg: #1e293b; 
+    --text: #f8fafc; --border: #334155; --hs-bg: #451a1a;
 }
+body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); margin: 0; font-size: 11px; }
 
-body {
-    font-family: 'Poppins', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    margin: 0;
-    font-size: 11px;
-    line-height: 1.4;
+.main-header { display: flex; justify-content: space-between; align-items: center; background: var(--primary); color: white; padding: 12px 20px; border-radius: 0 0 12px 12px; margin-bottom: 10px; }
+.btn-main-action { background: var(--blue); color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: 700; cursor: pointer; }
+
+/* Isı Haritası */
+.heatmap-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin: 10px; background: var(--card-bg); padding: 10px; border-radius: 8px; border: 1px solid var(--border); }
+.heatmap-day { text-align: center; padding: 5px; border-radius: 4px; border-bottom: 3px solid #ccc; }
+
+/* Uyarı Paneli */
+.alert-box { background: #fee2e2; border: 1px solid #fca5a5; color: #991b1b; padding: 10px; margin: 10px; border-radius: 8px; font-size: 10px; }
+
+/* Tablo ve Kartlar */
+.table-card { background: var(--card-bg); padding: 15px; border-radius: 12px; margin: 10px; overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; min-width: 1100px; }
+th { background: var(--primary); color: white; padding: 8px; font-size: 10px; }
+td { border: 1px solid var(--border); padding: 4px; vertical-align: top; width: 13.5%; }
+td:first-child { background: var(--primary); color: white; width: 80px; text-align: center; font-weight: bold; vertical-align: middle; }
+
+.birim-card { 
+    background: var(--card-bg); border-left: 4px solid var(--blue); padding: 5px; 
+    margin-bottom: 3px; border-radius: 4px; font-size: 9px; cursor: pointer; 
+    position: relative; border: 1px solid var(--border);
 }
+.birim-tag { font-size: 7px; color: var(--blue); font-weight: 800; display: block; }
+.adalet-badge { position: absolute; top: 2px; right: 2px; font-size: 7px; opacity: 0.6; }
 
-/* Header & Logo */
-.main-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: var(--primary);
-    color: white;
-    padding: 12px 20px;
-    border-radius: 0 0 12px 12px;
-    margin-bottom: 15px;
-    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-}
+/* Personel Kart Modalı */
+.card-modal { background: var(--card-bg); width: 90%; max-width: 350px; border-radius: 15px; overflow: hidden; animation: zoomIn 0.3s; }
+.card-header { background: var(--blue); color: white; padding: 15px; text-align: center; position: relative; }
+.card-body { padding: 15px; }
+.vardiya-gun-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed var(--border); }
+.cal-btn { width: 100%; background: #4285f4; color: white; border: none; padding: 12px; border-radius: 8px; font-weight: 700; cursor: pointer; margin-bottom: 10px; }
+.btn-close-card { width: 100%; background: #64748b; color: white; border: none; padding: 8px; border-radius: 8px; cursor: pointer; }
 
-.badge {
-    background: var(--blue);
-    font-size: 8px;
-    padding: 2px 6px;
-    border-radius: 4px;
-    width: fit-content;
-}
+/* Kapasite Giriş */
+.cap-table-header { display: grid; grid-template-columns: 140px repeat(6, 1fr); gap: 5px; font-weight: 800; text-align: center; color: var(--blue); }
+.cap-row { display: grid; grid-template-columns: 140px repeat(6, 1fr); gap: 5px; align-items: center; margin-bottom: 5px; }
+.cap-input-group input { width: 100%; text-align: center; border: 1px solid var(--border); border-radius: 4px; padding: 3px 0; font-weight: bold; }
+.input-hs { background: var(--hs-bg) !important; }
 
-.logo-area h1 { margin: 0; font-size: 18px; letter-spacing: 1px; }
-.logo-area h1 span { color: var(--blue); }
-.date-display { margin: 0; font-size: 10px; opacity: 0.8; }
+/* Checkbox Alanı */
+.checklist-horizontal-grid { display: flex; flex-wrap: wrap; gap: 5px; padding: 10px; }
+.check-item { background: var(--card-bg); padding: 3px 6px; border-radius: 4px; border: 1px solid var(--border); font-size: 10px; display: flex; align-items: center; gap: 4px; }
 
-/* Isı Haritası (Heatmap) */
-.heatmap-section { margin: 0 10px 15px 10px; }
-.heatmap-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 8px;
-    background: var(--card-bg);
-    padding: 12px;
-    border-radius: 8px;
-    border: 1px solid var(--border);
-}
+.admin-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+.admin-modal { background: var(--card-bg); width: 95%; max-width: 1000px; height: 80vh; border-radius: 12px; display: flex; flex-direction: column; }
+.admin-tabs { display: flex; border-bottom: 1px solid var(--border); }
+.tab-btn { padding: 15px; border: none; background: none; color: var(--text); font-weight: 700; opacity: 0.4; cursor: pointer; }
+.tab-btn.active { opacity: 1; border-bottom: 3px solid var(--blue); }
+.admin-body { flex: 1; padding: 15px; overflow-y: auto; }
 
-.heatmap-day {
-    text-align: center;
-    padding: 5px;
-    border-radius: 4px;
-    background: rgba(0,0,0,0.02);
-}
+.footer-buttons { display: flex; gap: 10px; justify-content: center; margin-bottom: 20px; }
+.wa-btn { background: #25d366; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; }
 
-/* Hata Dedektörü (Alerts) */
-.alert-box {
-    margin: 0 10px 15px 10px;
-    background: #fee2e2;
-    border: 1px solid #fca5a5;
-    color: #991b1b;
-    padding: 12px;
-    border-radius:
+@keyframes zoomIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.hidden { display: none !important; }
+.btn-close { position: absolute; right: 10px; top: 10px; background: none; border: none; color: white; font-size: 20px; cursor: pointer; }
