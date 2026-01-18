@@ -121,7 +121,7 @@ function tabloyuOlustur() {
     if (haftalikProgram[s.isim]) haftalikProgram[s.isim][s.gun] = s.saat;
   });
 
-  // MCR 8 GÜNLÜK DÖNGÜ: 2 Sabah → 2 Akşam → 2 Gece → 2 İzin
+  // MCR 8 günlük döngü: 2 Sabah → 2 Akşam → 2 Gece → 2 İzin
   const refDate = new Date("2026-01-19");
   const diff = Math.floor((mevcutPazartesi - refDate) / (1000 * 60 * 60 * 24));
   ["24TV MCR OPERATÖRÜ", "360TV MCR OPERATÖRÜ"].forEach(birim => {
@@ -131,15 +131,10 @@ function tabloyuOlustur() {
       for (let i = 0; i < 7; i++) {
         let cycle = (diff + i + offset) % 8;
         let atama;
-        if (cycle === 0 || cycle === 1) {
-          atama = "06:30–16:00";
-        } else if (cycle === 2 || cycle === 3) {
-          atama = "16:00–00:00";
-        } else if (cycle === 4 || cycle === 5) {
-          atama = "00:00–07:00";
-        } else {
-          atama = "İZİNLİ";
-        }
+        if (cycle === 0 || cycle === 1) atama = "06:30–16:00";
+        else if (cycle === 2 || cycle === 3) atama = "16:00–00:00";
+        else if (cycle === 4 || cycle === 5) atama = "00:00–07:00";
+        else atama = "İZİNLİ";
         haftalikProgram[p.isim][i] = atama;
       }
     });
@@ -165,10 +160,53 @@ function tabloyuOlustur() {
     }
   });
 
+  // Yeni adil atama algoritması
+  adilAtamaYap();
+
   temizleGunlukCakismalari();
   renderTable();
 }
 
+// Yeni: Adil atama (en az çalışan öncelikli + sırayla dolaşım)
+function adilAtamaYap() {
+  const calismaSayilari = {}; // her kişinin haftalık çalışma günü sayısı
+  sabitPersoneller.forEach(p => {
+    calismaSayilari[p.isim] = haftalikProgram[p.isim].filter(v => v !== null && v !== "İZİNLİ").length;
+  });
+
+  const isHS = [false, false, false, false, false, true, true]; // hafta sonu kontrolü
+
+  for (let gun = 0; gun < 7; gun++) {
+    for (let s of saatler) {
+      const birimKap = kapasiteAyarlari;
+      birimSiralamasi.forEach(birim => {
+        if (birim.includes("MCR")) return;
+
+        const kap = isHS[gun] ? (birimKap[birim]?.[s]?.haftasonu || 0) : (birimKap[birim]?.[s]?.haftaici || 0);
+        if (kap <= 0) return;
+
+        let adaylar = sabitPersoneller.filter(p => {
+          if (p.birim !== birim) return false;
+          if (haftalikProgram[p.isim][gun] !== null) return false;
+          if (birim !== "TEKNİK YÖNETMEN" && calismaSayilari[p.isim] >= 6) return false;
+          if (birim === "TEKNİK YÖNETMEN" && s === "00:00–07:00" && !["BARIŞ İNCE", "EKREM FİDAN"].includes(p.isim)) return false;
+          return true;
+        });
+
+        // En az çalışanları öne çıkar (adil dağılım)
+        adaylar.sort((a, b) => calismaSayilari[a.isim] - calismaSayilari[b.isim]);
+
+        for (let k = 0; k < kap && adaylar.length > 0; k++) {
+          let p = adaylar.shift();
+          haftalikProgram[p.isim][gun] = s;
+          calismaSayilari[p.isim]++;
+        }
+      });
+    }
+  }
+}
+
+// Geri kalan fonksiyonlar aynı kalıyor (temizleGunlukCakismalari, hucreDoldur, renderTable vb.)
 function temizleGunlukCakismalari() {
   sabitPersoneller.forEach(p => {
     const gunAtamalari = {};
@@ -196,7 +234,6 @@ function hucreDoldur(gun, saat) {
   const isHS = (gun >= 5);
   let atananlar = [];
 
-  // MCR'ları manuel atamadan çıkar (döngü zaten atıyor)
   birimSiralamasi.forEach(birim => {
     if (birim.includes("MCR")) return;
 
@@ -212,7 +249,7 @@ function hucreDoldur(gun, saat) {
       if (birim !== "TEKNİK YÖNETMEN" && haftalikProgram[p.isim].filter(v => v !== null && v !== "İZİNLİ").length >= 6) return false;
       if (birim === "TEKNİK YÖNETMEN" && saat === "00:00–07:00" && !["BARIŞ İNCE", "EKREM FİDAN"].includes(p.isim)) return false;
       return true;
-    }).sort(() => Math.random() - 0.5);
+    });
 
     let atanabilecek = Math.min(kap, adaylar.length);
     for (let k = 0; k < atanabilecek; k++) {
@@ -222,7 +259,7 @@ function hucreDoldur(gun, saat) {
     }
   });
 
-  // Döngüden gelen MCR atamalarını da tabloya ekle (bu satır sorunu çözer)
+  // Döngüden gelen MCR'ları ekle
   sabitPersoneller.forEach(p => {
     if (p.birim.includes("MCR") && haftalikProgram[p.isim][gun] === saat) {
       atananlar.push(p);
@@ -235,6 +272,7 @@ function hucreDoldur(gun, saat) {
     .join('');
 }
 
+// Geri kalan tüm fonksiyonlar aynı (renderTable, checklistOlustur, yönetim fonksiyonları vb.)
 function renderTable() {
   const head = document.getElementById("tableHeader");
   head.innerHTML = `<th>SAATLER</th>` + gunler.map((g, i) => {
