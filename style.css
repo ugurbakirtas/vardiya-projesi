@@ -1,46 +1,25 @@
-:root {
-    --primary: #0f172a; --blue: #2563eb; --bg: #f8fafc; --card-bg: #ffffff; 
-    --text: #1e293b; --border: #e2e8f0; --hs-bg: #fff1f2; --danger: #ef4444;
-}
-body.dark-mode {
-    --primary: #1e293b; --blue: #3b82f6; --bg: #0f172a; --card-bg: #1e293b;
-    --text: #f8fafc; --border: #334155; --hs-bg: #451a1a;
-}
+:root { --primary: #0f172a; --blue: #2563eb; --bg: #f8fafc; --card-bg: #ffffff; --text: #1e293b; --border: #e2e8f0; --danger: #ef4444; }
+body.dark-mode { --primary: #1e293b; --blue: #3b82f6; --bg: #0f172a; --card-bg: #1e293b; --text: #f8fafc; --border: #334155; }
 body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); margin: 0; font-size: 11px; }
 .app-wrapper { padding: 20px; }
-
-/* Header */
 .main-header { display: flex; justify-content: space-between; align-items: center; background: var(--primary); color: white; padding: 15px 25px; border-radius: 12px; margin-bottom: 15px; }
 .btn-main-action { background: var(--blue); color: white; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 700; cursor: pointer; }
-
-/* Admin Modal */
 .admin-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 9999; }
 .admin-modal { background: var(--card-bg); width: 95%; max-width: 1000px; height: 80vh; border-radius: 20px; overflow: hidden; display: flex; flex-direction: column; }
 .admin-tabs { display: flex; background: #e2e8f0; padding: 10px; gap: 10px; }
-.tab-btn { border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; font-weight: 600; }
+.tab-btn { border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; }
 .tab-btn.active { background: var(--blue); color: white; }
 .admin-content { padding: 20px; flex: 1; overflow-y: auto; }
 .admin-input-group { display: flex; gap: 10px; margin-bottom: 20px; }
-.admin-input-group input, .admin-input-group select { padding: 10px; border-radius: 8px; border: 1px solid var(--border); flex: 1; }
-
-/* Kapasite Grid */
-.cap-table-header { display: grid; grid-template-columns: 180px repeat(6, 1fr); font-weight: bold; padding: 10px; background: var(--bg); }
-.cap-row { display: grid; grid-template-columns: 180px repeat(6, 1fr); gap: 5px; padding: 10px 0; border-bottom: 1px solid var(--border); }
-.cap-input-group { display: flex; gap: 2px; }
-.cap-input-group input { width: 30px; text-align: center; border: 1px solid var(--border); border-radius: 4px; }
-.input-hs { background: #fee2e2; border-color: #fca5a5 !important; }
-
-/* Vardiya Tablosu */
-table { width: 100%; border-collapse: separate; border-spacing: 0; background: var(--card-bg); border-radius: 12px; overflow: hidden; }
-th { background: var(--primary); color: white; padding: 12px; }
-td { border: 1px solid var(--border); padding: 8px; vertical-align: top; width: 13%; }
-.birim-card { border-left: 4px solid var(--blue); padding: 5px; margin-bottom: 4px; background: rgba(37,99,235,0.05); border-radius: 4px; font-weight: 600; }
-.birim-tag { font-size: 7px; color: var(--blue); text-transform: uppercase; display: block; }
-
-/* İzinli Satırı */
+.cap-table-header, .cap-row { display: grid; grid-template-columns: 180px repeat(6, 1fr); gap: 5px; padding: 10px; border-bottom: 1px solid var(--border); }
+.cap-input-group input { width: 30px; text-align: center; }
+.input-hs { background: #fee2e2; }
+table { width: 100%; border-collapse: collapse; background: var(--card-bg); }
+th { background: var(--primary); color: white; padding: 10px; }
+td { border: 1px solid var(--border); padding: 5px; vertical-align: top; width: 13%; }
+.birim-card { border-left: 4px solid var(--blue); padding: 4px; margin-bottom: 3px; background: rgba(37,99,235,0.05); font-weight: 600; }
+.birim-tag { font-size: 7px; color: var(--blue); display: block; }
 .izinli-satiri td { background: #f1f5f9; border-top: 2px solid var(--primary); }
-.izinli-kart { border-left-color: #94a3b8 !important; background: #e2e8f0; opacity: 0.8; }
-
+.izinli-kart { border-left-color: #94a3b8 !important; opacity: 0.7; }
 .hidden { display: none !important; }
-.admin-list-item { display: flex; justify-content: space-between; padding: 10px; background: var(--bg); border-radius: 8px; margin-bottom: 5px; }
-.btn-add { padding: 10px 20px; border-radius: 8px; border: none; background: var(--green); color: white; cursor: pointer; }
+.admin-list-item { display: flex; justify-content: space-between; background: var(--bg); padding: 8px; margin-bottom: 4px; border-radius: 6px; }

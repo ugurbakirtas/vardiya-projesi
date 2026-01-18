@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PRO-Vardiya v26.0 | Yönetim & İzin Paneli</title>
+  <title>PRO-Vardiya v26.3 | MCR Sabit Sistem</title>
   <link rel="stylesheet" href="style.css">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -12,7 +12,7 @@
   <div class="app-wrapper">
     <header class="main-header no-print">
       <div class="logo-area">
-        <div class="badge">V26.0 FINAL</div>
+        <div class="badge">V26.3 MCR-FIX</div>
         <h1>TEKNİK <span>VARDİYA</span></h1>
         <p id="tarihAraligi" class="date-display">Yükleniyor...</p>
       </div>
@@ -21,7 +21,7 @@
         <button onclick="tabloyuOlustur()" class="btn-main-action pulse">VARDİYA OLUŞTUR</button>
         <button onclick="haftaDegistir(7)" class="btn-step">İLERİ »</button>
         <button onclick="toggleAdminPanel()" class="btn-admin">⚙️ YÖNETİM</button>
-        <button id="themeBtn" onclick="toggleTheme()" class="btn-theme">🌙</button>
+        <button onclick="toggleTheme()" class="btn-theme">🌙</button>
       </div>
     </header>
 
@@ -29,12 +29,11 @@
       <div class="admin-modal">
         <div class="admin-tabs">
           <button class="tab-btn active" onclick="tabDegistir('sabit')">📍 Sabit Atama</button>
-          <button class="tab-btn" onclick="tabDegistir('personel')">👤 Personel & Birim</button>
+          <button class="tab-btn" onclick="tabDegistir('personel')">👤 Personel/Birim</button>
           <button class="tab-btn" onclick="tabDegistir('kapasite')">📊 Kapasite (Hİ/HS)</button>
           <button class="tab-btn" onclick="tabDegistir('sistem')">⚙️ Sistem</button>
-          <button onclick="toggleAdminPanel()" class="btn-close-modal">✖ KAPAT</button>
+          <button onclick="toggleAdminPanel()" class="btn-close-modal">✖</button>
         </div>
-
         <div class="admin-content">
           <div id="tab-sabit" class="tab-content">
             <div class="admin-input-group">
@@ -48,24 +47,20 @@
             </div>
             <div id="sabitListesi" class="admin-list"></div>
           </div>
-
           <div id="tab-personel" class="tab-content hidden">
             <div class="admin-input-group">
-              <input type="text" id="yeniPersonelAd" placeholder="Personel Adı">
+              <input type="text" id="yeniPersonelAd" placeholder="Ad Soyad">
               <select id="yeniPersonelBirim"></select>
-              <button onclick="manuelPersonelEkle()" class="btn-add" style="background:var(--blue)">Ekle</button>
+              <button onclick="manuelPersonelEkle()" class="btn-add">Ekle</button>
             </div>
             <div id="personelYonetimListesi" class="admin-list"></div>
           </div>
-
           <div id="tab-kapasite" class="tab-content hidden">
-            <div class="info-box">Sol kutu: <b>Hafta İçi</b> | Sağ kutu (renkli): <b>Hafta Sonu</b></div>
             <div id="kapasiteListesi" class="cap-grid-container"></div>
           </div>
-
           <div id="tab-sistem" class="tab-content hidden">
-             <button onclick="exportExcel()" class="btn-add" style="background:#16a34a; width:100%; margin-bottom:10px;">EXCEL İNDİR</button>
-             <button onclick="sifirla()" class="btn-reset">TÜM VERİLERİ SIFIRLA</button>
+             <button onclick="exportExcel()" class="btn-add" style="background:#16a34a; width:100%;">EXCEL İNDİR</button>
+             <button onclick="sifirla()" class="btn-reset">TEMİZLE</button>
           </div>
         </div>
       </div>
@@ -73,11 +68,9 @@
 
     <main class="content-area">
       <section class="checklist-section no-print">
-        <div class="section-title">Haftalık İzin Seçimi</div>
         <div id="personelChecklist" class="checklist-horizontal-grid"></div>
       </section>
-      
-      <div class="table-card" id="print-area">
+      <div class="table-card">
         <table id="vardiyaTablosu">
           <thead><tr id="tableHeader"></tr></thead>
           <tbody id="tableBody"></tbody>
