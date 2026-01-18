@@ -34,27 +34,70 @@ const UNIT_COLORS = {
     "360TV MCR OPERATÖRÜ": "#d35400"
 };
 
+// SENİN VERDİĞİN EN GÜNCEL KAPASİTE DEĞERLERİ
 const DEFAULT_KAPASITE = {
+    // TEKNİK YÖNETMEN
     "TEKNİK YÖNETMEN_06:30–16:00":   {h:1, hs:1},
-    "TEKNİK YÖNETMEN_09:00–18:00":   {h:1, hs:1},
-    "TEKNİK YÖNETMEN_12:00–22:00":   {h:1, hs:1},
+    "TEKNİK YÖNETMEN_09:00–18:00":   {h:0, hs:1},
+    "TEKNİK YÖNETMEN_12:00–22:00":   {h:0, hs:0},
     "TEKNİK YÖNETMEN_16:00–00:00":   {h:1, hs:1},
     "TEKNİK YÖNETMEN_00:00–07:00":   {h:1, hs:1},
+    "TEKNİK YÖNETMEN_DIŞ YAYIN":     {h:0, hs:0},
 
-    "SES OPERATÖRÜ_06:30–16:00":     {h:4, hs:3},
-    "SES OPERATÖRÜ_09:00–18:00":     {h:2, hs:2},
-    "SES OPERATÖRÜ_12:00–22:00":     {h:2, hs:2},
-    "SES OPERATÖRÜ_16:00–00:00":     {h:3, hs:2},
-    "SES OPERATÖRÜ_00:00–07:00":     {h:1, hs:1},
+    // SES OPERATÖRÜ
+    "SES OPERATÖRÜ_06:30–16:00":     {h:4, hs:2},
+    "SES OPERATÖRÜ_09:00–18:00":     {h:0, hs:1},
+    "SES OPERATÖRÜ_12:00–22:00":     {h:0, hs:0},
+    "SES OPERATÖRÜ_16:00–00:00":     {h:2, hs:2},
+    "SES OPERATÖRÜ_00:00–07:00":     {h:0, hs:0},
+    "SES OPERATÖRÜ_DIŞ YAYIN":       {h:0, hs:0},
 
+    // PLAYOUT OPERATÖRÜ
     "PLAYOUT OPERATÖRÜ_06:30–16:00": {h:3, hs:2},
-    "PLAYOUT OPERATÖRÜ_09:00–18:00": {h:2, hs:1},
-    "PLAYOUT OPERATÖRÜ_12:00–22:00": {h:2, hs:1},
-    "PLAYOUT OPERATÖRÜ_16:00–00:00": {h:3, hs:2},
+    "PLAYOUT OPERATÖRÜ_09:00–18:00": {h:0, hs:0},
+    "PLAYOUT OPERATÖRÜ_12:00–22:00": {h:0, hs:0},
+    "PLAYOUT OPERATÖRÜ_16:00–00:00": {h:2, hs:2},
+    "PLAYOUT OPERATÖRÜ_00:00–07:00": {h:0, hs:0},
+    "PLAYOUT OPERATÖRÜ_DIŞ YAYIN":   {h:0, hs:0},
 
+    // KJ OPERATÖRÜ
     "KJ OPERATÖRÜ_06:30–16:00":      {h:3, hs:2},
+    "KJ OPERATÖRÜ_09:00–18:00":      {h:0, hs:0},
+    "KJ OPERATÖRÜ_12:00–22:00":      {h:0, hs:0},
     "KJ OPERATÖRÜ_16:00–00:00":      {h:2, hs:2},
-    "KJ OPERATÖRÜ_00:00–07:00":      {h:1, hs:1},
+    "KJ OPERATÖRÜ_00:00–07:00":      {h:0, hs:0},
+    "KJ OPERATÖRÜ_DIŞ YAYIN":        {h:0, hs:0},
+
+    // Diğer birimler için şimdilik boş bırakıldı - istersen ekleriz
+    "INGEST OPERATÖRÜ_06:30–16:00":     {h:0, hs:0},
+    "INGEST OPERATÖRÜ_09:00–18:00":     {h:0, hs:0},
+    "INGEST OPERATÖRÜ_12:00–22:00":     {h:0, hs:0},
+    "INGEST OPERATÖRÜ_16:00–00:00":     {h:0, hs:0},
+    "INGEST OPERATÖRÜ_00:00–07:00":     {h:0, hs:0},
+
+    "BİLGİ İŞLEM_06:30–16:00":          {h:0, hs:0},
+    "BİLGİ İŞLEM_09:00–18:00":          {h:0, hs:0},
+    "BİLGİ İŞLEM_12:00–22:00":          {h:0, hs:0},
+    "BİLGİ İŞLEM_16:00–00:00":          {h:0, hs:0},
+    "BİLGİ İŞLEM_00:00–07:00":          {h:0, hs:0},
+
+    "YAYIN SİSTEMLERİ_06:30–16:00":     {h:0, hs:0},
+    "YAYIN SİSTEMLERİ_09:00–18:00":     {h:0, hs:0},
+    "YAYIN SİSTEMLERİ_12:00–22:00":     {h:0, hs:0},
+    "YAYIN SİSTEMLERİ_16:00–00:00":     {h:0, hs:0},
+    "YAYIN SİSTEMLERİ_00:00–07:00":     {h:0, hs:0},
+
+    "24TV MCR OPERATÖRÜ_06:30–16:00":   {h:0, hs:0},
+    "24TV MCR OPERATÖRÜ_09:00–18:00":   {h:0, hs:0},
+    "24TV MCR OPERATÖRÜ_12:00–22:00":   {h:0, hs:0},
+    "24TV MCR OPERATÖRÜ_16:00–00:00":   {h:0, hs:0},
+    "24TV MCR OPERATÖRÜ_00:00–07:00":   {h:0, hs:0},
+
+    "360TV MCR OPERATÖRÜ_06:30–16:00":  {h:0, hs:0},
+    "360TV MCR OPERATÖRÜ_09:00–18:00":  {h:0, hs:0},
+    "360TV MCR OPERATÖRÜ_12:00–22:00":  {h:0, hs:0},
+    "360TV MCR OPERATÖRÜ_16:00–00:00":  {h:0, hs:0},
+    "360TV MCR OPERATÖRÜ_00:00–07:00":  {h:0, hs:0},
 };
 
 let state = {
@@ -122,7 +165,7 @@ function tabloyuOlustur() {
         }
     }
 
-    // 3. Otomatik atama - RASTGELELİK EKLENDİ
+    // 3. Otomatik atama - hafif rastgelelik var
     for (let gun = 0; gun < 7; gun++) {
         const haftaSonu = gun >= 5;
         state.birimler.forEach(birim => {
@@ -346,7 +389,7 @@ function whatsappKopyala() {
     alert("Henüz tam çalışmıyor.\nŞimdilik tabloyu ekran görüntüsü alarak paylaşabilirsiniz.");
 }
 
-// BAŞLANGIÇ - SADECE senin verdiğin 28 kişi
+// BAŞLANGIÇ PERSONELLERİ - SADECE senin verdiğin isimler
 window.onload = () => {
     if (state.personeller.length === 0) {
         state.personeller = [
@@ -385,6 +428,36 @@ window.onload = () => {
             {ad: "OĞUZHAN YALAZAN",   birim: "KJ OPERATÖRÜ", id: Date.now() + 26},
             {ad: "YEŞİM KİREÇ",       birim: "KJ OPERATÖRÜ", id: Date.now() + 27},
             {ad: "PINAR ÖZENÇ",       birim: "KJ OPERATÖRÜ", id: Date.now() + 28},
+
+            // INGEST OPERATÖRÜ
+            {ad: "ERCAN PALABIYIK",   birim: "INGEST OPERATÖRÜ", id: Date.now() + 29},
+            {ad: "RAMAZAN KOÇAK",     birim: "INGEST OPERATÖRÜ", id: Date.now() + 30},
+            {ad: "DEMET CENGİZ",      birim: "INGEST OPERATÖRÜ", id: Date.now() + 31},
+
+            // BİLGİ İŞLEM
+            {ad: "ÖZKAN KAYA",        birim: "BİLGİ İŞLEM", id: Date.now() + 32},
+            {ad: "VOLKAN DEMİRBAŞ",   birim: "BİLGİ İŞLEM", id: Date.now() + 33},
+            {ad: "HAKAN ELİPEK",      birim: "BİLGİ İŞLEM", id: Date.now() + 34},
+            {ad: "GÖKHAN BAĞIŞ",      birim: "BİLGİ İŞLEM", id: Date.now() + 35},
+
+            // YAYIN SİSTEMLERİ
+            {ad: "FATİH AYBEK",       birim: "YAYIN SİSTEMLERİ", id: Date.now() + 36},
+            {ad: "YİĞİT DAYI",        birim: "YAYIN SİSTEMLERİ", id: Date.now() + 37},
+            {ad: "BEYHAN KARAKAŞ",    birim: "YAYIN SİSTEMLERİ", id: Date.now() + 38},
+            {ad: "AKİF KOÇ",          birim: "YAYIN SİSTEMLERİ", id: Date.now() + 39},
+            {ad: "FERDİ TOPUZ",       birim: "YAYIN SİSTEMLERİ", id: Date.now() + 40},
+
+            // 24TV MCR OPERATÖRÜ
+            {ad: "FARUK YILMAZ",      birim: "24TV MCR OPERATÖRÜ", id: Date.now() + 41},
+            {ad: "YUSUF HENEK",       birim: "24TV MCR OPERATÖRÜ", id: Date.now() + 42},
+            {ad: "SEDA KAYA",         birim: "24TV MCR OPERATÖRÜ", id: Date.now() + 43},
+            {ad: "KADİR YILMAZ",      birim: "24TV MCR OPERATÖRÜ", id: Date.now() + 44},
+
+            // 360TV MCR OPERATÖRÜ
+            {ad: "EMRULLAH AHLATÇI",  birim: "360TV MCR OPERATÖRÜ", id: Date.now() + 45},
+            {ad: "EREN KAZAN",        birim: "360TV MCR OPERATÖRÜ", id: Date.now() + 46},
+            {ad: "MUSAB YAKUB DEMİRBAŞ", birim: "360TV MCR OPERATÖRÜ", id: Date.now() + 47},
+            {ad: "BÜKRE YAVUZ",       birim: "360TV MCR OPERATÖRÜ", id: Date.now() + 48},
         ];
         save();
     }
