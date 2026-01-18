@@ -34,7 +34,6 @@ const UNIT_COLORS = {
     "360TV MCR OPERATÖRÜ": "#d35400"
 };
 
-// Başlangıç kapasite değerleri (gerçekçi başlangıç için ayarlandı)
 const DEFAULT_KAPASITE = {
     "TEKNİK YÖNETMEN_06:30–16:00":   {h:1, hs:1},
     "TEKNİK YÖNETMEN_09:00–18:00":   {h:1, hs:1},
@@ -81,6 +80,7 @@ function save() {
     });
 }
 
+// --- ANA FONKSİYONLAR ---
 function tabloyuOlustur() {
     const haftaKey = currentMonday.toISOString().split('T')[0];
     document.getElementById("tarihAraligi").innerText = `${currentMonday.toLocaleDateString('tr-TR')} Haftası`;
@@ -113,7 +113,7 @@ function tabloyuOlustur() {
         }
     });
 
-    // 2. Gece Teknik Yönetmen rotasyonu (Barış & Ekrem)
+    // 2. Gece Teknik Yönetmen rotasyonu
     for (let i = 0; i < 7; i++) {
         let geceSorumlusu = (i < 2) ? "BARIŞ İNCE" : "EKREM FİDAN";
         if (program[geceSorumlusu]?.[i] === null) {
@@ -122,7 +122,7 @@ function tabloyuOlustur() {
         }
     }
 
-    // 3. Otomatik atama
+    // 3. Otomatik atama - RASTGELELİK EKLENDİ
     for (let gun = 0; gun < 7; gun++) {
         const haftaSonu = gun >= 5;
         state.birimler.forEach(birim => {
@@ -140,9 +140,14 @@ function tabloyuOlustur() {
                         .filter(p => 
                             p.birim === birim &&
                             program[p.ad][gun] === null &&
-                            calismaSayisi[p.ad] < 6  // Haftalık max 6 gün
-                        )
-                        .sort((a,b) => calismaSayisi[a.ad] - calismaSayisi[b.ad]);
+                            calismaSayisi[p.ad] < 6
+                        );
+
+                    // Az çalışana öncelik + aynı seviyedekileri karıştır
+                    adaylar.sort((a, b) => {
+                        const diff = calismaSayisi[a.ad] - calismaSayisi[b.ad];
+                        return diff !== 0 ? diff : Math.random() - 0.5;
+                    });
 
                     let eklenecek = hedef - mevcut;
                     for (let j = 0; j < eklenecek && adaylar[j]; j++) {
@@ -150,6 +155,7 @@ function tabloyuOlustur() {
                             !["BARIŞ İNCE", "EKREM FİDAN"].includes(adaylar[j].ad)) {
                             continue;
                         }
+
                         program[adaylar[j].ad][gun] = saat;
                         calismaSayisi[adaylar[j].ad]++;
                     }
@@ -200,8 +206,7 @@ function render(program) {
         </tr>`;
 }
 
-// Diğer fonksiyonlar (vardiyaDegistir, personelEkle, refreshUI, kapasiteCiz, capSave, checklistOlustur, toggleAdminPanel, tabDegistir, haftaDegistir, sil, sifirla, whatsappKopyala) aynı kalıyor
-
+// --- YÖNETİM FONKSİYONLARI ---
 function vardiyaDegistir(pAd, gunIndex) {
     const sirali = [...state.saatler];
     let mesaj = `${pAd} için vardiya seç:\n` +
