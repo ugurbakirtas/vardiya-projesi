@@ -2,46 +2,89 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <title>Vardiya Paneli</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PRO-Vardiya v26.7 | MCR 2 Gün Üst Üste İzin</title>
   <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
-  <header>
-    <h1>Yönetici Paneli</h1>
-  </header>
+  <div class="app-wrapper">
+    <header class="main-header no-print">
+      <div class="logo-area">
+        <div class="badge">V26.7</div>
+        <h1>TEKNİK <span>VARDİYA</span></h1>
+        <p id="tarihAraligi" class="date-display">Yükleniyor...</p>
+      </div>
+      <div class="nav-controls">
+        <button onclick="haftaDegistir(-7)" class="btn-step">« GERİ</button>
+        <button onclick="tabloyuOlustur()" class="btn-main-action pulse">VARDİYA OLUŞTUR</button>
+        <button onclick="haftaDegistir(7)" class="btn-step">İLERİ »</button>
+        <button onclick="toggleAdminPanel()" class="btn-admin">⚙️ YÖNETİM</button>
+        <button onclick="toggleTheme()" class="btn-theme">🌙</button>
+      </div>
+    </header>
 
-  <!-- Çalışan Yönetimi -->
-  <section class="panel">
-    <h2>Çalışan Yönetimi</h2>
-    <input type="text" id="employeeFirstName" placeholder="Ad">
-    <input type="text" id="employeeLastName" placeholder="Soyad">
-    <input type="text" id="employeeUnit" placeholder="Birim">
-    <label><input type="checkbox" id="unitRotation"> 8 Günlük Döngü Aktif</label>
-    <button onclick="addEmployee()">Ekle</button>
-    <ul id="employeeList"></ul>
-  </section>
+    <div id="adminPanel" class="admin-overlay hidden">
+      <div class="admin-modal">
+        <div class="admin-tabs">
+          <button class="tab-btn active" onclick="tabDegistir('sabit')">📍 Sabit Atama</button>
+          <button class="tab-btn" onclick="tabDegistir('personel')">👤 Personel & Birim</button>
+          <button class="tab-btn" onclick="tabDegistir('kapasite')">📊 Kapasite (Hİ/HS)</button>
+          <button class="tab-btn" onclick="tabDegistir('sistem')">⚙️ Sistem</button>
+          <button onclick="toggleAdminPanel()" class="btn-close-modal">✖</button>
+        </div>
 
-  <!-- Saat Yönetimi -->
-  <section class="panel">
-    <h2>Saat Yönetimi</h2>
-    <input type="text" id="hourRange" placeholder="örn: 07:00-16:00">
-    <input type="number" id="weekdayCapacity" placeholder="Hafta İçi Kapasite">
-    <input type="number" id="weekendCapacity" placeholder="Hafta Sonu Kapasite">
-    <button onclick="addHour()">Saat Ekle</button>
-    <ul id="hourList"></ul>
-  </section>
+        <div class="admin-content">
+          <div id="tab-sabit" class="tab-content">
+            <div class="admin-input-group">
+              <select id="sabitPersSec"></select>
+              <select id="sabitGunSec">
+                <option value="0">Pazartesi</option><option value="1">Salı</option><option value="2">Çarşamba</option>
+                <option value="3">Perşembe</option><option value="4">Cuma</option><option value="5">Cumartesi</option><option value="6">Pazar</option>
+              </select>
+              <select id="sabitSaatSec"></select>
+              <button onclick="sabitAtamaEkle()" class="btn-add">Ekle</button>
+            </div>
+            <div id="sabitListesi" class="admin-list"></div>
+          </div>
 
-  <!-- Vardiya Planı -->
-  <section class="panel">
-    <h2>Vardiya Planı</h2>
-    <input type="number" id="dayCount" value="7">
-    <button onclick="generateShifts()">Plan Oluştur</button>
-    <div id="shiftResult"></div>
-  </section>
+          <div id="tab-personel" class="tab-content hidden">
+            <div class="admin-input-group">
+              <input type="text" id="yeniPersonelAd" placeholder="Personel Adı">
+              <select id="yeniPersonelBirim"></select>
+              <button onclick="manuelPersonelEkle()" class="btn-add">Ekle</button>
+            </div>
+            <div id="personelYonetimListesi" class="admin-list"></div>
+          </div>
 
-  <footer>
-    <p>© 2026 Vardiya Sistemi</p>
-  </footer>
+          <div id="tab-kapasite" class="tab-content hidden">
+            <div class="info-box">Sol: Hafta İçi | Sağ (Kırmızı): Hafta Sonu</div>
+            <div id="kapasiteListesi" class="cap-grid-container"></div>
+          </div>
+
+          <div id="tab-sistem" class="tab-content hidden">
+             <button onclick="exportExcel()" class="btn-add" style="background:#16a34a; width:100%; margin-bottom:10px;">EXCEL İNDİR</button>
+             <button onclick="sifirla()" class="btn-reset">VERİLERİ SIFIRLA</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <main class="content-area">
+      <section class="checklist-section no-print">
+        <div id="personelChecklist" class="checklist-horizontal-grid"></div>
+      </section>
+      
+      <div class="table-card">
+        <table id="vardiyaTablosu">
+          <thead><tr id="tableHeader"></tr></thead>
+          <tbody id="tableBody"></tbody>
+          <tfoot id="tableFooter"></tfoot>
+        </table>
+      </div>
+    </main>
+  </div>
 
   <script src="script.js"></script>
 </body>
