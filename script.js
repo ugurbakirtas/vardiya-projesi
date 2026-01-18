@@ -1,5 +1,5 @@
 /**
- * PRO-Vardiya v26.0 | Excel ve Personel Analizli Motor
+ * PRO-Vardiya v26.0 | Haftalık Sabitleme ve Personel Yönetimi
  */
 
 const birimSiralamasi = [
@@ -69,28 +69,6 @@ let haftalikProgram = {};
 
 function getMonday(d) { d = new Date(d); let day = d.getDay(), diff = d.getDate() - day + (day == 0 ? -6 : 1); return new Date(d.setDate(diff)); }
 
-function excelYukle(event) {
-    const file = event.target.files[0];
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        const data = new Uint8Array(e.target.result);
-        const workbook = XLSX.read(data, { type: 'array' });
-        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-        const jsonData = XLSX.utils.sheet_to_json(firstSheet);
-        if (jsonData.length > 0) {
-            sabitPersoneller = jsonData.map((p, i) => ({
-                isim: (p.İsim || p.isim || p.Name || "").trim().toUpperCase(),
-                birim: (p.Birim || p.birim || p.Unit || "").trim().toUpperCase(),
-                id: i + 1
-            }));
-            localStorage.setItem("sabitPersoneller", JSON.stringify(sabitPersoneller));
-            alert("Liste Güncellendi!");
-            location.reload();
-        }
-    };
-    reader.readAsArrayBuffer(file);
-}
-
 function baslat() {
     birimSiralamasi.forEach(b => {
         if (!kapasiteAyarlari[b]) {
@@ -102,11 +80,12 @@ function baslat() {
                     else if (s === "16:00–00:00" || s === "00:00–07:00") { hi = 1; hs = 1; }
                     else { hi = 0; hs = 0; }
                 }
-                if ((b.includes("MCR")) && s === "00:00–07:00") { hi = 1; hs = 1; }
+                if (b.includes("MCR") && s === "00:00–07:00") { hi = 1; hs = 1; }
                 kapasiteAyarlari[b][s] = { haftaici: hi, haftasonu: hs };
             });
         }
     });
+    document.getElementById("yeniPersonelBirim").innerHTML = birimSiralamasi.map(b => `<option value="${b}">${b}</option>`).join('');
     checklistOlustur();
     tabloyuOlustur();
 }
@@ -114,13 +93,24 @@ function baslat() {
 function tabloyuOlustur() {
     document.getElementById("tarihAraligi").innerText = `${mevcutPazartesi.toLocaleDateString('tr-TR')} Haftası`;
     haftalikProgram = {};
+
     sabitPersoneller.forEach(p => {
         haftalikProgram[p.isim] = Array(7).fill(null);
         if (document.getElementById(`check_${p.id}`)?.checked) haftalikProgram[p.isim].fill("İZİN");
-        sabitAtamalar.forEach(s => { if (s.isim === p.isim) haftalikProgram[p.isim][s.gun] = s.saat; });
+        
+        // Sabit Atama Kontrolü (Gelişmiş: 'all' seçeneği eklendi)
+        sabitAtamalar.forEach(s => {
+            if (s.isim === p.isim) {
+                if (s.gun === "all") {
+                    for(let i=0; i<7; i++) { if(haftalikProgram[p.isim][i] === null) haftalikProgram[p.isim][i] = s.saat; }
+                } else {
+                    haftalikProgram[p.isim][parseInt(s.gun)] = s.saat;
+                }
+            }
+        });
     });
-    
-    // Teknik Yönetmen Gece Rotasyonu
+
+    // Teknik Yönetmen Rotasyonu
     const weekNum = Math.floor(mevcutPazartesi.getTime() / (7 * 24 * 60 * 60 * 1000));
     const sorumluGece = (weekNum % 2 === 0) ? "BARIŞ İNCE" : "EKREM FİDAN";
     [0, 1].forEach(gun => { 
@@ -174,6 +164,27 @@ function checklistOlustur() {
     cont.innerHTML = s.map(p => `<div class="check-item"><input type="checkbox" id="check_${p.id}" onchange="tabloyuOlustur()"><label for="check_${p.id}"><strong>${p.isim}</strong><br><small>${p.birim}</small></label></div>`).join('');
 }
 
+function manuelPersonelEkle() {
+    const ad = document.getElementById("yeniPersonelAd").value.trim().toUpperCase();
+    const birim = document.getElementById("yeniPersonelBirim").value;
+    if(!ad) return alert("Lütfen isim giriniz");
+    const yeni = { isim: ad, birim: birim, id: Date.now() };
+    sabitPersoneller.push(yeni);
+    localStorage.setItem("sabitPersoneller", JSON.stringify(sabitPersoneller));
+    alert("Personel Eklendi");
+    location.reload();
+}
+
+function personelSil(id) {
+    if(confirm("Bu personeli silmek istediğinize emin misiniz?")) {
+        sabitPersoneller = sabitPersoneller.filter(p => p.id !== id);
+        localStorage.setItem("sabitPersoneller", JSON.stringify(sabitPersoneller));
+        personelYonetimiCiz();
+        checklistOlustur();
+        tabloyuOlustur();
+    }
+}
+
 function toggleAdminPanel() { 
     const p = document.getElementById("adminPanel"); 
     p.classList.toggle("hidden"); 
@@ -188,7 +199,10 @@ function tabDegistir(name) {
 }
 
 function sabitAtamaEkle() {
-    sabitAtamalar.push({ isim: document.getElementById("sabitPersSec").value, gun: parseInt(document.getElementById("sabitGunSec").value), saat: document.getElementById("sabitSaatSec").value });
+    const isim = document.getElementById("sabitPersSec").value;
+    const gun = document.getElementById("sabitGunSec").value;
+    const saat = document.getElementById("sabitSaatSec").value;
+    sabitAtamalar.push({ isim, gun, saat });
     localStorage.setItem("sabitAtamalar", JSON.stringify(sabitAtamalar));
     sabitAtamaListesiCiz(); tabloyuOlustur();
 }
@@ -198,10 +212,32 @@ function sabitAtamaSil(idx) {
     sabitAtamaListesiCiz(); tabloyuOlustur(); 
 }
 
+function personelYonetimiCiz() {
+    document.getElementById("personelYonetimListesi").innerHTML = sabitPersoneller
+        .sort((a,b) => a.birim.localeCompare(b.birim))
+        .map(p => `<div class="admin-list-item"><span><b>[${p.birim}]</b> ${p.isim}</span><button onclick="personelSil(${p.id})" style="background:var(--danger); color:white; border:none; padding:4px 8px; border-radius:4px; cursor:pointer;">Sil</button></div>`).join('');
+}
+
+function excelYukle(event) {
+    const file = event.target.files[0];
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const data = new Uint8Array(e.target.result);
+        const workbook = XLSX.read(data, { type: 'array' });
+        const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+        if (jsonData.length > 0) {
+            sabitPersoneller = jsonData.map((p, i) => ({ isim: (p.İsim || p.isim || "").toUpperCase(), birim: (p.Birim || p.birim || "").toUpperCase(), id: i + 1 }));
+            localStorage.setItem("sabitPersoneller", JSON.stringify(sabitPersoneller));
+            location.reload();
+        }
+    };
+    reader.readAsArrayBuffer(file);
+}
+
 function sabitAtamaListesiCiz() {
     document.getElementById("sabitPersSec").innerHTML = sabitPersoneller.map(p => `<option value="${p.isim}">${p.isim}</option>`).join('');
     document.getElementById("sabitSaatSec").innerHTML = saatler.map(s => `<option value="${s}">${s}</option>`).join('');
-    document.getElementById("sabitListesi").innerHTML = sabitAtamalar.map((s, idx) => `<div class="admin-list-item"><span>${s.isim} (${gunler[s.gun]})</span><button onclick="sabitAtamaSil(${idx})">Sil</button></div>`).join('');
+    document.getElementById("sabitListesi").innerHTML = sabitAtamalar.map((s, idx) => `<div class="admin-list-item"><span>${s.isim} (${s.gun === 'all' ? 'TÜM HAFTA' : gunler[s.gun]}) -> ${s.saat}</span><button onclick="sabitAtamaSil(${idx})">Sil</button></div>`).join('');
 }
 
 function kapasitePaneliniCiz() {
@@ -217,8 +253,7 @@ function kapasitePaneliniCiz() {
     cont.innerHTML = html;
 }
 
-function guncelleK(b, s, t, v) { kapasiteAyarlari[b][s][t] = parseInt(v) || 0; localStorage.setItem("kapasiteAyarlari", JSON.stringify(kapasiteAyarlari)); }
-function personelYonetimiCiz() { document.getElementById("personelYonetimListesi").innerHTML = sabitPersoneller.map(p => `<div class="admin-list-item"><span>${p.isim} - ${p.birim}</span></div>`).join(''); }
+function guncelleK(b,s,t,v) { kapasiteAyarlari[b][s][t] = parseInt(v) || 0; localStorage.setItem("kapasiteAyarlari", JSON.stringify(kapasiteAyarlari)); }
 function haftaDegistir(g) { mevcutPazartesi.setDate(mevcutPazartesi.getDate() + g); tabloyuOlustur(); }
 function toggleTheme() { document.body.classList.toggle("dark-mode"); }
 function sifirla() { if(confirm("Tüm veriler temizlensin mi?")) { localStorage.clear(); location.reload(); } }

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PRO-Vardiya v26.0 | Personel Otomasyonu</title>
+  <title>PRO-Vardiya v26.0 | Kurumsal Yönetim</title>
   <link rel="stylesheet" href="style.css">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -12,7 +12,7 @@
   <div class="app-wrapper">
     <header class="main-header no-print">
       <div class="logo-area">
-        <div class="badge">V26.0 FINAL-SYSTEM</div>
+        <div class="badge">V26.0 ULTIMATE</div>
         <h1>TEKNİK <span>VARDİYA</span></h1>
         <p id="tarihAraligi" class="date-display">Yükleniyor...</p>
       </div>
@@ -32,17 +32,19 @@
           <button onclick="toggleAdminPanel()" style="background:none; border:none; color:white; font-size:30px; cursor:pointer;">×</button>
         </div>
         <div class="admin-tabs">
-          <button class="tab-btn active" onclick="tabDegistir('atama')">Sabit Atama</button>
+          <button class="tab-btn active" onclick="tabDegistir('atama')">Sabit Atamalar</button>
+          <button class="tab-btn" onclick="tabDegistir('personel')">Personel/Birim Ekle</button>
           <button class="tab-btn" onclick="tabDegistir('kapasite')">Kapasite</button>
-          <button class="tab-btn" onclick="tabDegistir('personel')">Personel Listesi</button>
           <button class="tab-btn" onclick="tabDegistir('sistem')">Sistem / Excel</button>
         </div>
         
         <div class="tab-body">
           <div id="tab-atama" class="tab-content">
+            <div class="info-box">Belirli bir günü veya <b>tüm haftayı</b> sabitleyebilirsiniz.</div>
             <div class="admin-form">
               <select id="sabitPersSec"></select>
               <select id="sabitGunSec">
+                <option value="all">TÜM HAFTA (SABİT)</option>
                 <option value="0">Pazartesi</option><option value="1">Salı</option>
                 <option value="2">Çarşamba</option><option value="3">Perşembe</option>
                 <option value="4">Cuma</option><option value="5">Cumartesi</option>
@@ -54,19 +56,23 @@
             <div id="sabitListesi" class="admin-list"></div>
           </div>
 
+          <div id="tab-personel" class="tab-content hidden">
+            <div class="admin-form">
+              <input type="text" id="yeniPersonelAd" placeholder="Personel Adı Soyadı">
+              <select id="yeniPersonelBirim"></select>
+              <button onclick="manuelPersonelEkle()" class="btn-add" style="background:var(--green)">Personel Ekle</button>
+            </div>
+            <div id="personelYonetimListesi" class="admin-list"></div>
+          </div>
+
           <div id="tab-kapasite" class="tab-content hidden">
             <div id="kapasiteListesi" class="cap-grid-container"></div>
           </div>
 
-          <div id="tab-personel" class="tab-content hidden">
-            <div id="personelYonetimListesi" class="admin-list"></div>
-          </div>
-
           <div id="tab-sistem" class="tab-content hidden">
-            <div class="info-box">Excel dosyası yükleyerek personel listesini güncelleyebilirsiniz. (Sütunlar: İsim, Birim)</div>
             <input type="file" id="excelInput" accept=".xlsx, .xls" onchange="excelYukle(event)" class="btn-add" style="background:#2563eb; width:100%; margin-bottom:10px; padding:10px;">
             <button onclick="exportExcel()" class="btn-add" style="background:#16a34a; width:100%; margin-bottom:10px;">VARDİYAYI EXCEL İNDİR</button>
-            <button onclick="sifirla()" class="btn-reset">TÜM VERİLERİ TEMİZLE</button>
+            <button onclick="sifirla()" class="btn-reset">TÜM VERİLERİ SIFIRLA</button>
           </div>
         </div>
       </div>
