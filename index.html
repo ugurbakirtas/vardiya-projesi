@@ -2,38 +2,8 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <title>Yönetici Paneli</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f4f9;
-      margin: 0;
-      padding: 0;
-    }
-    header {
-      background: #007acc;
-      color: white;
-      padding: 15px;
-      text-align: center;
-    }
-    .panel {
-      background: #fff;
-      margin: 20px;
-      padding: 20px;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-    }
-    button {
-      padding: 8px 12px;
-      background: #007acc;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-    button:hover {
-      background: #005fa3;
-    }
-  </style>
+  <title>Vardiya Paneli</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <header>
@@ -46,17 +16,39 @@
     <button onclick="openPanel()">Panele Gir</button>
   </section>
 
-  <!-- Panel -->
+  <!-- Çalışan Yönetimi -->
   <section id="adminSection" class="panel" style="display:none;">
-    <h2>Hoş geldiniz!</h2>
-    <p>Panel başarıyla açıldı 🎉</p>
+    <h2>Çalışan Yönetimi</h2>
+    <input type="text" id="employeeFirstName" placeholder="Ad">
+    <input type="text" id="employeeLastName" placeholder="Soyad">
+    <input type="text" id="employeeUnit" placeholder="Birim">
+    <label><input type="checkbox" id="unitRotation"> 8 Günlük Döngü Aktif</label>
+    <button onclick="addEmployee()">Ekle</button>
+    <ul id="employeeList"></ul>
   </section>
 
-  <script>
-    function openPanel() {
-      document.getElementById("loginSection").style.display = "none";
-      document.getElementById("adminSection").style.display = "block";
-    }
-  </script>
+  <!-- Saat Yönetimi -->
+  <section id="hourSection" class="panel" style="display:none;">
+    <h2>Saat Yönetimi</h2>
+    <input type="text" id="hourRange" placeholder="örn: 09:00-12:00">
+    <input type="number" id="weekdayCapacity" placeholder="Hafta İçi Kapasite">
+    <input type="number" id="weekendCapacity" placeholder="Hafta Sonu Kapasite">
+    <button onclick="addHour()">Saat Ekle</button>
+    <ul id="hourList"></ul>
+  </section>
+
+  <!-- Vardiya Planı -->
+  <section id="shiftSection" class="panel" style="display:none;">
+    <h2>Vardiya Planı</h2>
+    <input type="number" id="dayCount" value="7">
+    <button onclick="generateShifts()">Plan Oluştur</button>
+    <div id="shiftResult"></div>
+  </section>
+
+  <footer>
+    <p>© 2026 Vardiya Sistemi</p>
+  </footer>
+
+  <script src="script.js"></script>
 </body>
 </html>
