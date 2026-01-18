@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PRO-Vardiya v2026 | Onarılmış</title>
+  <title>PRO-Vardiya v2026 | Full Sistem</title>
   <link rel="stylesheet" href="style.css">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
@@ -27,45 +27,26 @@
         <div class="admin-tabs">
           <button class="tab-btn active" onclick="tabDegistir('personel')">PERSONEL/BİRİM</button>
           <button class="tab-btn" onclick="tabDegistir('kapasite')">SAAT/KAPASİTE</button>
-          <button class="tab-btn" onclick="tabDegistir('sabit')">SABİT ATAMA</button>
           <button class="tab-btn" onclick="tabDegistir('sistem')">SİSTEM</button>
         </div>
 
-        <div class="tab-container">
-          <div id="tab-personel" class="tab-content">
-            <div class="admin-section">
-              <h3>Personel Listesi</h3>
-              <div class="admin-input-group">
-                <input type="text" id="yeniPersInp" placeholder="Ad Soyad">
-                <select id="yeniPersBirimSec"></select>
-                <button onclick="personelEkle()" class="btn-add">EKLE</button>
-              </div>
-              <div id="persListesiAdmin" class="admin-list"></div>
-            </div>
+        <div id="tab-personel" class="tab-content">
+          <div class="admin-input-group">
+            <input type="text" id="yeniPersInp" placeholder="Ad Soyad">
+            <select id="yeniPersBirimSec"></select>
+            <button onclick="personelEkle()" class="btn-add">EKLE</button>
           </div>
+          <div id="persListesiAdmin" class="admin-list"></div>
+        </div>
 
-          <div id="tab-kapasite" class="tab-content hidden">
-            <div id="kapasiteTable" class="cap-grid-container"></div>
-          </div>
+        <div id="tab-kapasite" class="tab-content hidden">
+          <div id="kapasiteTable" class="cap-grid-container"></div>
+        </div>
 
-          <div id="tab-sabit" class="tab-content hidden">
-            <div class="admin-input-group">
-              <select id="sabitPersSec"></select>
-              <select id="sabitGunSec">
-                <option value="pzt_cum">HAFTA İÇİ (Pzt-Cum)</option>
-                <option value="0">Pazartesi</option><option value="1">Salı</option>
-                <option value="2">Çarşamba</option><option value="3">Perşembe</option>
-                <option value="4">Cuma</option><option value="5">Cumartesi</option>
-                <option value="6">Pazar</option>
-              </select>
-              <select id="sabitSaatSec"></select>
-              <button onclick="sabitAtamaEkle()" class="btn-add">EKLE</button>
-            </div>
-            <div id="sabitAtamaListesi" class="admin-list"></div>
-          </div>
-
-          <div id="tab-sistem" class="tab-content hidden">
-            <button onclick="sifirla()" class="btn-reset">SİSTEMİ SIFIRLA VE ONAR</button>
+        <div id="tab-sistem" class="tab-content hidden">
+          <div style="display:flex; gap:10px;">
+            <button onclick="sifirla()" class="btn-reset">SİSTEMİ SIFIRLA</button>
+            <button onclick="whatsappKopyala()" style="background:#25D366; color:white; border:none; padding:10px; border-radius:5px; cursor:pointer;">WP KOPYALA</button>
           </div>
         </div>
       </div>
