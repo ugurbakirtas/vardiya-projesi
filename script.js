@@ -4,7 +4,7 @@ function generateShifts() {
 
   let html = "";
 
-  // Örnek: Teknik Yönetmenler
+  // Teknik Yönetmenler
   const teknikYonetmenler = {
     "07:00-16:00": [
       ["CAN ŞENTUNALI","M.BERKMAN"],
@@ -25,7 +25,7 @@ function generateShifts() {
   html += "<h2>24TV - 360TV TEKNİK YÖNETMENLER</h2>";
   html += buildTable(dates, days, teknikYonetmenler);
 
-  // Örnek: Ses Operatörleri
+  // Ses Operatörleri
   const sesOperatorleri = {
     "06:30-16:00": [
       ["ANIL RİŞVAN","ULVİ MUTLUBAŞ","ZAFER AKAR","ERDOĞAN KÜÇÜKKAYA"],
@@ -40,9 +40,37 @@ function generateShifts() {
   html += "<h2>24TV - 360TV SES OPERATÖRÜ</h2>";
   html += buildTable(dates, days, sesOperatorleri);
 
-  // Burada diğer tüm bölümler aynı mantıkla eklenebilir:
-  // Playout, KJ, Ingest, Uplink, Bilgi İşlem, Yayın Sistemleri, Işık, Dekor, Kameramanlar, Reklam Akış, Yayın Yönetmeni, MCR, Resim Seçici, Arşiv, Renk Ayrımı vb.
-  // Her bölüm için ayrı bir obje tanımlayıp buildTable ile tabloya dönüştürülür.
+  // Playout Operatörleri
+  const playout = {
+    "06:30-16:00": [
+      ["NEHİR KAYGUSUZ","KADİR ÇAÇAN","MUSTAFA ERCÜMENT KILIÇ"],
+      ["SENA MİNARECİ","MEHMET TUNÇ","MUSTAFA ERCÜMENT KILIÇ"],
+      ["SENA MİNARECİ","MEHMET TUNÇ","MUSTAFA ERCÜMENT KILIÇ"],
+      ["İBRAHİM SERİNSÖZ","YUSUF ALPKILIÇ","MUSTAFA ERCÜMENT KILIÇ"],
+      ["İBRAHİM SERİNSÖZ","YUSUF ALPKILIÇ","MUSTAFA ERCÜMENT KILIÇ"],
+      ["NEHİR KAYGUSUZ","KADİR ÇAÇAN","YUSUF ALPKILIÇ"],
+      ["NEHİR KAYGUSUZ","KADİR ÇAÇAN","MEHMET TUNÇ"]
+    ]
+  };
+  html += "<h2>24 PLAYOUT OPERATÖRÜ</h2>";
+  html += buildTable(dates, days, playout);
+
+  // KJ Operatörleri
+  const kj = {
+    "06:30-16:00": [
+      ["YEŞİM KİREÇ","OĞUZHAN YALAZAN","YUSUF İSLAM TORUN"],
+      ["DEMET CENGİZ","SENA BAYDAR","SENA BAYDAR"],
+      ["DEMET CENGİZ","SENA BAYDAR","SENA BAYDAR"],
+      ["PINAR ÖZENÇ","CEMREHAN SUBAŞI","YUSUF İSLAM TORUN"],
+      ["PINAR ÖZENÇ","CEMREHAN SUBAŞI","YUSUF İSLAM TORUN"],
+      ["YEŞİM KİREÇ","OĞUZHAN YALAZAN","PINAR ÖZENÇ"],
+      ["YEŞİM KİREÇ","OĞUZHAN YALAZAN","SENA BAYDAR"]
+    ]
+  };
+  html += "<h2>24 KJ OPERATÖRÜ</h2>";
+  html += buildTable(dates, days, kj);
+
+  // Diğer bölümler aynı mantıkla eklenebilir...
 
   document.getElementById("shiftResult").innerHTML = html;
 }
