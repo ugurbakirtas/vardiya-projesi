@@ -9,6 +9,7 @@ const rotationCycle = [
   "İzin","İzin"
 ];
 
+// Login fonksiyonu
 function login() {
   const user = document.getElementById("username").value.trim();
   const pass = document.getElementById("password").value.trim();
@@ -24,6 +25,11 @@ function login() {
     msg.innerHTML = "Hatalı kullanıcı adı veya şifre!";
   }
 }
+
+// Butona event listener ekliyoruz
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("loginBtn").addEventListener("click", login);
+});
 
 // Çalışan Yönetimi
 function addEmployee() {
@@ -117,5 +123,3 @@ function generateShifts() {
   for (let day = 1; day <= dayCount; day++) {
     let row = `<tr><td>Gün ${day}</td>`;
     hours.forEach((h, i) => {
-      let isWeekend = (day % 7 === 6 || day % 7 === 0);
-      let capacity = isWeekend ? h.weekendCapacity : h.weekday
