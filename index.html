@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PRO-Vardiya v2026 | Teknik Sistem</title>
+  <title>PRO-Vardiya v2026 | Teknik Yönetim</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -14,6 +14,7 @@
       --text: #1e293b;
       --border: #e2e8f0;
       --danger: #ef4444;
+      --success: #22c55e;
     }
 
     body {
@@ -41,11 +42,14 @@
       background: var(--blue);
       color: white;
       border: none;
-      padding: 12px 24px;
+      padding: 10px 20px;
       border-radius: 8px;
       font-weight: 700;
       cursor: pointer;
+      transition: 0.3s;
     }
+
+    .btn-main-action:hover { opacity: 0.9; transform: translateY(-1px); }
 
     .admin-panel {
       background: var(--card-bg);
@@ -53,25 +57,46 @@
       border-radius: 12px;
       padding: 20px;
       margin-bottom: 20px;
+      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
     }
 
     .admin-tabs {
       display: flex;
       gap: 10px;
-      margin-bottom: 15px;
+      margin-bottom: 20px;
+      border-bottom: 2px solid var(--border);
+      padding-bottom: 10px;
     }
 
     .tab-btn {
       padding: 8px 16px;
       cursor: pointer;
-      border: 1px solid var(--border);
-      background: #f1f5f9;
+      border: none;
+      background: none;
       border-radius: 6px;
+      font-weight: 600;
+      color: #64748b;
     }
 
     .tab-btn.active {
       background: var(--blue);
       color: white;
+    }
+
+    .admin-input-group {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      padding: 15px;
+      background: #f1f5f9;
+      border-radius: 8px;
+    }
+
+    input, select {
+      padding: 8px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-family: inherit;
     }
 
     table {
@@ -83,107 +108,124 @@
     th {
       background: var(--primary);
       color: white;
-      padding: 10px;
+      padding: 12px 8px;
       border: 1px solid #334155;
     }
 
     td {
       border: 1px solid var(--border);
-      padding: 5px;
+      padding: 6px;
       vertical-align: top;
       width: 13%;
     }
 
     .birim-card {
       border-left: 4px solid var(--blue);
-      padding: 4px;
-      margin-bottom: 3px;
+      padding: 6px;
+      margin-bottom: 4px;
       background: rgba(37,99,235,0.05);
       font-weight: 600;
       cursor: pointer;
+      border-radius: 2px;
     }
 
     .birim-tag {
-      font-size: 8px;
+      font-size: 7px;
+      text-transform: uppercase;
       display: block;
       margin-bottom: 2px;
+      opacity: 0.8;
     }
 
-    .izinli-satiri td { background: #f1f5f9; }
-    .hidden { display: none !important; }
-
-    .checklist-horizontal-grid {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-bottom: 15px;
-      background: #fff;
-      padding: 10px;
-      border-radius: 8px;
-    }
-
-    .cap-grid-container {
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-    }
-
+    .izinli-satiri td { background: #f8fafc; border-top: 2px solid var(--primary); }
+    
     .cap-row {
       display: grid;
-      grid-template-columns: 150px repeat(6, 1fr);
-      gap: 5px;
+      grid-template-columns: 180px repeat(6, 1fr);
+      gap: 8px;
       align-items: center;
-      padding: 5px;
-      border-bottom: 1px solid #eee;
+      padding: 8px;
+      border-bottom: 1px solid var(--border);
     }
 
-    @media print {
-      .no-print { display: none; }
+    .cap-input-item {
+      display: flex;
+      flex-direction: column;
+      font-size: 9px;
+      gap: 2px;
     }
+
+    .cap-input-item input { width: 40px; padding: 2px; text-align: center; }
+
+    .pers-list-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 10px;
+    }
+
+    .pers-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px;
+      background: #f1f5f9;
+      border-radius: 6px;
+    }
+
+    .btn-del { color: var(--danger); border: none; background: none; cursor: pointer; font-weight: bold; }
+
+    .hidden { display: none !important; }
+    @media print { .no-print { display: none; } }
   </style>
 </head>
 <body>
   <div class="app-wrapper">
     <header class="main-header no-print">
-      <div class="logo-area">
-        <h1>TEKNİK <span>VARDİYA</span></h1>
-        <p id="tarihAraligi">Yükleniyor...</p>
+      <div>
+        <h1 style="margin:0; font-size:18px;">TEKNİK <span style="color:var(--blue)">VARDİYA</span></h1>
+        <p id="tarihAraligi" style="margin:0; opacity:0.8;"></p>
       </div>
       <div class="nav-controls">
-        <button onclick="haftaDegistir(-7)">« GERİ</button>
+        <button onclick="haftaDegistir(-7)" class="btn-main-action" style="background:#475569">« Geri</button>
         <button onclick="tabloyuOlustur()" class="btn-main-action">VARDİYA OLUŞTUR</button>
-        <button onclick="haftaDegistir(7)">İLERİ »</button>
-        <button onclick="toggleAdminPanel()">⚙ YÖNETİM</button>
+        <button onclick="haftaDegistir(7)" class="btn-main-action" style="background:#475569">İleri »</button>
+        <button onclick="toggleAdminPanel()" class="btn-main-action" style="background:#1e293b">⚙ Yönetim</button>
       </div>
     </header>
 
     <div id="adminPanel" class="admin-panel hidden no-print">
       <div class="admin-tabs">
-        <button class="tab-btn active" onclick="tabDegistir('personel')">PERSONEL</button>
-        <button class="tab-btn" onclick="tabDegistir('kapasite')">KAPASİTE</button>
+        <button class="tab-btn active" onclick="tabDegistir('personel')">PERSONEL YÖNETİMİ</button>
+        <button class="tab-btn" onclick="tabDegistir('kapasite')">KAPASİTE AYARLARI</button>
         <button class="tab-btn" onclick="tabDegistir('sistem')">SİSTEM</button>
       </div>
 
       <div id="tab-personel" class="tab-content">
         <div class="admin-input-group">
-          <input type="text" id="yeniPersInp" placeholder="Ad Soyad">
+          <input type="text" id="yeniPersInp" placeholder="Personel Ad Soyad">
           <select id="yeniPersBirimSec"></select>
-          <button onclick="personelEkle()">EKLE</button>
+          <button onclick="personelEkle()" class="btn-main-action" style="background:var(--success)">+ PERSONEL EKLE</button>
         </div>
-        <div id="persListesiAdmin"></div>
+        <div id="persListesiAdmin" class="pers-list-grid"></div>
       </div>
 
       <div id="tab-kapasite" class="tab-content hidden">
+        <div style="margin-bottom:10px; color:var(--danger); font-weight:600;">* H: Hafta İçi Kapasitesi | S: Hafta Sonu Kapasitesi</div>
         <div id="kapasiteTable" class="cap-grid-container"></div>
       </div>
 
       <div id="tab-sistem" class="tab-content hidden">
-        <button onclick="sifirla()">SİSTEMİ SIFIRLA</button>
+        <div style="background:#fee2e2; padding:20px; border-radius:8px; border:1px solid var(--danger);">
+            <h3>Tehlikeli Alan</h3>
+            <p>Tüm personelleri, manuel atamaları ve kapasite ayarlarını sıfırlar.</p>
+            <button onclick="sifirla()" class="btn-main-action" style="background:var(--danger)">SİSTEMİ KOMPLE SIFIRLA</button>
+        </div>
       </div>
     </div>
 
     <main>
-      <div id="personelChecklist" class="checklist-horizontal-grid no-print"></div>
+      <div id="personelChecklist" class="checklist-horizontal-grid no-print" style="margin-bottom:15px; background:white; padding:10px; border-radius:8px; display:flex; flex-wrap:wrap; gap:10px;"></div>
+      
       <table id="vardiyaTablosu">
         <thead id="tableHeader"></thead>
         <tbody id="tableBody"></tbody>
@@ -195,23 +237,22 @@
   <script>
     const DEFAULT_UNITS = ["TEKNİK YÖNETMEN", "SES OPERATÖRÜ", "PLAYOUT OPERATÖRÜ", "KJ OPERATÖRÜ", "INGEST OPERATÖRÜ", "BİLGİ İŞLEM", "YAYIN SİSTEMLERİ", "24TV MCR OPERATÖRÜ", "360TV MCR OPERATÖRÜ"];
     const DEFAULT_SHIFTS = ["06:30–16:00", "09:00–18:00", "12:00–22:00", "16:00–00:00", "00:00–07:00", "DIŞ YAYIN"];
-    const UNIT_COLORS = { "TEKNİK YÖNETMEN": "#e74c3c", "SES OPERATÖRÜ": "#3498db", "PLAYOUT OPERATÖRÜ": "#2ecc71", "KJ OPERATÖRÜ": "#f1c40f", "24TV MCR OPERATÖRÜ": "#e67e22", "360TV MCR OPERATÖRÜ": "#d35400" };
-
-    const DEFAULT_KAPASITE = {
-        "TEKNİK YÖNETMEN_06:30–16:00": {h:2, hs:1},
-        "TEKNİK YÖNETMEN_09:00–18:00": {h:0, hs:1},
-        "TEKNİK YÖNETMEN_16:00–00:00": {h:1, hs:1},
-        "TEKNİK YÖNETMEN_00:00–07:00": {h:1, hs:1},
-        "24TV MCR OPERATÖRÜ_00:00–07:00": {h:1, hs:1},
-        "360TV MCR OPERATÖRÜ_00:00–07:00": {h:1, hs:1}
+    const UNIT_COLORS = { 
+        "TEKNİK YÖNETMEN": "#e74c3c", 
+        "SES OPERATÖRÜ": "#3498db", 
+        "PLAYOUT OPERATÖRÜ": "#2ecc71", 
+        "KJ OPERATÖRÜ": "#f1c40f", 
+        "24TV MCR OPERATÖRÜ": "#e67e22", 
+        "360TV MCR OPERATÖRÜ": "#d35400",
+        "BİLGİ İŞLEM": "#64748b"
     };
 
     let state = {
-        birimler: JSON.parse(localStorage.getItem("v46_birimler")) || DEFAULT_UNITS,
-        saatler: JSON.parse(localStorage.getItem("v46_saatler")) || DEFAULT_SHIFTS,
-        personeller: JSON.parse(localStorage.getItem("v46_personeller")) || [],
-        kapasite: JSON.parse(localStorage.getItem("v46_kapasite")) || DEFAULT_KAPASITE,
-        manuelAtamalar: JSON.parse(localStorage.getItem("v46_manuelAtamalar")) || {}
+        birimler: JSON.parse(localStorage.getItem("v47_birimler")) || DEFAULT_UNITS,
+        saatler: JSON.parse(localStorage.getItem("v47_saatler")) || DEFAULT_SHIFTS,
+        personeller: JSON.parse(localStorage.getItem("v47_personeller")) || [],
+        kapasite: JSON.parse(localStorage.getItem("v47_kapasite")) || {},
+        manuelAtamalar: JSON.parse(localStorage.getItem("v47_manuelAtamalar")) || {}
     };
 
     let currentMonday = getMonday(new Date());
@@ -224,7 +265,7 @@
     }
 
     function save() {
-        Object.keys(state).forEach(k => localStorage.setItem(`v46_${k}`, JSON.stringify(state[k])));
+        Object.keys(state).forEach(k => localStorage.setItem(`v47_${k}`, JSON.stringify(state[k])));
     }
 
     function tabloyuOlustur() {
@@ -242,18 +283,18 @@
             if (document.getElementById(`check_${p.id}`)?.checked) program[p.ad].fill("İZİNLİ");
         });
 
-        // 1. Manuel Atamaları İşle
+        // 1. Manuel Atamalar (Asla silinmez)
         state.personeller.forEach(p => {
             for (let i = 0; i < 7; i++) {
                 let mK = `${haftaKey}_${p.ad}_${i}`;
                 if (state.manuelAtamalar[mK]) {
                     program[p.ad][i] = state.manuelAtamalar[mK];
-                    if (!["İZİNLİ", "BOŞALT"].includes(program[p.ad][i])) calismaSayisi[p.ad]++;
+                    if (!["İZİNLİ", "BOŞALT", "BOŞ"].includes(program[p.ad][i])) calismaSayisi[p.ad]++;
                 }
             }
         });
 
-        // 2. Özel Rotasyonlar (Gece Teknik Yönetmen)
+        // 2. Teknik Yönetmen Gece Rotasyonu
         for (let i = 0; i < 7; i++) {
             let geceSorumlusu = (i < 2) ? "BARIŞ İNCE" : "EKREM FİDAN";
             if (program[geceSorumlusu] && program[geceSorumlusu][i] === null) {
@@ -262,7 +303,7 @@
             }
         }
 
-        // 3. Otomatik Atama Algoritması
+        // 3. Otomatik Atama
         for (let gun = 0; gun < 7; gun++) {
             const isHs = gun >= 5;
             state.birimler.forEach(birim => {
@@ -277,12 +318,7 @@
                             p.birim === birim && program[p.ad][gun] === null && calismaSayisi[p.ad] < 6
                         );
 
-                        // MCR Gece Kısıtlaması: Her gece 1 kişi gelmeli
-                        if ((birim.includes("MCR")) && saat === "00:00–07:00") {
-                            // Algoritma burada adaylar arasından birini seçer
-                        }
-
-                        // Teknik Yönetmen Gece Kısıtlaması (Dışındakiler gece çalışamaz)
+                        // Özel kısıtlama: Teknik Yönetmen gecesi sadece Barış/Ekrem
                         if (birim === "TEKNİK YÖNETMEN" && saat === "00:00–07:00") {
                             adaylar = adaylar.filter(a => ["BARIŞ İNCE", "EKREM FİDAN"].includes(a.ad));
                         }
@@ -308,8 +344,8 @@
                 ${[0,1,2,3,4,5,6].map(gun => `
                     <td>
                         ${state.personeller.filter(p => program[p.ad][gun] === saat).map(p => `
-                            <div class="birim-card" onclick="vardiyaDegistir('${p.ad}',${gun})" style="border-left-color:${UNIT_COLORS[p.birim]}">
-                                <span class="birim-tag" style="color:${UNIT_COLORS[p.birim]}">${p.birim}</span>
+                            <div class="birim-card" onclick="vardiyaDegistir('${p.ad}',${gun})" style="border-left-color:${UNIT_COLORS[p.birim] || '#ccc'}">
+                                <span class="birim-tag" style="color:${UNIT_COLORS[p.birim] || '#666'}">${p.birim}</span>
                                 ${p.ad}
                             </div>
                         `).join('')}
@@ -328,8 +364,10 @@
     }
 
     function vardiyaDegistir(pAd, gunIndex) {
-        const secim = prompt(`${pAd} için vardiya (1-6) veya İZİNLİ / BOŞALT:\n1- 06:30\n2- 09:00\n3- 12:00\n4- 16:00\n5- 00:00\n6- DIŞ YAYIN`);
+        let list = state.saatler.map((s,i) => `${i+1}- ${s}`).join('\n');
+        const secim = prompt(`${pAd} için vardiya seçimi:\n${list}\n\nİZİNLİ veya BOŞALT yazabilirsiniz.`);
         if (!secim) return;
+        
         let sonuc = secim.toUpperCase();
         if (!isNaN(secim)) sonuc = state.saatler[parseInt(secim)-1];
         
@@ -339,18 +377,29 @@
         tabloyuOlustur();
     }
 
-    function toggleAdminPanel() { document.getElementById("adminPanel").classList.toggle("hidden"); refreshUI(); }
+    function toggleAdminPanel() { 
+        document.getElementById("adminPanel").classList.toggle("hidden"); 
+        refreshUI(); 
+    }
+
     function tabDegistir(t) { 
         document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         document.getElementById('tab-'+t).classList.remove('hidden');
+        event.currentTarget.classList.add('active');
     }
 
     function refreshUI() {
         const bSec = document.getElementById("yeniPersBirimSec");
-        if(bSec) bSec.innerHTML = state.birimler.map(b => `<option value="${b}">${b}</option>`).join('');
+        bSec.innerHTML = state.birimler.map(b => `<option value="${b}">${b}</option>`).join('');
         
         const pList = document.getElementById("persListesiAdmin");
-        if(pList) pList.innerHTML = state.personeller.map((p, i) => `<div>${p.ad} (${p.birim}) <button onclick="sil(${i})">X</button></div>`).join('');
+        pList.innerHTML = state.personeller.map((p, i) => `
+            <div class="pers-item">
+                <span>${p.ad} <small>(${p.birim})</small></span>
+                <button onclick="sil(${i})" class="btn-del">SİL</button>
+            </div>
+        `).join('');
         
         checklistOlustur();
         kapasiteCiz();
@@ -358,42 +407,67 @@
 
     function kapasiteCiz() {
         const box = document.getElementById("kapasiteTable");
-        box.innerHTML = state.birimler.map(b => `
+        let header = `<div class="cap-row" style="background:#f1f5f9; font-weight:700;"><div>Birim</div>${state.saatler.map(s => `<div>${s.split('–')[0]}</div>`).join('')}</div>`;
+        
+        let rows = state.birimler.map(b => `
             <div class="cap-row">
-                <div>${b}</div>
+                <div style="font-weight:600">${b}</div>
                 ${state.saatler.map(s => {
                     const v = state.kapasite[`${b}_${s}`] || {h:0, hs:0};
-                    return `<div>H:<input type="number" value="${v.h}" onchange="capUp('${b}_${s}','h',this.value)" style="width:30px">
-                            S:<input type="number" value="${v.hs}" onchange="capUp('${b}_${s}','hs',this.value)" style="width:30px"></div>`;
+                    return `<div class="cap-input-item">
+                                <span>H: <input type="number" value="${v.h}" onchange="capUp('${b}_${s}','h',this.value)"></span>
+                                <span>S: <input type="number" value="${v.hs}" onchange="capUp('${b}_${s}','hs',this.value)"></span>
+                            </div>`;
                 }).join('')}
             </div>`).join('');
+        box.innerHTML = header + rows;
     }
 
     function capUp(k, t, v) { 
         if(!state.kapasite[k]) state.kapasite[k] = {h:0, hs:0};
-        state.kapasite[k][t] = parseInt(v); 
+        state.kapasite[k][t] = parseInt(v) || 0; 
         save(); 
     }
 
     function checklistOlustur() {
         document.getElementById("personelChecklist").innerHTML = state.personeller.map(p => `
-            <label><input type="checkbox" id="check_${p.id}" onchange="tabloyuOlustur()"> ${p.ad}</label>
+            <label style="cursor:pointer; background:#f1f5f9; padding:5px 10px; border-radius:4px;">
+                <input type="checkbox" id="check_${p.id}" onchange="tabloyuOlustur()"> ${p.ad}
+            </label>
         `).join('');
     }
 
     function haftaDegistir(v) { currentMonday.setDate(currentMonday.getDate() + v); tabloyuOlustur(); }
+    
     function personelEkle() {
-        const ad = document.getElementById("yeniPersInp").value.toUpperCase();
+        const ad = document.getElementById("yeniPersInp").value.toUpperCase().trim();
         const birim = document.getElementById("yeniPersBirimSec").value;
-        if(ad) { state.personeller.push({ad, birim, id: Date.now()}); save(); refreshUI(); tabloyuOlustur(); }
+        if(ad) { 
+            state.personeller.push({ad, birim, id: Date.now()}); 
+            save(); 
+            document.getElementById("yeniPersInp").value = "";
+            refreshUI(); 
+            tabloyuOlustur(); 
+        }
     }
-    function sil(i) { state.personeller.splice(i, 1); save(); refreshUI(); tabloyuOlustur(); }
-    function sifirla() { if(confirm("Tüm veriler silinsin mi?")) { localStorage.clear(); location.reload(); } }
+
+    function sil(i) { 
+        if(confirm("Bu personeli silmek istediğinize emin misiniz?")) {
+            state.personeller.splice(i, 1); 
+            save(); 
+            refreshUI(); 
+            tabloyuOlustur(); 
+        }
+    }
+
+    function sifirla() { 
+        if(confirm("DİKKAT! Tüm verileriniz kalıcı olarak silinecek. Onaylıyor musunuz?")) { 
+            localStorage.clear(); 
+            location.reload(); 
+        } 
+    }
 
     window.onload = () => {
-        if(state.personeller.length === 0) {
-            // Varsayılan personel listesi buraya eklenebilir.
-        }
         tabloyuOlustur();
         refreshUI();
     };
