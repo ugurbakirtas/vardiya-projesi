@@ -1,123 +1,66 @@
-let employees = [];
-let hours = [];
-
-const rotationCycle = ["Sabah", "Sabah", "Akşam", "Akşam", "Gece", "Gece", "İzin", "İzin"];
-
-function openPanel() {
-  document.getElementById("loginSection").style.display = "none";
-  document.getElementById("adminSection").style.display = "block";
-  document.getElementById("hourSection").style.display = "block";
-  document.getElementById("shiftSection").style.display = "block";
-}
-
-// Çalışan ekleme
-function addEmployee() {
-  const firstName = document.getElementById("employeeFirstName").value;
-  const lastName = document.getElementById("employeeLastName").value;
-  const unit = document.getElementById("employeeUnit").value;
-  const rotationActive = document.getElementById("unitRotation").checked;
-
-  if (firstName && lastName && unit) {
-    employees.push({
-      firstName,
-      lastName,
-      unit,
-      rotationActive,
-      rotationIndex: 0,
-      izin: []
-    });
-    updateEmployeeList();
-    document.getElementById("employeeFirstName").value = "";
-    document.getElementById("employeeLastName").value = "";
-    document.getElementById("employeeUnit").value = "";
-    document.getElementById("unitRotation").checked = false;
-  }
-}
-
-function updateEmployeeList() {
-  const list = document.getElementById("employeeList");
-  list.innerHTML = "";
-  employees.forEach((emp, index) => {
-    list.innerHTML += `<li>
-      ${emp.firstName} ${emp.lastName} (${emp.unit}) ${emp.rotationActive ? "→ Döngü Aktif" : ""}
-      <button onclick="removeEmployee(${index})">Sil</button>
-      <button onclick="addIzin(${index})">İzin Ekle</button>
-      <br><small>İzin: ${emp.izin.join(", ") || "Yok"}</small>
-    </li>`;
-  });
-}
-
-function removeEmployee(index) {
-  employees.splice(index, 1);
-  updateEmployeeList();
-}
-
-function addIzin(index) {
-  const gun = prompt("İzin günü girin (örn: 3)");
-  if (gun) {
-    employees[index].izin.push(parseInt(gun));
-    updateEmployeeList();
-  }
-}
-
-// Saat ekleme
-function addHour() {
-  const range = document.getElementById("hourRange").value;
-  const weekdayCap = parseInt(document.getElementById("weekdayCapacity").value);
-  const weekendCap = parseInt(document.getElementById("weekendCapacity").value);
-
-  if (range && weekdayCap && weekendCap) {
-    hours.push({ range, weekdayCap, weekendCap });
-    updateHourList();
-    document.getElementById("hourRange").value = "";
-    document.getElementById("weekdayCapacity").value = "";
-    document.getElementById("weekendCapacity").value = "";
-  }
-}
-
-function updateHourList() {
-  const list = document.getElementById("hourList");
-  list.innerHTML = "";
-  hours.forEach((h, index) => {
-    list.innerHTML += `<li>${h.range} → Hafta İçi: ${h.weekdayCap}, Hafta Sonu: ${h.weekendCap}
-      <button onclick="removeHour(${index})">Sil</button></li>`;
-  });
-}
-
-function removeHour(index) {
-  hours.splice(index, 1);
-  updateHourList();
-}
-
-// Vardiya planı
 function generateShifts() {
-  const dayCount = parseInt(document.getElementById("dayCount").value);
-  let html = "<h3>Vardiya Planı</h3><table border='1'><tr><th>Gün</th>";
-  hours.forEach(h => html += `<th>${h.range}</th>`);
-  html += "</tr>";
+  const dates = ["19 Ocak 2026","20 Ocak 2026","21 Ocak 2026","22 Ocak 2026","23 Ocak 2026","24 Ocak 2026","25 Ocak 2026"];
+  const days = ["Pazartesi","Salı","Çarşamba","Perşembe","Cuma","Cumartesi","Pazar"];
 
-  for (let day = 1; day <= dayCount; day++) {
-    html += `<tr><td>Gün ${day}</td>`;
-    hours.forEach((h, i) => {
-      const isWeekend = (day % 7 === 6 || day % 7 === 0);
-      const capacity = isWeekend ? h.weekendCap : h.weekdayCap;
-      html += `<td>${assignEmployees(day, capacity, i)}</td>`;
-    });
-    html += "</tr>";
-  }
+  let html = "";
 
-  html += "</table>";
+  // Örnek: Teknik Yönetmenler
+  const teknikYonetmenler = {
+    "07:00-16:00": [
+      ["CAN ŞENTUNALI","M.BERKMAN"],
+      ["CAN ŞENTUNALI","M.BERKMAN"],
+      ["EKREM FİDAN","YUNUS EMRE YAYLA"],
+      ["EKREM FİDAN","H.CAN SAĞLAM"],
+      ["H.CAN SAĞLAM","YUNUS EMRE YAYLA"],
+      ["H.CAN SAĞLAM"],
+      ["CAN ŞENTUNALI"]
+    ],
+    "16:00-01:00": [
+      ["H.CAN SAĞLAM"],["H.CAN SAĞLAM"],["CAN ŞENTUNALI"],["M.BERKMAN"],["M.BERKMAN"],["YUNUS EMRE YAYLA"],["BARIŞ İNCE"]
+    ],
+    "00:00-07:00": [
+      ["BARIŞ İNCE"],["BARIŞ İNCE"],["BARIŞ İNCE"],["BARIŞ İNCE"],["EKREM FİDAN"],["EKREM FİDAN"],["EKREM FİDAN"]
+    ]
+  };
+  html += "<h2>24TV - 360TV TEKNİK YÖNETMENLER</h2>";
+  html += buildTable(dates, days, teknikYonetmenler);
+
+  // Örnek: Ses Operatörleri
+  const sesOperatorleri = {
+    "06:30-16:00": [
+      ["ANIL RİŞVAN","ULVİ MUTLUBAŞ","ZAFER AKAR","ERDOĞAN KÜÇÜKKAYA"],
+      ["ENES KALE","ERSAN TİLBE","ZAFER AKAR","ERDOĞAN KÜÇÜKKAYA"],
+      ["ENES KALE","ERSAN TİLBE","ZAFER AKAR","ERDOĞAN KÜÇÜKKAYA"],
+      ["ULVİ MUTLUBAŞ","DOĞUŞ MALGIL","ZAFER AKAR","ERDOĞAN KÜÇÜKKAYA"],
+      ["ENES KALE","ULVİ MUTLUBAŞ","ZAFER AKAR","ERDOĞAN KÜÇÜKKAYA"],
+      ["ERSAN TİLBE","ENES KALE","ANIL RİŞVAN","ULVİ MUTLUBAŞ"],
+      ["ERSAN TİLBE","ANIL RİŞVAN","ENES KALE"]
+    ]
+  };
+  html += "<h2>24TV - 360TV SES OPERATÖRÜ</h2>";
+  html += buildTable(dates, days, sesOperatorleri);
+
+  // Burada diğer tüm bölümler aynı mantıkla eklenebilir:
+  // Playout, KJ, Ingest, Uplink, Bilgi İşlem, Yayın Sistemleri, Işık, Dekor, Kameramanlar, Reklam Akış, Yayın Yönetmeni, MCR, Resim Seçici, Arşiv, Renk Ayrımı vb.
+  // Her bölüm için ayrı bir obje tanımlayıp buildTable ile tabloya dönüştürülür.
+
   document.getElementById("shiftResult").innerHTML = html;
 }
 
-function assignEmployees(day, capacity, shiftIndex) {
-  let assigned = [];
-  let counter = 0;
-  let startIndex = (day + shiftIndex) % employees.length;
+function buildTable(dates, days, shifts) {
+  let html = "<table><tr>";
+  dates.forEach((d,i) => {
+    html += `<th>${d}<br>${days[i]}</th>`;
+  });
+  html += "</tr>";
 
-  for (let i = 0; i < employees.length && counter < capacity; i++) {
-    const emp = employees[(startIndex + i) % employees.length];
-    if (emp.izin.includes(day)) continue;
-
-    if (emp.rotationActive) {
-      const shift = rotation
+  for (const [time, schedule] of Object.entries(shifts)) {
+    html += "<tr>";
+    schedule.forEach(cell => {
+      html += `<td>${time}<br>${cell.join("<br>")}</td>`;
+    });
+    html += "</tr>";
+  }
+  html += "</table>";
+  return html;
+}

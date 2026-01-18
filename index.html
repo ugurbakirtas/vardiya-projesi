@@ -2,46 +2,16 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8">
-  <title>Vardiya Paneli</title>
+  <title>Teknik Personel Çalışma Listesi</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <header>
-    <h1>Yönetici Paneli</h1>
+    <h1>TEKNİK PERSONEL ÇALIŞMA LİSTESİ</h1>
   </header>
 
-  <!-- Giriş -->
-  <section id="loginSection" class="panel">
-    <h2>Giriş Yap</h2>
-    <button onclick="openPanel()">Panele Gir</button>
-  </section>
-
-  <!-- Çalışan Yönetimi -->
-  <section id="adminSection" class="panel" style="display:none;">
-    <h2>Çalışan Yönetimi</h2>
-    <input type="text" id="employeeFirstName" placeholder="Ad">
-    <input type="text" id="employeeLastName" placeholder="Soyad">
-    <input type="text" id="employeeUnit" placeholder="Birim">
-    <label><input type="checkbox" id="unitRotation"> 8 Günlük Döngü Aktif</label>
-    <button onclick="addEmployee()">Ekle</button>
-    <ul id="employeeList"></ul>
-  </section>
-
-  <!-- Saat Yönetimi -->
-  <section id="hourSection" class="panel" style="display:none;">
-    <h2>Saat Yönetimi</h2>
-    <input type="text" id="hourRange" placeholder="örn: 09:00-12:00">
-    <input type="number" id="weekdayCapacity" placeholder="Hafta İçi Kapasite">
-    <input type="number" id="weekendCapacity" placeholder="Hafta Sonu Kapasite">
-    <button onclick="addHour()">Saat Ekle</button>
-    <ul id="hourList"></ul>
-  </section>
-
-  <!-- Vardiya Planı -->
-  <section id="shiftSection" class="panel" style="display:none;">
-    <h2>Vardiya Planı</h2>
-    <input type="number" id="dayCount" value="7">
-    <button onclick="generateShifts()">Plan Oluştur</button>
+  <section id="shiftSection" class="panel">
+    <button onclick="generateShifts()">Planı Göster</button>
     <div id="shiftResult"></div>
   </section>
 
