@@ -16,13 +16,13 @@ function login() {
   const msg = document.getElementById("loginMessage");
 
   if (user === adminUser.username && pass === adminUser.password) {
-    msg.innerHTML = "Giriş başarılı!";
+    msg.innerHTML = "✅ Giriş başarılı!";
     document.getElementById("loginSection").style.display = "none";
     document.getElementById("adminSection").style.display = "block";
     document.getElementById("shiftSection").style.display = "block";
     document.getElementById("hourSection").style.display = "block";
   } else {
-    msg.innerHTML = "Hatalı kullanıcı adı veya şifre!";
+    msg.innerHTML = "❌ Hatalı kullanıcı adı veya şifre!";
   }
 }
 
@@ -123,3 +123,4 @@ function generateShifts() {
   for (let day = 1; day <= dayCount; day++) {
     let row = `<tr><td>Gün ${day}</td>`;
     hours.forEach((h, i) => {
+      let isWeekend =
