@@ -15,6 +15,7 @@
       --border: #e2e8f0;
       --danger: #ef4444;
       --success: #22c55e;
+      --weekend-bg: #fee2e2; /* Hafta sonu için hafif kırmızımsı arka plan */
     }
 
     body {
@@ -83,13 +84,17 @@
       color: white;
     }
 
+    .admin-section-box {
+      background: #f1f5f9;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+    }
+
     .admin-input-group {
       display: flex;
       gap: 10px;
-      margin-bottom: 20px;
-      padding: 15px;
-      background: #f1f5f9;
-      border-radius: 8px;
+      flex-wrap: wrap;
     }
 
     input, select {
@@ -137,8 +142,6 @@
       opacity: 0.8;
     }
 
-    .izinli-satiri td { background: #f8fafc; border-top: 2px solid var(--primary); }
-    
     .cap-row {
       display: grid;
       grid-template-columns: 180px repeat(6, 1fr);
@@ -153,9 +156,13 @@
       flex-direction: column;
       font-size: 9px;
       gap: 2px;
+      padding: 4px;
+      border-radius: 4px;
     }
 
-    .cap-input-item input { width: 40px; padding: 2px; text-align: center; }
+    .weekend-input { background-color: var(--weekend-bg); }
+
+    .cap-input-item input { width: 40px; padding: 2px; text-align: center; font-weight: bold; }
 
     .pers-list-grid {
       display: grid;
@@ -168,11 +175,23 @@
       justify-content: space-between;
       align-items: center;
       padding: 8px;
-      background: #f1f5f9;
+      background: white;
       border-radius: 6px;
+      border: 1px solid var(--border);
     }
 
-    .btn-del { color: var(--danger); border: none; background: none; cursor: pointer; font-weight: bold; }
+    .unit-item {
+        display: inline-flex;
+        align-items: center;
+        background: var(--primary);
+        color: white;
+        padding: 5px 10px;
+        border-radius: 20px;
+        margin: 5px;
+        font-size: 10px;
+    }
+
+    .btn-del { color: var(--danger); border: none; background: none; cursor: pointer; font-weight: bold; margin-left: 10px; }
 
     .hidden { display: none !important; }
     @media print { .no-print { display: none; } }
@@ -195,36 +214,51 @@
 
     <div id="adminPanel" class="admin-panel hidden no-print">
       <div class="admin-tabs">
-        <button class="tab-btn active" onclick="tabDegistir('personel')">PERSONEL YÖNETİMİ</button>
+        <button class="tab-btn active" onclick="tabDegistir('ekip')">EKİP VE BİRİMLER</button>
         <button class="tab-btn" onclick="tabDegistir('kapasite')">KAPASİTE AYARLARI</button>
         <button class="tab-btn" onclick="tabDegistir('sistem')">SİSTEM</button>
       </div>
 
-      <div id="tab-personel" class="tab-content">
-        <div class="admin-input-group">
-          <input type="text" id="yeniPersInp" placeholder="Personel Ad Soyad">
-          <select id="yeniPersBirimSec"></select>
-          <button onclick="personelEkle()" class="btn-main-action" style="background:var(--success)">+ PERSONEL EKLE</button>
+      <div id="tab-ekip" class="tab-content">
+        <div class="admin-section-box">
+            <h4>Birim Ekleme</h4>
+            <div class="admin-input-group">
+                <input type="text" id="yeniBirimInp" placeholder="Birim Adı (Örn: REJİ)">
+                <button onclick="birimEkle()" class="btn-main-action" style="background:var(--primary)">BİRİM EKLE</button>
+            </div>
+            <div id="birimListesiAdmin" style="margin-top:10px;"></div>
         </div>
-        <div id="persListesiAdmin" class="pers-list-grid"></div>
+
+        <div class="admin-section-box">
+            <h4>Personel Ekleme</h4>
+            <div class="admin-input-group">
+                <input type="text" id="yeniPersInp" placeholder="Personel Ad Soyad">
+                <select id="yeniPersBirimSec"></select>
+                <button onclick="personelEkle()" class="btn-main-action" style="background:var(--success)">PERSONEL EKLE</button>
+            </div>
+            <div id="persListesiAdmin" class="pers-list-grid" style="margin-top:15px;"></div>
+        </div>
       </div>
 
       <div id="tab-kapasite" class="tab-content hidden">
-        <div style="margin-bottom:10px; color:var(--danger); font-weight:600;">* H: Hafta İçi Kapasitesi | S: Hafta Sonu Kapasitesi</div>
+        <div style="margin-bottom:10px;">
+            <span style="font-weight:600;">H: Hafta İçi</span> | 
+            <span style="background:var(--weekend-bg); padding:2px 5px; border-radius:3px; font-weight:600;">S: Hafta Sonu</span>
+        </div>
         <div id="kapasiteTable" class="cap-grid-container"></div>
       </div>
 
       <div id="tab-sistem" class="tab-content hidden">
         <div style="background:#fee2e2; padding:20px; border-radius:8px; border:1px solid var(--danger);">
-            <h3>Tehlikeli Alan</h3>
-            <p>Tüm personelleri, manuel atamaları ve kapasite ayarlarını sıfırlar.</p>
-            <button onclick="sifirla()" class="btn-main-action" style="background:var(--danger)">SİSTEMİ KOMPLE SIFIRLA</button>
+            <h3>Sistemi Sıfırla</h3>
+            <p>Tüm veriler (personeller, birimler ve kapasiteler) silinecektir.</p>
+            <button onclick="sifirla()" class="btn-main-action" style="background:var(--danger)">VERİLERİ TEMİZLE</button>
         </div>
       </div>
     </div>
 
     <main>
-      <div id="personelChecklist" class="checklist-horizontal-grid no-print" style="margin-bottom:15px; background:white; padding:10px; border-radius:8px; display:flex; flex-wrap:wrap; gap:10px;"></div>
+      <div id="personelChecklist" class="no-print" style="margin-bottom:15px; background:white; padding:10px; border-radius:8px; display:flex; flex-wrap:wrap; gap:10px;"></div>
       
       <table id="vardiyaTablosu">
         <thead id="tableHeader"></thead>
@@ -237,22 +271,14 @@
   <script>
     const DEFAULT_UNITS = ["TEKNİK YÖNETMEN", "SES OPERATÖRÜ", "PLAYOUT OPERATÖRÜ", "KJ OPERATÖRÜ", "INGEST OPERATÖRÜ", "BİLGİ İŞLEM", "YAYIN SİSTEMLERİ", "24TV MCR OPERATÖRÜ", "360TV MCR OPERATÖRÜ"];
     const DEFAULT_SHIFTS = ["06:30–16:00", "09:00–18:00", "12:00–22:00", "16:00–00:00", "00:00–07:00", "DIŞ YAYIN"];
-    const UNIT_COLORS = { 
-        "TEKNİK YÖNETMEN": "#e74c3c", 
-        "SES OPERATÖRÜ": "#3498db", 
-        "PLAYOUT OPERATÖRÜ": "#2ecc71", 
-        "KJ OPERATÖRÜ": "#f1c40f", 
-        "24TV MCR OPERATÖRÜ": "#e67e22", 
-        "360TV MCR OPERATÖRÜ": "#d35400",
-        "BİLGİ İŞLEM": "#64748b"
-    };
+    const UNIT_COLORS = { "TEKNİK YÖNETMEN": "#e74c3c", "SES OPERATÖRÜ": "#3498db", "PLAYOUT OPERATÖRÜ": "#2ecc71", "KJ OPERATÖRÜ": "#f1c40f", "24TV MCR OPERATÖRÜ": "#e67e22", "360TV MCR OPERATÖRÜ": "#d35400" };
 
     let state = {
-        birimler: JSON.parse(localStorage.getItem("v47_birimler")) || DEFAULT_UNITS,
-        saatler: JSON.parse(localStorage.getItem("v47_saatler")) || DEFAULT_SHIFTS,
-        personeller: JSON.parse(localStorage.getItem("v47_personeller")) || [],
-        kapasite: JSON.parse(localStorage.getItem("v47_kapasite")) || {},
-        manuelAtamalar: JSON.parse(localStorage.getItem("v47_manuelAtamalar")) || {}
+        birimler: JSON.parse(localStorage.getItem("v48_birimler")) || DEFAULT_UNITS,
+        saatler: JSON.parse(localStorage.getItem("v48_saatler")) || DEFAULT_SHIFTS,
+        personeller: JSON.parse(localStorage.getItem("v48_personeller")) || [],
+        kapasite: JSON.parse(localStorage.getItem("v48_kapasite")) || {},
+        manuelAtamalar: JSON.parse(localStorage.getItem("v48_manuelAtamalar")) || {}
     };
 
     let currentMonday = getMonday(new Date());
@@ -265,7 +291,7 @@
     }
 
     function save() {
-        Object.keys(state).forEach(k => localStorage.setItem(`v47_${k}`, JSON.stringify(state[k])));
+        Object.keys(state).forEach(k => localStorage.setItem(`v48_${k}`, JSON.stringify(state[k])));
     }
 
     function tabloyuOlustur() {
@@ -283,7 +309,7 @@
             if (document.getElementById(`check_${p.id}`)?.checked) program[p.ad].fill("İZİNLİ");
         });
 
-        // 1. Manuel Atamalar (Asla silinmez)
+        // 1. Manuel Atamalar
         state.personeller.forEach(p => {
             for (let i = 0; i < 7; i++) {
                 let mK = `${haftaKey}_${p.ad}_${i}`;
@@ -310,21 +336,14 @@
                 state.saatler.forEach(saat => {
                     const cap = state.kapasite[`${birim}_${saat}`] || {h:0, hs:0};
                     const hedef = isHs ? cap.hs : cap.h;
-                    
                     let mevcut = state.personeller.filter(p => p.birim === birim && program[p.ad][gun] === saat).length;
                     
                     if (mevcut < hedef) {
-                        let adaylar = state.personeller.filter(p => 
-                            p.birim === birim && program[p.ad][gun] === null && calismaSayisi[p.ad] < 6
-                        );
-
-                        // Özel kısıtlama: Teknik Yönetmen gecesi sadece Barış/Ekrem
+                        let adaylar = state.personeller.filter(p => p.birim === birim && program[p.ad][gun] === null && calismaSayisi[p.ad] < 6);
                         if (birim === "TEKNİK YÖNETMEN" && saat === "00:00–07:00") {
                             adaylar = adaylar.filter(a => ["BARIŞ İNCE", "EKREM FİDAN"].includes(a.ad));
                         }
-
                         adaylar.sort((a, b) => calismaSayisi[a.ad] - calismaSayisi[b.ad]);
-
                         for (let j = 0; j < (hedef - mevcut) && adaylar[j]; j++) {
                             program[adaylar[j].ad][gun] = saat;
                             calismaSayisi[adaylar[j].ad]++;
@@ -365,12 +384,10 @@
 
     function vardiyaDegistir(pAd, gunIndex) {
         let list = state.saatler.map((s,i) => `${i+1}- ${s}`).join('\n');
-        const secim = prompt(`${pAd} için vardiya seçimi:\n${list}\n\nİZİNLİ veya BOŞALT yazabilirsiniz.`);
+        const secim = prompt(`${pAd} için vardiya:\n${list}\n\nİZİNLİ veya BOŞ yazın.`);
         if (!secim) return;
-        
         let sonuc = secim.toUpperCase();
         if (!isNaN(secim)) sonuc = state.saatler[parseInt(secim)-1];
-        
         const key = `${currentMonday.toISOString().split('T')[0]}_${pAd}_${gunIndex}`;
         state.manuelAtamalar[key] = sonuc;
         save();
@@ -393,11 +410,16 @@
         const bSec = document.getElementById("yeniPersBirimSec");
         bSec.innerHTML = state.birimler.map(b => `<option value="${b}">${b}</option>`).join('');
         
+        const bList = document.getElementById("birimListesiAdmin");
+        bList.innerHTML = state.birimler.map((b, i) => `
+            <span class="unit-item">${b} <button onclick="birimSil(${i})" class="btn-del" style="color:white">×</button></span>
+        `).join('');
+
         const pList = document.getElementById("persListesiAdmin");
         pList.innerHTML = state.personeller.map((p, i) => `
             <div class="pers-item">
                 <span>${p.ad} <small>(${p.birim})</small></span>
-                <button onclick="sil(${i})" class="btn-del">SİL</button>
+                <button onclick="persSil(${i})" class="btn-del">SİL</button>
             </div>
         `).join('');
         
@@ -407,8 +429,6 @@
 
     function kapasiteCiz() {
         const box = document.getElementById("kapasiteTable");
-        let header = `<div class="cap-row" style="background:#f1f5f9; font-weight:700;"><div>Birim</div>${state.saatler.map(s => `<div>${s.split('–')[0]}</div>`).join('')}</div>`;
-        
         let rows = state.birimler.map(b => `
             <div class="cap-row">
                 <div style="font-weight:600">${b}</div>
@@ -416,22 +436,18 @@
                     const v = state.kapasite[`${b}_${s}`] || {h:0, hs:0};
                     return `<div class="cap-input-item">
                                 <span>H: <input type="number" value="${v.h}" onchange="capUp('${b}_${s}','h',this.value)"></span>
-                                <span>S: <input type="number" value="${v.hs}" onchange="capUp('${b}_${s}','hs',this.value)"></span>
+                                <span class="weekend-input">S: <input type="number" value="${v.hs}" onchange="capUp('${b}_${s}','hs',this.value)"></span>
                             </div>`;
                 }).join('')}
             </div>`).join('');
-        box.innerHTML = header + rows;
+        box.innerHTML = rows;
     }
 
-    function capUp(k, t, v) { 
-        if(!state.kapasite[k]) state.kapasite[k] = {h:0, hs:0};
-        state.kapasite[k][t] = parseInt(v) || 0; 
-        save(); 
-    }
-
+    function capUp(k, t, v) { state.kapasite[k] = state.kapasite[k] || {h:0, hs:0}; state.kapasite[k][t] = parseInt(v) || 0; save(); }
+    
     function checklistOlustur() {
         document.getElementById("personelChecklist").innerHTML = state.personeller.map(p => `
-            <label style="cursor:pointer; background:#f1f5f9; padding:5px 10px; border-radius:4px;">
+            <label style="cursor:pointer; background:#f1f5f9; padding:5px 10px; border-radius:4px; font-size:10px;">
                 <input type="checkbox" id="check_${p.id}" onchange="tabloyuOlustur()"> ${p.ad}
             </label>
         `).join('');
@@ -439,38 +455,24 @@
 
     function haftaDegistir(v) { currentMonday.setDate(currentMonday.getDate() + v); tabloyuOlustur(); }
     
+    function birimEkle() {
+        const b = document.getElementById("yeniBirimInp").value.toUpperCase().trim();
+        if(b && !state.birimler.includes(b)) { state.birimler.push(b); save(); refreshUI(); }
+    }
+
+    function birimSil(i) { if(confirm("Birimi silerseniz bu birimdeki kapasite ayarları da kaybolur. Emin misiniz?")) { state.birimler.splice(i, 1); save(); refreshUI(); } }
+
     function personelEkle() {
         const ad = document.getElementById("yeniPersInp").value.toUpperCase().trim();
         const birim = document.getElementById("yeniPersBirimSec").value;
-        if(ad) { 
-            state.personeller.push({ad, birim, id: Date.now()}); 
-            save(); 
-            document.getElementById("yeniPersInp").value = "";
-            refreshUI(); 
-            tabloyuOlustur(); 
-        }
+        if(ad) { state.personeller.push({ad, birim, id: Date.now()}); save(); document.getElementById("yeniPersInp").value = ""; refreshUI(); tabloyuOlustur(); }
     }
 
-    function sil(i) { 
-        if(confirm("Bu personeli silmek istediğinize emin misiniz?")) {
-            state.personeller.splice(i, 1); 
-            save(); 
-            refreshUI(); 
-            tabloyuOlustur(); 
-        }
-    }
+    function persSil(i) { if(confirm("Personeli silmek istediğinize emin misiniz?")) { state.personeller.splice(i, 1); save(); refreshUI(); tabloyuOlustur(); } }
 
-    function sifirla() { 
-        if(confirm("DİKKAT! Tüm verileriniz kalıcı olarak silinecek. Onaylıyor musunuz?")) { 
-            localStorage.clear(); 
-            location.reload(); 
-        } 
-    }
+    function sifirla() { if(confirm("TÜM VERİLER SİLİNECEK! Emin misiniz?")) { localStorage.clear(); location.reload(); } }
 
-    window.onload = () => {
-        tabloyuOlustur();
-        refreshUI();
-    };
+    window.onload = () => { tabloyuOlustur(); refreshUI(); };
   </script>
 </body>
 </html>
