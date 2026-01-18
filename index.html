@@ -3,41 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teknik Vardiya Planlama v100</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <title>Teknik Vardiya Planlama - Tam Versiyon</title>
     <style>
         :root { --bg: #f0f2f5; --panel: #ffffff; --text: #2d3436; --primary: #0984e3; --accent: #6c5ce7; }
-        body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); margin: 0; font-size: 11px; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); color: var(--text); margin: 0; font-size: 11px; transition: opacity 0.2s ease-in; }
         .header { background: #1e272e; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.3); }
-        .btn { padding: 8px 15px; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; font-size: 11px; transition: 0.2s; }
+        .btn { padding: 8px 15px; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; font-size: 11px; }
         .btn-main { background: var(--primary); color: white; }
         .btn-sec { background: #636e72; color: white; }
-        
-        /* Tablo Yapısı */
         .container { padding: 15px; overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
         th { background: #f8f9fa; padding: 12px; border-bottom: 2px solid #eee; text-align: center; }
-        td { border: 1px solid #eee; padding: 5px; vertical-align: top; width: 13%; height: 100px; }
+        td { border: 1px solid #eee; padding: 5px; vertical-align: top; width: 13%; height: 90px; }
         .shift-col { background: #2d3436; color: white; font-weight: bold; width: 100px; text-align: center; }
         .weekend { background: #fff9db !important; }
-
-        /* Kartlar */
-        .birim-card { padding: 6px; margin: 4px; border-radius: 4px; background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); cursor: grab; border-left: 5px solid #ccc; position: relative; }
+        .birim-card { padding: 6px; margin: 4px; border-radius: 4px; background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); cursor: grab; border-left: 5px solid #ccc; }
         .birim-card b { display: block; font-size: 9px; opacity: 0.8; margin-bottom: 2px; }
-        
-        /* Yönetim Paneli */
-        #adminPanel { position: fixed; top: 0; right: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; justify-content: center; align-items: center; }
-        .panel-content { background: white; width: 90%; max-width: 900px; height: 80vh; border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; }
+        #adminPanel { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; display: flex; justify-content: center; align-items: center; }
+        .panel-content { background: white; width: 90%; max-width: 1000px; height: 85vh; border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; }
         .panel-tabs { display: flex; background: #eee; }
-        .tab-btn { flex: 1; padding: 12px; border: none; cursor: pointer; font-weight: bold; }
-        .tab-btn.active { background: white; border-bottom: 3px solid var(--primary); }
+        .tab-btn { flex: 1; padding: 15px; border: none; cursor: pointer; font-weight: bold; background: #ddd; }
+        .tab-btn.active { background: white; color: var(--primary); }
         .tab-content { padding: 20px; overflow-y: auto; flex: 1; }
+        .cap-row { display: grid; grid-template-columns: 160px repeat(6, 1fr); gap: 10px; padding: 8px; border-bottom: 1px solid #eee; align-items: center; }
         .hidden { display: none !important; }
-
-        /* Kapasite Izgarası */
-        .cap-grid { display: grid; gap: 5px; }
-        .cap-row { display: grid; grid-template-columns: 150px repeat(6, 1fr); gap: 5px; align-items: center; border-bottom: 1px solid #eee; padding: 5px; }
-        .cap-input { width: 35px; border: 1px solid #ccc; border-radius: 3px; padding: 2px; }
     </style>
 </head>
 <body>
@@ -49,8 +38,9 @@
     </div>
     <div style="display:flex; gap:10px;">
         <button class="btn btn-sec" onclick="haftaDegistir(-1)">« GERİ</button>
-        <button class="btn btn-main" onclick="toggleAdminPanel()">⚙ YÖNETİM</button>
+        <button class="btn btn-main" style="background:#007bff" onclick="vardiyaOlustur()">VARDİYA OLUŞTUR</button>
         <button class="btn btn-sec" onclick="haftaDegistir(1)">İLERİ »</button>
+        <button class="btn btn-sec" style="background:#2d3436" onclick="toggleAdminPanel()">⚙ YÖNETİM</button>
     </div>
 </div>
 
@@ -58,51 +48,40 @@
     <table>
         <thead>
             <tr>
-                <th>Saat / Birim</th>
+                <th>Saat / Gün</th>
                 <th>Pazartesi</th><th>Salı</th><th>Çarşamba</th><th>Perşembe</th><th>Cuma</th><th class="weekend">Cumartesi</th><th class="weekend">Pazar</th>
             </tr>
         </thead>
-        <tbody id="tableBody">
-            </tbody>
+        <tbody id="tableBody"></tbody>
     </table>
 </div>
 
 <div id="adminPanel" class="hidden">
     <div class="panel-content">
         <div class="panel-tabs">
-            <button class="tab-btn active" onclick="tabDegistir('kapasite')">SAAT/KAPASİTE</button>
-            <button class="tab-btn" onclick="tabDegistir('personel')">PERSONEL LİSTESİ</button>
-            <button class="tab-btn" onclick="tabDegistir('sistem')">SİSTEM/OLUŞTUR</button>
+            <button class="tab-btn active" onclick="tabDegistir('personel')">PERSONEL/BİRİM</button>
+            <button class="tab-btn" onclick="tabDegistir('kapasite')">SAAT/KAPASİTE</button>
+            <button class="tab-btn" onclick="tabDegistir('sistem')">SİSTEM</button>
             <button class="tab-btn" style="background:#ff7675; color:white" onclick="toggleAdminPanel()">KAPAT</button>
         </div>
-
-        <div id="tab-kapasite" class="tab-content">
+        <div id="tab-personel" class="tab-content">
+            <h3>Personel ve İzin Durumu</h3>
+            <div id="personelChecklist" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px;"></div>
+        </div>
+        <div id="tab-kapasite" class="tab-content hidden">
             <h3>Birim Kapasite Ayarları</h3>
-            <p>Her vardiya saatine her birimden kaç kişi geleceğini girin:</p>
-            <div id="kapasiteTable" class="cap-grid"></div>
+            <div id="kapasiteGrid"></div>
         </div>
-
-        <div id="tab-personel" class="tab-content hidden">
-            <h3>Personel Listesi ve İzin Durumu</h3>
-            <div id="personelChecklist" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;"></div>
-        </div>
-
         <div id="tab-sistem" class="tab-content hidden">
-            <div style="text-align:center; padding:20px;">
-                <button onclick="vardiyaOlustur()" style="background:#e67e22; color:white; padding:20px 40px; font-size:18px; border:none; border-radius:10px; cursor:pointer; font-weight:bold; box-shadow:0 4px 15px rgba(230,126,34,0.4)">⚡ VARDİYAYI OTOMATİK OLUŞTUR</button>
-                <div style="margin-top:30px; display:flex; gap:10px; justify-content:center;">
-                    <button class="btn btn-sec" onclick="whatsappKopyala()">🟢 WP KOPYALA</button>
-                    <button class="btn btn-sec" onclick="sifirla()" style="background:#d63031">🔄 SIFIRLA</button>
-                    <button class="btn btn-sec" onclick="verileriYedekle()">💾 YEDEK AL</button>
-                </div>
-            </div>
+            <h3>Sistem Ayarları</h3>
+            <button class="btn btn-sec" onclick="sifirla()" style="background:#d63031">Tüm Verileri Sıfırla</button>
+            <button class="btn btn-sec" onclick="localStorage.clear(); location.reload();">Fabrika Ayarlarına Dön</button>
         </div>
     </div>
 </div>
 
 <script>
-// --- JAVASCRIPT MOTORU ---
-
+// --- 1. VERİLER VE HAFIZA ---
 const INITIAL_STAFF = [
     {ad: "CAN ŞENTUNALI", birim: "TEKNİK YÖNETMEN", id: 101}, {ad: "M.BERKMAN", birim: "TEKNİK YÖNETMEN", id: 102}, {ad: "EKREM FİDAN", birim: "TEKNİK YÖNETMEN", id: 103},
     {ad: "YUNUS EMRE YAYLA", birim: "TEKNİK YÖNETMEN", id: 104}, {ad: "H.CAN SAĞLAM", birim: "TEKNİK YÖNETMEN", id: 105}, {ad: "BARIŞ İNCE", birim: "TEKNİK YÖNETMEN", id: 106},
@@ -115,4 +94,112 @@ const INITIAL_STAFF = [
     {ad: "SENA BAYDAR", birim: "KJ OPERATÖRÜ", id: 125}, {ad: "OĞUZHAN YALAZAN", birim: "KJ OPERATÖRÜ", id: 126}, {ad: "YEŞİM KİREÇ", birim: "KJ OPERATÖRÜ", id: 127},
     {ad: "PINAR ÖZENÇ", birim: "KJ OPERATÖRÜ", id: 128}, {ad: "ERCAN PALABIYIK", birim: "INGEST OPERATÖRÜ", id: 129}, {ad: "RAMAZAN KOÇAK", birim: "INGEST OPERATÖRÜ", id: 130},
     {ad: "UĞUR AKBABA", birim: "INGEST OPERATÖRÜ", id: 131}, {ad: "ÖZKAN KAYA", birim: "BİLGİ İŞLEM", id: 132}, {ad: "HAKAN ELİPEK", birim: "BİLGİ İŞLEM", id: 133},
-    {ad: "VOLKAN DEMİRBAŞ",
+    {ad: "VOLKAN DEMİRBAŞ", birim: "BİLGİ İŞLEM", id: 134}, {ad: "GÖKHAN BAĞIŞ", birim: "BİLGİ İŞLEM", id: 135}, {ad: "FATİH AYBEK", birim: "YAYIN SİSTEMLERİ", id: 136},
+    {ad: "AKİF KOÇ", birim: "YAYIN SİSTEMLERİ", id: 137}, {ad: "BEYHAN KARAKAŞ", birim: "YAYIN SİSTEMLERİ", id: 138}, {ad: "FERDİ TOPUZ", birim: "YAYIN SİSTEMLERİ", id: 139},
+    {ad: "YİĞİT DAYI", birim: "YAYIN SİSTEMLERİ", id: 140}, {ad: "FARUK YILMAZ", birim: "24TV MCR OPERATÖRÜ", id: 141}, {ad: "KADİR YILMAZ", birim: "24TV MCR OPERATÖRÜ", id: 142},
+    {ad: "YUSUF HENEK", birim: "24TV MCR OPERATÖRÜ", id: 143}, {ad: "SEDA KAYA", birim: "24TV MCR OPERATÖRÜ", id: 144}, {ad: "BÜKRE YAVUZ", birim: "360TV MCR OPERATÖRÜ", id: 145},
+    {ad: "EMRULLAH AHLATÇI", birim: "360TV MCR OPERATÖRÜ", id: 146}, {ad: "EREN KAZAN", birim: "360TV MCR OPERATÖRÜ", id: 147}, {ad: "MUSAB YAKUP DEMİRBAŞ", birim: "360TV MCR OPERATÖRÜ", id: 148}
+];
+
+const SHIFTS = ["06:30–16:00", "09:00–18:00", "12:00–22:00", "16:00–00:00", "00:00–07:00", "DIŞ YAYIN"];
+const UNIT_COLORS = { "TEKNİK YÖNETMEN": "#e74c3c", "SES OPERATÖRÜ": "#3498db", "PLAYOUT OPERATÖRÜ": "#2ecc71", "KJ OPERATÖRÜ": "#f1c40f", "INGEST OPERATÖRÜ": "#9b59b6", "BİLGİ İŞLEM": "#34495e", "YAYIN SİSTEMLERİ": "#1abc9c", "24TV MCR OPERATÖRÜ": "#e67e22", "360TV MCR OPERATÖRÜ": "#d35400" };
+
+let state = {
+    pers: JSON.parse(localStorage.getItem("v_pers")) || INITIAL_STAFF,
+    cap: JSON.parse(localStorage.getItem("v_cap")) || {},
+    man: JSON.parse(localStorage.getItem("v_man")) || {},
+    izni: JSON.parse(localStorage.getItem("v_izni")) || []
+};
+
+let currentMonday = getMonday(new Date());
+
+function getMonday(d) { d = new Date(d); let day = d.getDay(), diff = d.getDate() - day + (day == 0 ? -6 : 1); return new Date(d.setDate(diff)); }
+function save() { localStorage.setItem("v_pers", JSON.stringify(state.pers)); localStorage.setItem("v_cap", JSON.stringify(state.cap)); localStorage.setItem("v_man", JSON.stringify(state.man)); localStorage.setItem("v_izni", JSON.stringify(state.izni)); }
+
+// --- 2. ANA TABLO ---
+function tabloyuOlustur() {
+    const haftaKey = currentMonday.toISOString().split('T')[0];
+    document.getElementById("tarihAraligi").innerText = `${currentMonday.toLocaleDateString('tr-TR')} Haftası`;
+    const body = document.getElementById("tableBody");
+    body.innerHTML = SHIFTS.map(s => `
+        <tr>
+            <td class="shift-col">${s}</td>
+            ${[0,1,2,3,4,5,6].map(i => `
+                <td class="${i>4?'weekend':''}" ondragover="event.preventDefault()" ondrop="handleDrop(event, '${s}', ${i})">
+                    ${state.pers.filter(p => state.man[`${haftaKey}_${p.ad}_${i}`] === s).map(p => `
+                        <div class="birim-card" draggable="true" ondragstart="handleDragStart(event, '${p.ad}', ${i})" onclick="manuelGiris('${p.ad}', ${i})" style="border-left-color:${UNIT_COLORS[p.birim]}">
+                            <b>${p.birim}</b>${p.ad}
+                        </div>
+                    `).join('')}
+                </td>`).join('')}
+        </tr>`).join('');
+}
+
+// --- 3. OTOMATİK VARDİYA OLUŞTURMA ---
+function vardiyaOlustur() {
+    const haftaKey = currentMonday.toISOString().split('T')[0];
+    
+    // Temizle ama kalıcı tercihleri koruma mantığı eklenebilir
+    // Şimdilik sadece bu haftayı temizle
+    Object.keys(state.man).forEach(k => { if(k.startsWith(haftaKey)) delete state.man[k]; });
+
+    // Teknik Yönetmen Gece Rotasyonu
+    for(let i=0; i<7; i++) {
+        let p = (i < 2) ? "BARIŞ İNCE" : "EKREM FİDAN";
+        state.man[`${haftaKey}_${p}_${i}`] = "00:00–07:00";
+    }
+
+    // Diğerleri için kapasiteye göre dağıt
+    Object.keys(UNIT_COLORS).forEach(birim => {
+        let birimdekiler = state.pers.filter(p => p.birim === birim);
+        for(let gun=0; gun<7; gun++) {
+            SHIFTS.forEach(saat => {
+                let hedef = state.cap[`${birim}_${saat}`] || 0;
+                let atanan = birimdekiler.filter(p => state.man[`${haftaKey}_${p.ad}_${gun}`] === saat).length;
+                while(atanan < hedef) {
+                    let musait = birimdekiler.find(p => !state.man[`${haftaKey}_${p.ad}_${gun}`]);
+                    if(!musait) break;
+                    state.man[`${haftaKey}_${musait.ad}_${gun}`] = saat;
+                    atanan++;
+                }
+            });
+        }
+    });
+    save(); tabloyuOlustur();
+}
+
+// --- 4. YÖNETİM VE ARAÇLAR ---
+function toggleAdminPanel() { document.getElementById("adminPanel").classList.toggle("hidden"); refreshPanels(); }
+function tabDegistir(id) { 
+    document.querySelectorAll('.tab-content').forEach(t=>t.classList.add('hidden'));
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    document.getElementById('tab-'+id).classList.remove('hidden');
+    event.currentTarget.classList.add('active');
+}
+function refreshPanels() {
+    document.getElementById("personelChecklist").innerHTML = state.pers.map(p => `<div><input type="checkbox" ${state.izni.includes(p.ad)?'checked':''} onchange="toggleIzin('${p.ad}')"> ${p.ad} <small>(${p.birim})</small></div>`).join('');
+    let grid = document.getElementById("kapasiteGrid");
+    grid.innerHTML = `<div class="cap-row" style="background:#eee; font-weight:bold"><div>Birim</div>${SHIFTS.map(s=>`<div>${s.split('–')[0]}</div>`).join('')}</div>`;
+    Object.keys(UNIT_COLORS).forEach(b => {
+        grid.innerHTML += `<div class="cap-row"><div>${b}</div>${SHIFTS.map(s => `<input type="number" value="${state.cap[b+'_'+s]||0}" onchange="state.cap['${b+'_'+s}']=parseInt(this.value);save()" style="width:35px">`).join('')}</div>`;
+    });
+}
+function toggleIzin(ad) { if(state.izni.includes(ad)) state.izni = state.izni.filter(x=>x!==ad); else state.izni.push(ad); save(); }
+function haftaDegistir(v) { currentMonday.setDate(currentMonday.getDate() + (v*7)); tabloyuOlustur(); }
+let draggedData = null;
+function handleDragStart(e, pAd, gun) { draggedData = { pAd, gun }; }
+function handleDrop(e, vardiya, gun) {
+    e.preventDefault(); if (!draggedData) return;
+    state.man[`${currentMonday.toISOString().split('T')[0]}_${draggedData.pAd}_${gun}`] = vardiya;
+    save(); tabloyuOlustur();
+}
+function manuelGiris(p, i) {
+    let s = prompt(`${p} için saat (Örn: 09:00–18:00 veya boş bırak):`, state.man[`${currentMonday.toISOString().split('T')[0]}_${p}_${i}`] || "");
+    if(s !== null) { if(s === "") delete state.man[`${currentMonday.toISOString().split('T')[0]}_${p}_${i}`]; else state.man[`${currentMonday.toISOString().split('T')[0]}_${p}_${i}`] = s; save(); tabloyuOlustur(); }
+}
+function sifirla() { if(confirm("Tüm tablo verileri silinecek?")) { state.man = {}; save(); tabloyuOlustur(); } }
+
+window.onload = () => { tabloyuOlustur(); };
+</script>
+</body>
+</html>
