@@ -3,17 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PRO-Vardiya v23.5 | Yönetim Paneli</title>
+  <title>PRO-Vardiya v24.0 | Sabit Atama Sistemi</title>
   <link rel="stylesheet" href="style.css">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
 <body>
   <div class="app-wrapper">
-    <header class="no-print main-header">
+    <header class="main-header no-print">
       <div class="logo-area">
-        <div class="badge">V23.5 PRO</div>
+        <div class="badge">V24.0 FIXED-ENGINE</div>
         <h1>TEKNİK <span>VARDİYA</span></h1>
         <p id="tarihAraligi" class="date-display">Yükleniyor...</p>
       </div>
@@ -32,60 +30,52 @@
           <button class="tab-btn active" onclick="tabDegistir('kapasite')">Kapasite</button>
           <button class="tab-btn" onclick="tabDegistir('birim')">Birimler</button>
           <button class="tab-btn" onclick="tabDegistir('personel')">Personeller</button>
+          <button class="tab-btn" onclick="tabDegistir('sabit')">📍 Sabit Atamalar</button>
           <button class="tab-btn" onclick="tabDegistir('izin')">Ön İzin</button>
-          <button class="tab-btn" onclick="tabDegistir('ayarlar')">Ayarlar</button>
-          <button onclick="toggleAdminPanel()" class="btn-close-modal">✖ Kapat</button>
+          <button class="tab-btn" onclick="tabDegistir('ayarlar')">Sistem</button>
+          <button onclick="toggleAdminPanel()" class="btn-close-modal">✖ KAPAT</button>
         </div>
 
         <div class="admin-content">
+          <div id="tab-sabit" class="tab-content hidden">
+            <div class="info-box">Buraya eklediğiniz kişiler, o gün ve saatte algoritma tarafından <strong>değiştirilemez</strong> şekilde sabitlenir.</div>
+            <div class="admin-input-group">
+              <select id="sabitPersSec"></select>
+              <select id="sabitGunSec">
+                <option value="0">Pazartesi</option><option value="1">Salı</option><option value="2">Çarşamba</option>
+                <option value="3">Perşembe</option><option value="4">Cuma</option><option value="5">Cumartesi</option><option value="6">Pazar</option>
+              </select>
+              <select id="sabitSaatSec"></select>
+              <button onclick="sabitAtamaEkle()" class="btn-add">Atamayı Sabitle</button>
+            </div>
+            <div id="sabitListesi" class="admin-list"></div>
+          </div>
+
           <div id="tab-kapasite" class="tab-content">
-            <h3>Vardiya Kapasiteleri (H.İçi / H.Sonu)</h3>
             <div id="kapasiteListesi" class="cap-grid-container"></div>
           </div>
-
           <div id="tab-birim" class="tab-content hidden">
-            <div class="admin-input-group">
-              <input type="text" id="yeniBirimAd" placeholder="Yeni Birim Adı">
-              <button onclick="birimEkle()" class="btn-add">Ekle</button>
-            </div>
+            <div class="admin-input-group"><input type="text" id="yeniBirimAd"><button onclick="birimEkle()">Ekle</button></div>
             <div id="birimYonetimListesi" class="admin-list"></div>
           </div>
-
           <div id="tab-personel" class="tab-content hidden">
-            <div class="admin-input-group">
-              <input type="text" id="yeniPersIsim" placeholder="Ad Soyad">
-              <select id="yeniPersBirim"></select>
-              <button onclick="personelEkle()" class="btn-add">Ekle</button>
-            </div>
+            <div class="admin-input-group"><input type="text" id="yeniPersIsim"><select id="yeniPersBirim"></select><button onclick="personelEkle()">Ekle</button></div>
             <div id="personelYonetimListesi" class="admin-list"></div>
           </div>
-
           <div id="tab-izin" class="tab-content hidden">
-            <h3>Personel İzin Atama</h3>
-            <div class="admin-input-group">
-              <select id="izinPersSec"></select>
-              <select id="izinGunSec">
-                <option value="0">Pazartesi</option><option value="1">Salı</option>
-                <option value="2">Çarşamba</option><option value="3">Perşembe</option>
-                <option value="4">Cuma</option><option value="5">Cumartesi</option>
-                <option value="6">Pazar</option>
-              </select>
-              <button onclick="izinEkle()" class="btn-add">İzin Ekle</button>
-            </div>
+            <div class="admin-input-group"><select id="izinPersSec"></select><select id="izinGunSec">
+              <option value="0">Pazartesi</option><option value="1">Salı</option><option value="2">Çarşamba</option>
+              <option value="3">Perşembe</option><option value="4">Cuma</option><option value="5">Cumartesi</option><option value="6">Pazar</option>
+            </select><button onclick="izinEkle()">İzin Ekle</button></div>
             <div id="izinListesi" class="admin-list"></div>
           </div>
-
-          <div id="tab-ayarlar" class="tab-content hidden">
-            <button onclick="sifirla()" class="btn-reset">FABRİKA AYARLARINA DÖN (TÜM VERİLERİ SİL)</button>
-          </div>
+          <div id="tab-ayarlar" class="tab-content hidden"><button onclick="sifirla()" class="btn-reset">SİSTEMİ SIFIRLA</button></div>
         </div>
       </div>
     </div>
 
     <main class="content-area">
-      <section class="checklist-section no-print">
-        <div id="personelChecklist" class="checklist-horizontal-grid"></div>
-      </section>
+      <section class="checklist-section no-print"><div id="personelChecklist" class="checklist-horizontal-grid"></div></section>
       <div class="table-card" id="print-area">
         <table id="vardiyaTablosu">
           <thead><tr id="tableHeader"></tr></thead>
