@@ -10,8 +10,8 @@ const rotationCycle = [
 ];
 
 function login() {
-  const user = document.getElementById("username").value;
-  const pass = document.getElementById("password").value;
+  const user = document.getElementById("username").value.trim();
+  const pass = document.getElementById("password").value.trim();
   const msg = document.getElementById("loginMessage");
 
   if (user === adminUser.username && pass === adminUser.password) {
@@ -118,4 +118,4 @@ function generateShifts() {
     let row = `<tr><td>Gün ${day}</td>`;
     hours.forEach((h, i) => {
       let isWeekend = (day % 7 === 6 || day % 7 === 0);
-      let capacity = isWeekend ? h.weekendCapacity : h.weekdayCapacity
+      let capacity = isWeekend ? h.weekendCapacity : h.weekday
