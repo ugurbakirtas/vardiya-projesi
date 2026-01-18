@@ -1,4 +1,4 @@
-// --- 1. VERİ HAVUZU (SABİT) ---
+// --- 1. VERİ HAVUZU ---
 const DEFAULT_UNITS = ["TEKNİK YÖNETMEN", "SES OPERATÖRÜ", "PLAYOUT OPERATÖRÜ", "KJ OPERATÖRÜ", "INGEST OPERATÖRÜ", "BİLGİ İŞLEM", "YAYIN SİSTEMLERİ", "24TV MCR OPERATÖRÜ", "360TV MCR OPERATÖRÜ"];
 const DEFAULT_SHIFTS = ["06:30–16:00", "09:00–18:00", "12:00–22:00", "16:00–00:00", "00:00–07:00", "DIŞ YAYIN"];
 const DEFAULT_STAFF = [
@@ -22,40 +22,46 @@ const DEFAULT_STAFF = [
 
 // --- 2. DURUM YÖNETİMİ ---
 let state = {
-    birimler: JSON.parse(localStorage.getItem("v27_birimler")) || DEFAULT_UNITS,
-    saatler: JSON.parse(localStorage.getItem("v27_saatler")) || DEFAULT_SHIFTS,
-    personeller: JSON.parse(localStorage.getItem("v27_personeller")) || DEFAULT_STAFF.map((p,i) => ({...p, id: 100+i})),
-    sabitAtamalar: JSON.parse(localStorage.getItem("v27_sabitAtamalar")) || [],
-    kapasite: JSON.parse(localStorage.getItem("v27_kapasite")) || {}
+    birimler: JSON.parse(localStorage.getItem("v28_birimler")) || DEFAULT_UNITS,
+    saatler: JSON.parse(localStorage.getItem("v28_saatler")) || DEFAULT_SHIFTS,
+    personeller: JSON.parse(localStorage.getItem("v28_personeller")) || DEFAULT_STAFF.map((p,i) => ({...p, id: 100+i})),
+    sabitAtamalar: JSON.parse(localStorage.getItem("v28_sabitAtamalar")) || [],
+    kapasite: JSON.parse(localStorage.getItem("v28_kapasite")) || {},
+    manuelIzinler: JSON.parse(localStorage.getItem("v28_manuelIzinler")) || {} // Personel ID -> [gün indisleri]
 };
 
 let currentMonday = getMonday(new Date());
 function getMonday(d) { d = new Date(d); let day = d.getDay(), diff = d.getDate() - day + (day == 0 ? -6 : 1); return new Date(d.setDate(diff)); }
 function save() { 
-    localStorage.setItem("v27_birimler", JSON.stringify(state.birimler)); 
-    localStorage.setItem("v27_saatler", JSON.stringify(state.saatler)); 
-    localStorage.setItem("v27_personeller", JSON.stringify(state.personeller)); 
-    localStorage.setItem("v27_sabitAtamalar", JSON.stringify(state.sabitAtamalar)); 
-    localStorage.setItem("v27_kapasite", JSON.stringify(state.kapasite)); 
+    localStorage.setItem("v28_birimler", JSON.stringify(state.birimler)); 
+    localStorage.setItem("v28_saatler", JSON.stringify(state.saatler)); 
+    localStorage.setItem("v28_personeller", JSON.stringify(state.personeller)); 
+    localStorage.setItem("v28_sabitAtamalar", JSON.stringify(state.sabitAtamalar)); 
+    localStorage.setItem("v28_kapasite", JSON.stringify(state.kapasite));
+    localStorage.setItem("v28_manuelIzinler", JSON.stringify(state.manuelIzinler));
 }
 
-// --- 3. ANA MOTOR (ROTASYON & HAFTA DEĞİŞİMİ) ---
+// --- 3. ANA MOTOR (KENDİNİ DÜZELTEN ALGORİTMA) ---
 function tabloyuOlustur() {
-    const tarihLabel = document.getElementById("tarihAraligi");
-    if(tarihLabel) tarihLabel.innerText = `${currentMonday.toLocaleDateString('tr-TR')} Haftası`;
+    if(document.getElementById("tarihAraligi")) document.getElementById("tarihAraligi").innerText = `${currentMonday.toLocaleDateString('tr-TR')} Haftası`;
     
     let program = {};
     let puanlar = {};
-    const haftaSeed = currentMonday.getTime(); // Hafta değişince farklı sonuç vermesi için
+    const haftaSeed = currentMonday.getTime();
 
+    // Personelleri hazırla
     state.personeller.forEach(p => {
         program[p.ad] = Array(7).fill(null);
         puanlar[p.ad] = 0;
+        
+        // Checklist'ten gelen genel izin kontrolü
         let chk = document.getElementById(`check_${p.id}`);
-        if(chk && chk.checked) program[p.ad].fill("İZİNLİ");
+        if(chk && chk.checked) {
+            program[p.ad].fill("İZİNLİ");
+        }
     });
 
-    // Sabit Atamalar
+    // 1. Sabit Atamalar (Öncelikli)
     state.sabitAtamalar.forEach(a => {
         if(program[a.p]) {
             if(a.g === "pzt_cum") {
@@ -67,7 +73,7 @@ function tabloyuOlustur() {
         }
     });
 
-    // Teknik Yönetmen Gece Rotasyonu
+    // 2. Teknik Yönetmen Gece Rotasyonu
     for(let i=0; i<7; i++) {
         let gececi = (i < 2) ? "BARIŞ İNCE" : "EKREM FİDAN";
         if(program[gececi] && program[gececi][i] === null) {
@@ -76,7 +82,7 @@ function tabloyuOlustur() {
         }
     }
 
-    // Haftalık Rastgele & Dengeli Dağıtım
+    // 3. Dinamik Dağıtım (Boşlukları Otomatik Doldurur)
     for(let i=0; i<7; i++) {
         let isWeekend = (i >= 5);
         state.birimler.forEach(birim => {
@@ -90,7 +96,6 @@ function tabloyuOlustur() {
                         .filter(p => p.birim === birim && program[p.ad][i] === null)
                         .sort((a, b) => {
                             if(puanlar[a.ad] !== puanlar[b.ad]) return puanlar[a.ad] - puanlar[b.ad];
-                            // Hafta Seed + Personel ID ile her hafta farklı karıştırma
                             return Math.sin(haftaSeed + a.id) - Math.sin(haftaSeed + b.id);
                         });
 
@@ -105,12 +110,10 @@ function tabloyuOlustur() {
     render(program);
 }
 
-// --- 4. GÖRSELLEŞTİRME ---
+// --- 4. GÖRSELLEŞTİRME VE KAYIT ---
 function render(program) {
     const body = document.getElementById("tableBody");
-    const foot = document.getElementById("tableFooter");
     if(!body) return;
-
     let html = "";
     state.saatler.forEach(s => {
         html += `<tr><td><strong>${s}</strong></td>`;
@@ -129,24 +132,16 @@ function render(program) {
             .map(p => `<div class="birim-card izinli-kart"><span class="birim-tag">${p.birim}</span>${p.ad}</div>`).join('');
         footHtml += `<td>${iz}</td>`;
     }
-    if(foot) foot.innerHTML = footHtml + "</tr>";
+    document.getElementById("tableFooter").innerHTML = footHtml + "</tr>";
 }
 
-// --- 5. YÖNETİM PANELİ VE SİSTEM ARAÇLARI ---
+// --- 5. YÖNETİM VE ETKİLEŞİM ---
 function refreshUI() {
-    const listAdmin = document.getElementById("persListesiAdmin");
-    if(listAdmin) listAdmin.innerHTML = state.personeller.map((p,i) => `<div class="admin-list-item">${p.ad} (${p.birim}) <button onclick="sil('personeller',${i})">SİL</button></div>`).join('');
-    
-    const bSec = document.getElementById("yeniPersBirimSec");
-    if(bSec) bSec.innerHTML = state.birimler.map(b => `<option value="${b}">${b}</option>`).join('');
+    if(document.getElementById("persListesiAdmin")) document.getElementById("persListesiAdmin").innerHTML = state.personeller.map((p,i) => `<div class="admin-list-item">${p.ad} (${p.birim}) <button onclick="sil('personeller',${i})">SİL</button></div>`).join('');
+    if(document.getElementById("yeniPersBirimSec")) document.getElementById("yeniPersBirimSec").innerHTML = state.birimler.map(b => `<option value="${b}">${b}</option>`).join('');
+    if(document.getElementById("sabitPersSec")) document.getElementById("sabitPersSec").innerHTML = state.personeller.map(p => `<option value="${p.ad}">${p.ad}</option>`).join('');
+    if(document.getElementById("sabitSaatSec")) document.getElementById("sabitSaatSec").innerHTML = state.saatler.map(s => `<option value="${s}">${s}</option>`).join('');
 
-    const sPers = document.getElementById("sabitPersSec");
-    if(sPers) sPers.innerHTML = state.personeller.map(p => `<option value="${p.ad}">${p.ad}</option>`).join('');
-
-    const sSaat = document.getElementById("sabitSaatSec");
-    if(sSaat) sSaat.innerHTML = state.saatler.map(s => `<option value="${s}">${s}</option>`).join('');
-
-    // Sistem Sekmesi: Birim ve Saat Yönetimi
     const tabSistem = document.getElementById("tab-sistem");
     if(tabSistem) {
         let bHtml = `<h4>Birimler</h4><div class="admin-input-group"><input type="text" id="yInpB" placeholder="Birim Adı"><button onclick="birimEkle()">EKLE</button></div>`;
@@ -155,19 +150,8 @@ function refreshUI() {
         sHtml += state.saatler.map((s,i) => `<div class="admin-list-item">${s} <button onclick="sil('saatler',${i})">SİL</button></div>`).join('');
         tabSistem.innerHTML = bHtml + "<hr>" + sHtml + `<hr><button class="btn-reset" onclick="sifirla()">SIFIRLA</button>`;
     }
-
     checklistOlustur(); kapasiteCiz(); sabitAtamaListele();
 }
-
-function birimEkle() { let v = document.getElementById("yInpB").value.toUpperCase(); if(v){ state.birimler.push(v); save(); refreshUI(); } }
-function saatEkle() { let v = document.getElementById("yInpS").value; if(v){ state.saatler.push(v); save(); refreshUI(); tabloyuOlustur(); } }
-function personelEkle() { let ad = document.getElementById("yeniPersInp").value.toUpperCase(); let birim = document.getElementById("yeniPersBirimSec").value; if(ad){ state.personeller.push({ad, birim, id: Date.now()}); save(); refreshUI(); tabloyuOlustur(); } }
-function sil(k, i) { state[k].splice(i, 1); save(); refreshUI(); tabloyuOlustur(); }
-function capSave(k, t, v) { if(!state.kapasite[k]) state.kapasite[k] = {h:0, hs:0}; state.kapasite[k][t] = parseInt(v) || 0; save(); }
-function tabDegistir(n) { document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden')); document.getElementById('tab-'+n).classList.remove('hidden'); refreshUI(); }
-function toggleAdminPanel() { document.getElementById("adminPanel").classList.toggle("hidden"); refreshUI(); }
-function haftaDegistir(v) { currentMonday.setDate(currentMonday.getDate() + (v * 7)); tabloyuOlustur(); }
-function sifirla() { if(confirm("Tüm veriler silinecek!")) { localStorage.clear(); location.reload(); } }
 
 function checklistOlustur() {
     const box = document.getElementById("personelChecklist");
@@ -188,7 +172,16 @@ function kapasiteCiz() {
     kTab.innerHTML = h;
 }
 
+function capSave(k, t, v) { if(!state.kapasite[k]) state.kapasite[k] = {h:0, hs:0}; state.kapasite[k][t] = parseInt(v) || 0; save(); tabloyuOlustur(); }
+function birimEkle() { let v = document.getElementById("yInpB").value.toUpperCase(); if(v){ state.birimler.push(v); save(); refreshUI(); } }
+function saatEkle() { let v = document.getElementById("yInpS").value; if(v){ state.saatler.push(v); save(); refreshUI(); tabloyuOlustur(); } }
+function personelEkle() { let ad = document.getElementById("yeniPersInp").value.toUpperCase(); let birim = document.getElementById("yeniPersBirimSec").value; if(ad){ state.personeller.push({ad, birim, id: Date.now()}); save(); refreshUI(); tabloyuOlustur(); } }
+function sil(k, i) { state[k].splice(i, 1); save(); refreshUI(); tabloyuOlustur(); }
+function tabDegistir(n) { document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden')); document.getElementById('tab-'+n).classList.remove('hidden'); refreshUI(); }
+function toggleAdminPanel() { document.getElementById("adminPanel").classList.toggle("hidden"); refreshUI(); }
+function haftaDegistir(v) { currentMonday.setDate(currentMonday.getDate() + (v * 7)); tabloyuOlustur(); }
+function sifirla() { if(confirm("Tüm veriler silinecek!")) { localStorage.clear(); location.reload(); } }
 function sabitAtamaEkle() { state.sabitAtamalar.push({p: document.getElementById("sabitPersSec").value, g: document.getElementById("sabitGunSec").value, s: document.getElementById("sabitSaatSec").value}); save(); refreshUI(); tabloyuOlustur(); }
-function sabitAtamaListele() { const l = document.getElementById("sabitAtamaListesi"); if(l) l.innerHTML = state.sabitAtamalar.map((a,i) => `<div class="admin-list-item">${a.p} | ${a.g} | ${a.s} <button onclick="sil('sabitAtamalar',${i})">SİL</button></div>`).join(''); }
+function sabitAtamaListele() { if(document.getElementById("sabitAtamaListesi")) document.getElementById("sabitAtamaListesi").innerHTML = state.sabitAtamalar.map((a,i) => `<div class="admin-list-item">${a.p} | ${a.g} | ${a.s} <button onclick="sil('sabitAtamalar',${i})">SİL</button></div>`).join(''); }
 
 window.onload = () => { refreshUI(); tabloyuOlustur(); };
