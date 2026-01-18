@@ -127,25 +127,25 @@ function tabloyuOlustur() {
   ["24TV MCR OPERATÖRÜ", "360TV MCR OPERATÖRÜ"].forEach(birim => {
     let mcrP = sabitPersoneller.filter(p => p.birim === birim);
     mcrP.forEach((p, idx) => {
-      let offset = idx * 3;  // Farklı başlangıç noktaları için kaydırma
+      let offset = idx * 3;
       for (let i = 0; i < 7; i++) {
         let cycle = (diff + i + offset) % 8;
         let atama;
         if (cycle === 0 || cycle === 1) {
-          atama = "06:30–16:00";      // 1-2. gün Sabah
+          atama = "06:30–16:00";
         } else if (cycle === 2 || cycle === 3) {
-          atama = "16:00–00:00";      // 3-4. gün Akşam
+          atama = "16:00–00:00";
         } else if (cycle === 4 || cycle === 5) {
-          atama = "00:00–07:00";      // 5-6. gün Gece (üst üste 2)
-        } else { // cycle 6 ve 7
-          atama = "İZİNLİ";           // 7-8. gün İzin (üst üste 2)
+          atama = "00:00–07:00";
+        } else {
+          atama = "İZİNLİ";
         }
         haftalikProgram[p.isim][i] = atama;
       }
     });
   });
 
-  // TY hariç en az 1 gün izin zorunluluğu
+  // TY hariç en az 1 gün izin
   sabitPersoneller.forEach(p => {
     if (!p.birim.includes("MCR") && p.birim !== "TEKNİK YÖNETMEN") {
       if (!haftalikProgram[p.isim].includes("İZİNLİ")) {
@@ -196,6 +196,7 @@ function hucreDoldur(gun, saat) {
   const isHS = (gun >= 5);
   let atananlar = [];
 
+  // MCR'ları manuel atamadan çıkar (döngü zaten atıyor)
   birimSiralamasi.forEach(birim => {
     if (birim.includes("MCR")) return;
 
@@ -217,6 +218,13 @@ function hucreDoldur(gun, saat) {
     for (let k = 0; k < atanabilecek; k++) {
       let p = adaylar[k];
       haftalikProgram[p.isim][gun] = saat;
+      atananlar.push(p);
+    }
+  });
+
+  // Döngüden gelen MCR atamalarını da tabloya ekle (bu satır sorunu çözer)
+  sabitPersoneller.forEach(p => {
+    if (p.birim.includes("MCR") && haftalikProgram[p.isim][gun] === saat) {
       atananlar.push(p);
     }
   });
