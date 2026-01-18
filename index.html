@@ -3,44 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PRO-Vardiya v2026 | En Stabil Versiyon</title>
+  <title>PRO-Vardiya v2026 | Onarılmış</title>
+  <link rel="stylesheet" href="style.css">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-  <style>
-    /* STYLE.CSS İÇERİĞİ */
-    :root { --primary: #0f172a; --blue: #2563eb; --bg: #f8fafc; --card-bg: #ffffff; --text: #1e293b; --border: #e2e8f0; --danger: #ef4444; }
-    body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); margin: 0; font-size: 11px; }
-    .app-wrapper { padding: 20px; }
-    .main-header { display: flex; justify-content: space-between; align-items: center; background: var(--primary); color: white; padding: 15px 25px; border-radius: 12px; margin-bottom: 15px; }
-    .logo-area h1 { margin: 0; font-size: 18px; }
-    .logo-area span { color: var(--blue); }
-    .btn-main-action { background: var(--blue); color: white; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 700; cursor: pointer; }
-    .btn-step, .btn-admin { background: #334155; color: white; border: none; padding: 8px 15px; border-radius: 6px; cursor: pointer; margin: 0 5px; }
-    
-    .admin-panel { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center; z-index: 9999; }
-    .admin-content { background: white; width: 90%; max-width: 1000px; height: 80vh; border-radius: 15px; overflow: hidden; display: flex; flex-direction: column; color: #1e293b; }
-    .admin-tabs { display: flex; background: #e2e8f0; padding: 10px; gap: 5px; }
-    .tab-btn { border: none; padding: 10px; cursor: pointer; border-radius: 5px; }
-    .tab-btn.active { background: var(--blue); color: white; }
-    .tab-container { padding: 20px; flex: 1; overflow-y: auto; }
-
-    table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
-    th { background: var(--primary); color: white; padding: 12px; text-align: left; border: 1px solid #334155; }
-    td { border: 1px solid var(--border); padding: 8px; vertical-align: top; width: 12%; }
-    
-    .birim-card { border-left: 4px solid var(--blue); padding: 5px; margin-bottom: 4px; background: #f1f5f9; font-weight: 600; cursor: pointer; border-radius: 4px; }
-    .birim-tag { font-size: 8px; text-transform: uppercase; display: block; margin-bottom: 2px; color: white; padding: 2px 4px; border-radius: 3px; width: fit-content; }
-    .izinli-kart { border-left-color: #94a3b8 !important; background: #f8fafc; color: #64748b; font-style: italic; }
-    
-    .checklist-horizontal-grid { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px; background: white; padding: 15px; border-radius: 8px; border: 1px solid var(--border); }
-    .check-item { display: flex; align-items: center; gap: 5px; font-weight: 500; }
-    .cap-grid-container { display: grid; gap: 10px; }
-    .cap-row { display: grid; grid-template-columns: 150px repeat(6, 1fr); gap: 5px; align-items: center; border-bottom: 1px solid var(--border); padding: 5px 0; }
-    .hidden { display: none !important; }
-    @media print { .no-print { display: none !important; } }
-  </style>
 </head>
 <body>
-
   <div class="app-wrapper">
     <header class="main-header no-print">
       <div class="logo-area">
@@ -60,18 +27,45 @@
         <div class="admin-tabs">
           <button class="tab-btn active" onclick="tabDegistir('personel')">PERSONEL/BİRİM</button>
           <button class="tab-btn" onclick="tabDegistir('kapasite')">SAAT/KAPASİTE</button>
+          <button class="tab-btn" onclick="tabDegistir('sabit')">SABİT ATAMA</button>
           <button class="tab-btn" onclick="tabDegistir('sistem')">SİSTEM</button>
-          <button onclick="toggleAdminPanel()" style="margin-left:auto; background:var(--danger); color:white;" class="tab-btn">KAPAT</button>
         </div>
+
         <div class="tab-container">
           <div id="tab-personel" class="tab-content">
-            <div id="persListesiAdmin"></div>
+            <div class="admin-section">
+              <h3>Personel Listesi</h3>
+              <div class="admin-input-group">
+                <input type="text" id="yeniPersInp" placeholder="Ad Soyad">
+                <select id="yeniPersBirimSec"></select>
+                <button onclick="personelEkle()" class="btn-add">EKLE</button>
+              </div>
+              <div id="persListesiAdmin" class="admin-list"></div>
+            </div>
           </div>
+
           <div id="tab-kapasite" class="tab-content hidden">
             <div id="kapasiteTable" class="cap-grid-container"></div>
           </div>
+
+          <div id="tab-sabit" class="tab-content hidden">
+            <div class="admin-input-group">
+              <select id="sabitPersSec"></select>
+              <select id="sabitGunSec">
+                <option value="pzt_cum">HAFTA İÇİ (Pzt-Cum)</option>
+                <option value="0">Pazartesi</option><option value="1">Salı</option>
+                <option value="2">Çarşamba</option><option value="3">Perşembe</option>
+                <option value="4">Cuma</option><option value="5">Cumartesi</option>
+                <option value="6">Pazar</option>
+              </select>
+              <select id="sabitSaatSec"></select>
+              <button onclick="sabitAtamaEkle()" class="btn-add">EKLE</button>
+            </div>
+            <div id="sabitAtamaListesi" class="admin-list"></div>
+          </div>
+
           <div id="tab-sistem" class="tab-content hidden">
-            <button onclick="sifirla()" class="btn-main-action" style="background:var(--danger)">FABRİKA AYARLARINA DÖN</button>
+            <button onclick="sifirla()" class="btn-reset">SİSTEMİ SIFIRLA VE ONAR</button>
           </div>
         </div>
       </div>
@@ -81,177 +75,13 @@
       <div id="personelChecklist" class="checklist-horizontal-grid no-print"></div>
       <div class="table-card">
         <table id="vardiyaTablosu">
-          <thead>
-            <tr>
-              <th>SAAT / GÜN</th>
-              <th>PAZARTESİ</th><th>SALI</th><th>ÇARŞAMBA</th><th>PERŞEMBE</th><th>CUMA</th><th>CUMARTESİ</th><th>PAZAR</th>
-            </tr>
-          </thead>
+          <thead id="tableHeader"></thead>
           <tbody id="tableBody"></tbody>
-          <tfoot>
-            <tr style="background:#f1f5f9">
-                <td style="font-weight:bold">İZİNLİ / YEDEK</td>
-                <td id="foot-0"></td><td id="foot-1"></td><td id="foot-2"></td>
-                <td id="foot-3"></td><td id="foot-4"></td><td id="foot-5"></td><td id="foot-6"></td>
-            </tr>
-          </tfoot>
+          <tfoot id="tableFooter"></tfoot>
         </table>
       </div>
     </main>
   </div>
-
-<script>
-// SCRIPT.JS İÇERİĞİ (Geliştirilmiş ve Hataları Giderilmiş)
-const DEFAULT_STAFF = [
-    {ad: "CAN ŞENTUNALI", birim: "TEKNİK YÖNETMEN"}, {ad: "M.BERKMAN", birim: "TEKNİK YÖNETMEN"}, {ad: "EKREM FİDAN", birim: "TEKNİK YÖNETMEN"},
-    {ad: "YUNUS EMRE YAYLA", birim: "TEKNİK YÖNETMEN"}, {ad: "H.CAN SAĞLAM", birim: "TEKNİK YÖNETMEN"}, {ad: "BARIŞ İNCE", birim: "TEKNİK YÖNETMEN"},
-    {ad: "ANIL RİŞVAN", birim: "SES OPERATÖRÜ"}, {ad: "ULVİ MUTLUBAŞ", birim: "SES OPERATÖRÜ"}, {ad: "ZAFER AKAR", birim: "SES OPERATÖRÜ"},
-    {ad: "ERDOĞAN KÜÇÜKKAYA", birim: "SES OPERATÖRÜ"}, {ad: "OSMAN DİNÇER", birim: "SES OPERATÖRÜ"}, {ad: "DOĞUŞ MALGIL", birim: "SES OPERATÖRÜ"},
-    {ad: "ENES KALE", birim: "SES OPERATÖRÜ"}, {ad: "ERSAN TİLBE", birim: "SES OPERATÖRÜ"}, {ad: "NEHİR KAYGUSUZ", birim: "PLAYOUT OPERATÖRÜ"},
-    {ad: "KADİR ÇAÇAN", birim: "PLAYOUT OPERATÖRÜ"}, {ad: "M.ERCÜMENT KILIÇ", birim: "PLAYOUT OPERATÖRÜ"}, {ad: "İBRAHİM SERİNSÖZ", birim: "PLAYOUT OPERATÖRÜ"},
-    {ad: "YUSUF ALPKILIÇ", birim: "PLAYOUT OPERATÖRÜ"}, {ad: "SENA MİNARECİ", birim: "PLAYOUT OPERATÖRÜ"}, {ad: "MEHMET TUNÇ", birim: "PLAYOUT OPERATÖRÜ"},
-    {ad: "YUSUF İSLAM TORUN", birim: "KJ OPERATÖRÜ"}, {ad: "CEMREHAN SUBAŞI", birim: "KJ OPERATÖRÜ"}, {ad: "DEMET CENGİZ", birim: "KJ OPERATÖRÜ"},
-    {ad: "SENA BAYDAR", birim: "KJ OPERATÖRÜ"}, {ad: "OĞUZHAN YALAZAN", birim: "KJ OPERATÖRÜ"}, {ad: "YEŞİM KİREÇ", birim: "KJ OPERATÖRÜ"},
-    {ad: "PINAR ÖZENÇ", birim: "KJ OPERATÖRÜ"}, {ad: "ERCAN PALABIYIK", birim: "INGEST OPERATÖRÜ"}, {ad: "RAMAZAN KOÇAK", birim: "INGEST OPERATÖRÜ"},
-    {ad: "UĞUR AKBABA", birim: "INGEST OPERATÖRÜ"}, {ad: "ÖZKAN KAYA", birim: "BİLGİ İŞLEM"}, {ad: "HAKAN ELİPEK", birim: "BİLGİ İŞLEM"},
-    {ad: "VOLKAN DEMİRBAŞ", birim: "BİLGİ İŞLEM"}, {ad: "GÖKHAN BAĞIŞ", birim: "BİLGİ İŞLEM"}, {ad: "FATİH AYBEK", birim: "YAYIN SİSTEMLERİ"},
-    {ad: "AKİF KOÇ", birim: "YAYIN SİSTEMLERİ"}, {ad: "BEYHAN KARAKAŞ", birim: "YAYIN SİSTEMLERİ"}, {ad: "FERDİ TOPUZ", birim: "YAYIN SİSTEMLERİ"},
-    {ad: "YİĞİT DAYI", birim: "YAYIN SİSTEMLERİ"}, {ad: "FARUK YILMAZ", birim: "24TV MCR OPERATÖRÜ"}, {ad: "KADİR YILMAZ", birim: "24TV MCR OPERATÖRÜ"},
-    {ad: "YUSUF HENEK", birim: "24TV MCR OPERATÖRÜ"}, {ad: "SEDA KAYA", birim: "24TV MCR OPERATÖRÜ"}, {ad: "BÜKRE YAVUZ", birim: "360TV MCR OPERATÖRÜ"},
-    {ad: "EMRULLAH AHLATÇI", birim: "360TV MCR OPERATÖRÜ"}, {ad: "EREN KAZAN", birim: "360TV MCR OPERATÖRÜ"}, {ad: "MUSAB YAKUP DEMİRBAŞ", birim: "360TV MCR OPERATÖRÜ"}
-];
-
-const UNIT_COLORS = { "TEKNİK YÖNETMEN": "#ef4444", "SES OPERATÖRÜ": "#3b82f6", "PLAYOUT OPERATÖRÜ": "#10b981", "KJ OPERATÖRÜ": "#f59e0b", "INGEST OPERATÖRÜ": "#8b5cf6", "BİLGİ İŞLEM": "#64748b", "YAYIN SİSTEMLERİ": "#14b8a6", "24TV MCR OPERATÖRÜ": "#f97316", "360TV MCR OPERATÖRÜ": "#d97706" };
-const SHIFTS = ["06:30–16:00", "09:00–18:00", "12:00–22:00", "16:00–00:00", "00:00–07:00", "DIŞ YAYIN"];
-
-let state = {
-    personeller: JSON.parse(localStorage.getItem("vS_pers")) || DEFAULT_STAFF.map((p,i)=>({...p, id: 800+i})),
-    kapasite: JSON.parse(localStorage.getItem("vS_cap")) || {},
-    manuelAtamalar: JSON.parse(localStorage.getItem("vS_man")) || {}
-};
-
-let currentMonday = getMonday(new Date());
-
-function getMonday(d) { d = new Date(d); let day = d.getDay(), diff = d.getDate() - day + (day == 0 ? -6 : 1); return new Date(d.setDate(diff)); }
-function save() { localStorage.setItem("vS_pers", JSON.stringify(state.personeller)); localStorage.setItem("vS_cap", JSON.stringify(state.kapasite)); localStorage.setItem("vS_man", JSON.stringify(state.manuelAtamalar)); }
-
-function tabloyuOlustur() {
-    const haftaKey = currentMonday.toISOString().split('T')[0];
-    document.getElementById("tarihAraligi").innerText = `${currentMonday.toLocaleDateString('tr-TR')} Haftası`;
-    
-    let program = {}; 
-    state.personeller.forEach(p => { 
-        program[p.ad] = Array(7).fill(null);
-        if(document.getElementById(`check_${p.id}`)?.checked) program[p.ad].fill("İZİNLİ");
-    });
-
-    // 1. Manuel Atamalar
-    state.personeller.forEach(p => {
-        for(let i=0; i<7; i++) {
-            let key = `${haftaKey}_${p.ad}_${i}`;
-            if(state.manuelAtamalar[key]) program[p.ad][i] = state.manuelAtamalar[key];
-        }
-    });
-
-    // 2. Teknik Yönetmen Özel Gece Rotasyonu
-    for(let i=0; i<7; i++) {
-        let gececi = (i < 2) ? "BARIŞ İNCE" : "EKREM FİDAN";
-        if(program[gececi] && program[gececi][i] === null) program[gececi][i] = "00:00–07:00";
-    }
-
-    // 3. Otomatik Dağıtım (Kapasiteye Göre)
-    for(let i=0; i<7; i++) {
-        Object.keys(UNIT_COLORS).forEach(birim => {
-            SHIFTS.forEach(saat => {
-                let k = `${birim}_${saat}`;
-                let hedef = state.kapasite[k] ? (i >= 5 ? state.kapasite[k].hs : state.kapasite[k].h) : 0;
-                let mevcut = state.personeller.filter(p => p.birim === birim && program[p.ad][i] === saat).length;
-                
-                if(mevcut < hedef) {
-                    let adaylar = state.personeller.filter(p => p.birim === birim && program[p.ad][i] === null);
-                    for(let j=0; j < (hedef-mevcut) && adaylar[j]; j++) {
-                        program[adaylar[j].ad][i] = saat;
-                    }
-                }
-            });
-        });
-    }
-
-    renderTable(program);
-}
-
-function renderTable(program) {
-    const body = document.getElementById("tableBody");
-    body.innerHTML = SHIFTS.map(s => `
-        <tr>
-            <td style="font-weight:bold; background:#f8fafc">${s}</td>
-            ${[0,1,2,3,4,5,6].map(i => `<td>${state.personeller.filter(p => program[p.ad][i] === s).map(p => `
-                <div class="birim-card" onclick="vardiyaSec('${p.ad}', ${i})" style="border-left-color:${UNIT_COLORS[p.birim]}">
-                    <span class="birim-tag" style="background:${UNIT_COLORS[p.birim]}">${p.birim}</span>${p.ad}
-                </div>`).join('')}</td>`).join('')}
-        </tr>`).join('');
-
-    // Foot (İzinli/Yedek) render
-    for(let i=0; i<7; i++) {
-        const footTd = document.getElementById(`foot-${i}`);
-        footTd.innerHTML = state.personeller.filter(p => ["İZİNLİ", null].includes(program[p.ad][i])).map(p => `
-            <div class="birim-card izinli-kart" onclick="vardiyaSec('${p.ad}', ${i})">${p.ad}</div>
-        `).join('');
-    }
-}
-
-function vardiyaSec(p, i) {
-    let secim = prompt(`${p} için vardiya (1:06:30, 2:09:00, 3:12:00, 4:16:00, 5:00:00, 6:DIŞ, 0:BOŞALT, İ:İZİNLİ):`);
-    if(secim !== null) {
-        let hK = currentMonday.toISOString().split('T')[0];
-        let vals = {"1":SHIFTS[0], "2":SHIFTS[1], "3":SHIFTS[2], "4":SHIFTS[3], "5":SHIFTS[4], "6":SHIFTS[5], "0":"BOŞALT", "İ":"İZİNLİ"};
-        state.manuelAtamalar[`${hK}_${p}_${i}`] = vals[secim.toUpperCase()] || null;
-        save(); tabloyuOlustur();
-    }
-}
-
-function toggleAdminPanel() { document.getElementById("adminPanel").classList.toggle("hidden"); refreshAdmin(); }
-function tabDegistir(id) { 
-    document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden')); 
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById('tab-'+id).classList.remove('hidden');
-    event.currentTarget.classList.add('active');
-}
-
-function refreshAdmin() {
-    const pList = document.getElementById("persListesiAdmin");
-    pList.innerHTML = state.personeller.map(p => `<div style="padding:5px; border-bottom:1px solid #eee">${p.ad} (${p.birim})</div>`).join('');
-    
-    const kTab = document.getElementById("kapasiteTable");
-    let html = `<div class="cap-row" style="font-weight:bold"><div>Birim</div>${SHIFTS.map(s=>`<div>${s.split('–')[0]}</div>`).join('')}</div>`;
-    Object.keys(UNIT_COLORS).forEach(b => {
-        html += `<div class="cap-row"><div>${b}</div>${SHIFTS.map(s => {
-            let v = state.kapasite[b+'_'+s] || {h:0, hs:0};
-            return `<div>H:<input type="number" value="${v.h}" onchange="capUpd('${b}','${s}','h',this.value)" style="width:25px"> 
-                         S:<input type="number" value="${v.hs}" onchange="capUpd('${b}','${s}','hs',this.value)" style="width:25px"></div>`;
-        }).join('')}</div>`;
-    });
-    kTab.innerHTML = html;
-}
-
-function capUpd(b, s, t, v) { 
-    let k = b+'_'+s; if(!state.kapasite[k]) state.kapasite[k] = {h:0, hs:0}; 
-    state.kapasite[k][t] = parseInt(v) || 0; save(); 
-}
-
-function checklistOlustur() {
-    const box = document.getElementById("personelChecklist");
-    box.innerHTML = state.personeller.map(p => `
-        <div class="check-item">
-            <input type="checkbox" id="check_${p.id}" onchange="tabloyuOlustur()">
-            <label for="check_${p.id}">${p.ad}</label>
-        </div>`).join('');
-}
-
-function haftaDegistir(v) { currentMonday.setDate(currentMonday.getDate() + v); tabloyuOlustur(); }
-function sifirla() { if(confirm("Tüm veriler silinsin mi?")) { localStorage.clear(); location.reload(); } }
-
-window.onload = () => { checklistOlustur(); tabloyuOlustur(); };
-</script>
+  <script src="script.js"></script>
 </body>
 </html>
