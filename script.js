@@ -1,5 +1,6 @@
 // --- 1. AYARLAR VE VERİ ---
 const ADMIN_PASSWORD = "admin123";
+
 const DEFAULT_UNITS = [
     "TEKNİK YÖNETMEN", 
     "SES OPERATÖRÜ", 
@@ -33,22 +34,37 @@ const UNIT_COLORS = {
     "360TV MCR OPERATÖRÜ": "#d35400"
 };
 
-// Varsayılan kapasite (örnek değerler - kendi ihtiyaçlarınıza göre değiştirin)
+// Daha kapsamlı başlangıç kapasitesi
 const DEFAULT_KAPASITE = {
     "TEKNİK YÖNETMEN_06:30–16:00":   {h:1, hs:1},
     "TEKNİK YÖNETMEN_09:00–18:00":   {h:1, hs:1},
     "TEKNİK YÖNETMEN_12:00–22:00":   {h:1, hs:1},
     "TEKNİK YÖNETMEN_16:00–00:00":   {h:1, hs:1},
-    "TEKNİK YÖNETMEN_00:00–07:00":   {h:1, hs:1},  // Barış/Ekrem özel rotasyonu var
+    "TEKNİK YÖNETMEN_00:00–07:00":   {h:1, hs:1},
+
     "SES OPERATÖRÜ_06:30–16:00":     {h:3, hs:2},
     "SES OPERATÖRÜ_09:00–18:00":     {h:3, hs:2},
     "SES OPERATÖRÜ_12:00–22:00":     {h:2, hs:2},
     "SES OPERATÖRÜ_16:00–00:00":     {h:2, hs:2},
+    "SES OPERATÖRÜ_00:00–07:00":     {h:1, hs:1},
+
     "PLAYOUT OPERATÖRÜ_06:30–16:00": {h:2, hs:1},
+    "PLAYOUT OPERATÖRÜ_09:00–18:00": {h:2, hs:1},
+    "PLAYOUT OPERATÖRÜ_12:00–22:00": {h:2, hs:1},
     "PLAYOUT OPERATÖRÜ_16:00–00:00": {h:2, hs:1},
-    // İhtiyacınıza göre diğer birim ve saatleri de ekleyin...
-    // Örnek:
-    // "24TV MCR OPERATÖRÜ_00:00–07:00": {h:1, hs:1},
+
+    "KJ OPERATÖRÜ_06:30–16:00":      {h:1, hs:1},
+    "KJ OPERATÖRÜ_16:00–00:00":      {h:1, hs:1},
+    "KJ OPERATÖRÜ_00:00–07:00":      {h:1, hs:1},
+
+    "INGEST OPERATÖRÜ_09:00–18:00":  {h:2, hs:1},
+    "INGEST OPERATÖRÜ_12:00–22:00":  {h:1, hs:1},
+
+    "24TV MCR OPERATÖRÜ_00:00–07:00":{h:1, hs:1},
+    "24TV MCR OPERATÖRÜ_16:00–00:00":{h:1, hs:1},
+
+    "360TV MCR OPERATÖRÜ_00:00–07:00":{h:1, hs:1},
+    "360TV MCR OPERATÖRÜ_16:00–00:00":{h:1, hs:1},
 };
 
 let state = {
@@ -79,25 +95,22 @@ function tabloyuOlustur() {
     const haftaKey = currentMonday.toISOString().split('T')[0];
     document.getElementById("tarihAraligi").innerText = `${currentMonday.toLocaleDateString('tr-TR')} Haftası`;
 
-    // Header oluştur (Günler)
     const gunler = ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"];
     document.getElementById("tableHeader").innerHTML = `<tr><th>Saat</th>${gunler.map(g => `<th>${g}</th>`).join('')}</tr>`;
 
     let program = {};
     let calismaSayisi = {};
 
-    // Her personel için başlangıç durumu
     state.personeller.forEach(p => {
         program[p.ad] = Array(7).fill(null);
         calismaSayisi[p.ad] = 0;
 
-        // İzinli seçiliyse tüm haftayı izinli yap
         if (document.getElementById(`check_${p.id}`)?.checked) {
             program[p.ad].fill("İZİNLİ");
         }
     });
 
-    // 1. Manuel atamaları yerleştir
+    // 1. Manuel atamalar
     state.personeller.forEach(p => {
         for (let i = 0; i < 7; i++) {
             let mK = `${haftaKey}_${p.ad}_${i}`;
@@ -110,43 +123,44 @@ function tabloyuOlustur() {
         }
     });
 
-    // 2. Teknik Yönetmen Gece vardiyası özel rotasyonu (Barış & Ekrem)
+    // 2. Gece Teknik Yönetmen rotasyonu (Barış & Ekrem)
     for (let i = 0; i < 7; i++) {
-        let geceSorumlusu = (i < 2) ? "BARIŞ İNCE" : "EKREM FİDAN";  // İlk 2 gün Barış, sonrası Ekrem
-        if (program[geceSorumlusu] && program[geceSorumlusu][i] === null) {
+        let geceSorumlusu = (i < 2) ? "BARIŞ İNCE" : "EKREM FİDAN";
+        if (program[geceSorumlusu]?.[i] === null) {
             program[geceSorumlusu][i] = "00:00–07:00";
             calismaSayisi[geceSorumlusu]++;
         }
     }
 
-    // 3. Kapasiteye göre otomatik dağıtım
+    // 3. Otomatik atama
     for (let gun = 0; gun < 7; gun++) {
         const haftaSonu = gun >= 5;
         state.birimler.forEach(birim => {
             state.saatler.forEach(saat => {
                 const key = `${birim}_${saat}`;
-                const kapasite = state.kapasite[key] || { h: 0, hs: 0 };
-                const hedef = haftaSonu ? (kapasite.hs || 0) : (kapasite.h || 0);
+                const kapasite = state.kapasite[key] || {h:0, hs:0};
+                const hedef = haftaSonu ? kapasite.hs : kapasite.h;
 
-                // Mevcut atanan kişi sayısı
-                let mevcut = state.personeller.filter(p =>
+                let mevcut = state.personeller.filter(p => 
                     p.birim === birim && program[p.ad][gun] === saat
                 ).length;
 
                 if (mevcut < hedef) {
-                    // Adaylar: bu gün boş olanlar + çalışma limiti altında olanlar
                     let adaylar = state.personeller
-                        .filter(p =>
+                        .filter(p => 
                             p.birim === birim &&
                             program[p.ad][gun] === null &&
                             calismaSayisi[p.ad] < 5
                         )
-                        .sort((a, b) => calismaSayisi[a.ad] - calismaSayisi[b.ad]); // En az çalışana öncelik
+                        .sort((a,b) => calismaSayisi[a.ad] - calismaSayisi[b.ad]);
 
                     let eklenecek = hedef - mevcut;
                     for (let j = 0; j < eklenecek && adaylar[j]; j++) {
-                        // Teknik Yönetmen gece vardiyası kısıtı (rotasyon dışında)
-                        if (birim === "TEKNİK YÖNETMEN" && saat === "00:00–07:00") continue;
+                        // Gece kısıtı biraz yumuşatıldı - sadece rotasyon dışı için
+                        if (birim === "TEKNİK YÖNETMEN" && saat === "00:00–07:00" && 
+                            !["BARIŞ İNCE", "EKREM FİDAN"].includes(adaylar[j].ad)) {
+                            continue;
+                        }
 
                         program[adaylar[j].ad][gun] = saat;
                         calismaSayisi[adaylar[j].ad]++;
@@ -155,6 +169,11 @@ function tabloyuOlustur() {
             });
         });
     }
+
+    // Hata ayıklama için console'a bilgi yaz
+    console.log("=== VARDİYA OLUŞTURMA SONUÇLARI ===");
+    console.log("Program:", program);
+    console.log("Çalışma sayıları:", calismaSayisi);
 
     render(program);
 }
@@ -187,7 +206,7 @@ function render(program) {
             ${[0,1,2,3,4,5,6].map(gun => `
                 <td>
                     ${state.personeller
-                        .filter(p => program[p.ad][gun] === null || program[p.ad][gun] === "İZİNLİ")
+                        .filter(p => !program[p.ad][gun] || program[p.ad][gun] === "İZİNLİ")
                         .map(p => `
                             <div class="birim-card izinli-kart" onclick="vardiyaDegistir('${p.ad}',${gun})">
                                 ${p.ad}${program[p.ad][gun] === "İZİNLİ" ? " (İzinli)" : ""}
@@ -222,7 +241,11 @@ function vardiyaDegistir(pAd, gunIndex) {
 function personelEkle() {
     let ad = document.getElementById("yeniPersInp").value.trim().toUpperCase();
     let birim = document.getElementById("yeniPersBirimSec").value;
+    
     if (!ad || !birim) return alert("Ad ve birim seçmelisiniz!");
+    if (state.personeller.some(p => p.ad === ad)) {
+        return alert("Bu isimde bir personel zaten mevcut!");
+    }
 
     state.personeller.push({ ad, birim, id: Date.now() });
     save();
@@ -268,9 +291,9 @@ function kapasiteCiz() {
                     return `
                         <div>
                             H:<input type="number" min="0" value="${v.h}" 
-                                     onchange="capSave('${key}','h',this.value)" style="width:35px">
+                                     onchange="capSave('${key}','h',this.value)" style="width:40px">
                             S:<input type="number" min="0" value="${v.hs}" 
-                                     onchange="capSave('${key}','hs',this.value)" style="width:35px">
+                                     onchange="capSave('${key}','hs',this.value)" style="width:40px">
                         </div>`;
                 }).join('')}
             </div>`;
@@ -324,26 +347,28 @@ function sil(tur, index) {
 }
 
 function sifirla() {
-    if (confirm("Tüm veriler kalıcı olarak silinecek!\nDevam etmek istiyor musunuz?")) {
+    if (confirm("TÜM VERİLER SİLİNECEK!\nDevam etmek istiyor musunuz?")) {
         localStorage.clear();
         location.reload();
     }
 }
 
 function whatsappKopyala() {
-    alert("WhatsApp kopyalama özelliği henüz tamamlanmadı.\nİsterseniz tabloyu ekran görüntüsü alıp paylaşabilirsiniz.");
+    alert("Henüz tam çalışmıyor.\nŞimdilik tabloyu ekran görüntüsü alarak paylaşabilirsiniz.");
 }
 
-// Başlangıç
+// Başlangıç - Daha fazla örnek personel
 window.onload = () => {
-    // İlk seferde örnek personel ekle
     if (state.personeller.length === 0) {
         state.personeller = [
             {ad: "CAN ŞENTUNALI",   birim: "TEKNİK YÖNETMEN", id: 1001},
             {ad: "EKREM FİDAN",     birim: "TEKNİK YÖNETMEN", id: 1002},
             {ad: "BARIŞ İNCE",      birim: "TEKNİK YÖNETMEN", id: 1003},
             {ad: "ANIL RİŞVAN",     birim: "SES OPERATÖRÜ",   id: 1004},
-            // İsterseniz buraya daha fazla örnek personel ekleyebilirsiniz
+            {ad: "MEHMET YILMAZ",   birim: "SES OPERATÖRÜ",   id: 1005},
+            {ad: "FATİH KAYA",      birim: "SES OPERATÖRÜ",   id: 1006},
+            {ad: "AYŞE DEMİR",      birim: "PLAYOUT OPERATÖRÜ", id: 1007},
+            {ad: "BURAK ÖZDEMİR",   birim: "PLAYOUT OPERATÖRÜ", id: 1008},
         ];
         save();
     }
