@@ -32,20 +32,21 @@ let currentMonday = getMonday(new Date());
 function getMonday(d) { d = new Date(d); let day = d.getDay(), diff = d.getDate() - day + (day == 0 ? -6 : 1); return new Date(d.setDate(diff)); }
 function save() { localStorage.setItem("v26_birimler", JSON.stringify(state.birimler)); localStorage.setItem("v26_saatler", JSON.stringify(state.saatler)); localStorage.setItem("v26_personeller", JSON.stringify(state.personeller)); localStorage.setItem("v26_sabitAtamalar", JSON.stringify(state.sabitAtamalar)); localStorage.setItem("v26_kapasite", JSON.stringify(state.kapasite)); }
 
-// --- VARDIYA MOTORU (HAFTALIK KAYDIRMALI) ---
+// --- VARDIYA MOTORU (HAFTALIK DEĞİŞKEN ROTASYON) ---
 function tabloyuOlustur() {
     const tarihArea = document.getElementById("tarihAraligi");
     if(tarihArea) tarihArea.innerText = `${currentMonday.toLocaleDateString('tr-TR')} Haftası`;
     
     let program = {};
-    let calismaPuani = {};
+    let calismaSayaci = {};
     
-    // HAFTAYA GÖRE KAYDIRMA DEĞERİ (Her hafta liste farklı birinden başlasın)
-    const haftaKaydirma = Math.floor(currentMonday.getTime() / (1000 * 60 * 60 * 24 * 7)) % 10;
+    // Her hafta listenin farklı bir yerden başlaması için kaydırma (Hafta numarasına göre)
+    const haftaNo = Math.floor(currentMonday.getTime() / (1000 * 60 * 60 * 24 * 7));
+    const kaydirmaMiktari = haftaNo % 10;
 
     state.personeller.forEach(p => {
         program[p.ad] = Array(7).fill(null);
-        calismaPuani[p.ad] = 0;
+        calismaSayaci[p.ad] = 0;
         let chk = document.getElementById(`check_${p.id}`);
         if(chk && chk.checked) program[p.ad].fill("İZİNLİ");
     });
@@ -54,25 +55,25 @@ function tabloyuOlustur() {
     state.sabitAtamalar.forEach(a => {
         if(program[a.p]) {
             if(a.g === "pzt_cum") {
-                for(let i=0; i<5; i++) if(program[a.p][i] !== "İZİNLİ") { program[a.p][i] = a.s; calismaPuani[a.p]++; }
+                for(let i=0; i<5; i++) if(program[a.p][i] !== "İZİNLİ") { program[a.p][i] = a.s; calismaSayaci[a.p]++; }
                 program[a.p][5] = program[a.p][6] = "İZİNLİ";
             } else {
                 let g = parseInt(a.g);
-                if(program[a.p][g] !== "İZİNLİ") { program[a.p][g] = a.s; calismaPuani[a.p]++; }
+                if(program[a.p][g] !== "İZİNLİ") { program[a.p][g] = a.s; calismaSayaci[a.p]++; }
             }
         }
     });
 
-    // 2. Teknik Yönetmen Gece Rotasyonu (Haftalık değişir)
+    // 2. Teknik Yönetmen Gece Rotasyonu (Barış ve Ekrem)
     for(let i=0; i<7; i++) {
         let gececi = (i < 2) ? "BARIŞ İNCE" : "EKREM FİDAN";
         if(program[gececi] && program[gececi][i] === null) {
             program[gececi][i] = "00:00–07:00";
-            calismaPuani[gececi]++;
+            calismaSayaci[gececi]++;
         }
     }
 
-    // 3. Dinamik ve Kaydırmalı Dağıtım
+    // 3. Dinamik ve Adaletli Dağıtım
     for(let i=0; i<7; i++) {
         let isWeekend = (i >= 5);
         state.birimler.forEach(birim => {
@@ -82,17 +83,18 @@ function tabloyuOlustur() {
                 let mevcut = state.personeller.filter(p => p.birim === birim && program[p.ad][i] === saat).length;
 
                 if(mevcut < hedef) {
+                    // Personelleri önce çalışma puanına, sonra hafta kaydırmasına göre diz
                     let adaylar = state.personeller
                         .filter(p => p.birim === birim && program[p.ad][i] === null)
                         .sort((a, b) => {
-                            // Önce çalışma puanına bak, puanlar eşitse hafta kaydırmasına göre karıştır
-                            if(calismaPuani[a.ad] !== calismaPuani[b.ad]) return calismaPuani[a.ad] - calismaPuani[b.ad];
-                            return (state.personeller.indexOf(a) + haftaKaydirma) % state.personeller.length - (state.personeller.indexOf(b) + haftaKaydirma) % state.personeller.length;
+                            if(calismaSayaci[a.ad] !== calismaSayaci[b.ad]) return calismaSayaci[a.ad] - calismaSayaci[b.ad];
+                            return (state.personeller.indexOf(a) + kaydirmaMiktari) % state.personeller.length - 
+                                   (state.personeller.indexOf(b) + kaydirmaMiktari) % state.personeller.length;
                         });
 
                     for(let j=0; j < (hedef - mevcut) && adaylar[j]; j++) {
                         program[adaylar[j].ad][i] = saat;
-                        calismaPuani[adaylar[j].ad]++;
+                        calismaSayaci[adaylar[j].ad]++;
                     }
                 }
             });
@@ -125,7 +127,7 @@ function render(program) {
     if(foot) foot.innerHTML = footHtml + "</tr>";
 }
 
-// --- DİĞER FONKSİYONLAR ---
+// --- ARA YÜZ FONKSİYONLARI ---
 function refreshUI() {
     const pList = document.getElementById("persListesiAdmin");
     if(pList) pList.innerHTML = state.personeller.map((p,i) => `<div class="admin-list-item">${p.ad} (${p.birim}) <button onclick="sil('personeller',${i})">SİL</button></div>`).join('');
