@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PRO-Vardiya v23.0 | Dinamik Sistem</title>
+  <title>PRO-Vardiya v23.5 | Dinamik İzin Sistemi</title>
   <link rel="stylesheet" href="style.css">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -13,7 +13,7 @@
   <div class="app-wrapper">
     <header class="no-print main-header">
       <div class="logo-area">
-        <div class="badge">V23.0 DYNAMİC</div>
+        <div class="badge">V23.5 PRE-LEAVE</div>
         <h1>TEKNİK <span>VARDİYA</span></h1>
         <p id="tarihAraligi" class="date-display">Yükleniyor...</p>
       </div>
@@ -29,30 +29,28 @@
     <div id="adminPanel" class="admin-overlay hidden">
       <div class="admin-modal">
         <div class="admin-tabs">
-          <button class="tab-btn active" onclick="tabDegistir('kapasite')">Kapasite & Saat</button>
-          <button class="tab-btn" onclick="tabDegistir('birim')">Birim Yönetimi</button>
-          <button class="tab-btn" onclick="tabDegistir('personel')">Personel Yönetimi</button>
-          <button class="tab-btn" onclick="tabDegistir('kurallar')">Ayarlar</button>
+          <button class="tab-btn active" onclick="tabDegistir('kapasite')">Kapasite</button>
+          <button class="tab-btn" onclick="tabDegistir('birim')">Birimler</button>
+          <button class="tab-btn" onclick="tabDegistir('personel')">Personeller</button>
+          <button class="tab-btn" onclick="tabDegistir('izin')">Önceden İzin Ver</button>
+          <button class="tab-btn" onclick="tabDegistir('ayarlar')">Ayarlar</button>
           <button onclick="toggleAdminPanel()" class="btn-close-modal">✖</button>
         </div>
 
         <div class="admin-content">
           <div id="tab-kapasite" class="tab-content">
-            <h3>Vardiya Kapasiteleri (Haftaiçi / Haftasonu)</h3>
             <div id="kapasiteListesi" class="cap-grid-container"></div>
           </div>
 
           <div id="tab-birim" class="tab-content hidden">
-            <h3>Birim Ekle</h3>
             <div class="admin-input-group">
-              <input type="text" id="yeniBirimAd" placeholder="Örn: REJİ">
+              <input type="text" id="yeniBirimAd" placeholder="Yeni Birim">
               <button onclick="birimEkle()" class="btn-add">Ekle</button>
             </div>
             <div id="birimYonetimListesi" class="admin-list"></div>
           </div>
 
           <div id="tab-personel" class="tab-content hidden">
-            <h3>Personel Ekle</h3>
             <div class="admin-input-group">
               <input type="text" id="yeniPersIsim" placeholder="Ad Soyad">
               <select id="yeniPersBirim"></select>
@@ -61,13 +59,26 @@
             <div id="personelYonetimListesi" class="admin-list"></div>
           </div>
 
-          <div id="tab-kurallar" class="tab-content hidden">
-            <h3>Genel Ayarlar</h3>
-            <div class="auto-rules-container">
-               <label><input type="checkbox" id="rule_geceSonrasiIzin" onchange="autoRuleKaydet()"> Gece çalışan ertesi gün izinli olsun</label>
-               <hr>
-               <button onclick="sifirla()" class="btn-reset">TÜM SİSTEMİ SIFIRLA</button>
+          <div id="tab-izin" class="tab-content hidden">
+            <h3>Personel İzin Atama</h3>
+            <p>Seçtiğiniz personel o gün hiçbir vardiyaya atanmaz.</p>
+            <div class="admin-input-group">
+              <select id="izinPersSec"></select>
+              <select id="izinGunSec">
+                <option value="0">Pazartesi</option><option value="1">Salı</option>
+                <option value="2">Çarşamba</option><option value="3">Perşembe</option>
+                <option value="4">Cuma</option><option value="5">Cumartesi</option>
+                <option value="6">Pazar</option>
+              </select>
+              <button onclick="izinEkle()" class="btn-add">İzin Tanımla</button>
             </div>
+            <div id="izinListesi" class="admin-list"></div>
+          </div>
+
+          <div id="tab-ayarlar" class="tab-content hidden">
+            <label><input type="checkbox" id="rule_geceSonrasiIzin" onchange="autoRuleKaydet()"> Gece sonrası dinlenme (1 gün)</label>
+            <hr>
+            <button onclick="sifirla()" class="btn-reset">SİSTEMİ SIFIRLA</button>
           </div>
         </div>
       </div>
@@ -82,11 +93,6 @@
           <thead><tr id="tableHeader"></tr></thead>
           <tbody id="tableBody"></tbody>
         </table>
-      </div>
-      <div class="footer-buttons no-print">
-          <button onclick="whatsappMesajiOlustur()" class="wa-btn">WhatsApp</button>
-          <button onclick="exportExcel()" class="ex-btn">Excel</button>
-          <button onclick="exportPDF()" class="pdf-btn">PDF İndir</button>
       </div>
     </main>
   </div>
