@@ -1,4 +1,4 @@
-// --- VERİ HAVUZU (PERSONEL LİSTESİ GERİ EKLENDİ) ---
+// --- VERİ HAVUZU ---
 const DEFAULT_UNITS = ["TEKNİK YÖNETMEN", "SES OPERATÖRÜ", "PLAYOUT OPERATÖRÜ", "KJ OPERATÖRÜ", "INGEST OPERATÖRÜ", "BİLGİ İŞLEM", "YAYIN SİSTEMLERİ", "24TV MCR OPERATÖRÜ", "360TV MCR OPERATÖRÜ"];
 const DEFAULT_SHIFTS = ["06:30–16:00", "09:00–18:00", "12:00–22:00", "16:00–00:00", "00:00–07:00", "DIŞ YAYIN"];
 const DEFAULT_STAFF = [
@@ -32,13 +32,16 @@ let currentMonday = getMonday(new Date());
 function getMonday(d) { d = new Date(d); let day = d.getDay(), diff = d.getDate() - day + (day == 0 ? -6 : 1); return new Date(d.setDate(diff)); }
 function save() { localStorage.setItem("v26_birimler", JSON.stringify(state.birimler)); localStorage.setItem("v26_saatler", JSON.stringify(state.saatler)); localStorage.setItem("v26_personeller", JSON.stringify(state.personeller)); localStorage.setItem("v26_sabitAtamalar", JSON.stringify(state.sabitAtamalar)); localStorage.setItem("v26_kapasite", JSON.stringify(state.kapasite)); }
 
-// --- VARDIYA OLUŞTURMA MOTORU (ROTASYONLU) ---
+// --- VARDIYA MOTORU (HAFTALIK KAYDIRMALI) ---
 function tabloyuOlustur() {
     const tarihArea = document.getElementById("tarihAraligi");
     if(tarihArea) tarihArea.innerText = `${currentMonday.toLocaleDateString('tr-TR')} Haftası`;
     
     let program = {};
     let calismaPuani = {};
+    
+    // HAFTAYA GÖRE KAYDIRMA DEĞERİ (Her hafta liste farklı birinden başlasın)
+    const haftaKaydirma = Math.floor(currentMonday.getTime() / (1000 * 60 * 60 * 24 * 7)) % 10;
 
     state.personeller.forEach(p => {
         program[p.ad] = Array(7).fill(null);
@@ -60,7 +63,7 @@ function tabloyuOlustur() {
         }
     });
 
-    // 2. Teknik Yönetmen Gece Rotasyonu
+    // 2. Teknik Yönetmen Gece Rotasyonu (Haftalık değişir)
     for(let i=0; i<7; i++) {
         let gececi = (i < 2) ? "BARIŞ İNCE" : "EKREM FİDAN";
         if(program[gececi] && program[gececi][i] === null) {
@@ -69,7 +72,7 @@ function tabloyuOlustur() {
         }
     }
 
-    // 3. Rotasyonlu Dağıtım
+    // 3. Dinamik ve Kaydırmalı Dağıtım
     for(let i=0; i<7; i++) {
         let isWeekend = (i >= 5);
         state.birimler.forEach(birim => {
@@ -81,7 +84,11 @@ function tabloyuOlustur() {
                 if(mevcut < hedef) {
                     let adaylar = state.personeller
                         .filter(p => p.birim === birim && program[p.ad][i] === null)
-                        .sort((a, b) => calismaPuani[a.ad] - calismaPuani[b.ad]);
+                        .sort((a, b) => {
+                            // Önce çalışma puanına bak, puanlar eşitse hafta kaydırmasına göre karıştır
+                            if(calismaPuani[a.ad] !== calismaPuani[b.ad]) return calismaPuani[a.ad] - calismaPuani[b.ad];
+                            return (state.personeller.indexOf(a) + haftaKaydirma) % state.personeller.length - (state.personeller.indexOf(b) + haftaKaydirma) % state.personeller.length;
+                        });
 
                     for(let j=0; j < (hedef - mevcut) && adaylar[j]; j++) {
                         program[adaylar[j].ad][i] = saat;
@@ -98,7 +105,6 @@ function render(program) {
     const body = document.getElementById("tableBody");
     const foot = document.getElementById("tableFooter");
     if(!body) return;
-
     let bodyHtml = "";
     state.saatler.forEach(s => {
         bodyHtml += `<tr><td><strong>${s}</strong></td>`;
@@ -110,7 +116,6 @@ function render(program) {
         bodyHtml += `</tr>`;
     });
     body.innerHTML = bodyHtml;
-
     let footHtml = `<tr><td><strong>İZİNLİ / YEDEK</strong></td>`;
     for(let i=0; i<7; i++) {
         let iz = state.personeller.filter(p => program[p.ad][i] === "İZİNLİ" || program[p.ad][i] === null)
@@ -120,30 +125,22 @@ function render(program) {
     if(foot) foot.innerHTML = footHtml + "</tr>";
 }
 
-// --- ARA YÜZ VE PANEL ---
+// --- DİĞER FONKSİYONLAR ---
 function refreshUI() {
     const pList = document.getElementById("persListesiAdmin");
     if(pList) pList.innerHTML = state.personeller.map((p,i) => `<div class="admin-list-item">${p.ad} (${p.birim}) <button onclick="sil('personeller',${i})">SİL</button></div>`).join('');
-    
     const bSec = document.getElementById("yeniPersBirimSec");
     if(bSec) bSec.innerHTML = state.birimler.map(b => `<option value="${b}">${b}</option>`).join('');
-    
     const sPers = document.getElementById("sabitPersSec");
     if(sPers) sPers.innerHTML = state.personeller.map(p => `<option value="${p.ad}">${p.ad}</option>`).join('');
-
     const sSaat = document.getElementById("sabitSaatSec");
     if(sSaat) sSaat.innerHTML = state.saatler.map(s => `<option value="${s}">${s}</option>`).join('');
-
-    checklistOlustur();
-    kapasiteCiz();
-    sabitAtamaListele();
+    checklistOlustur(); kapasiteCiz(); sabitAtamaListele();
 }
-
 function checklistOlustur() {
     const cont = document.getElementById("personelChecklist");
     if(cont) cont.innerHTML = state.personeller.sort((a,b) => state.birimler.indexOf(a.birim) - state.birimler.indexOf(b.birim)).map(p => `<div class="check-item"><input type="checkbox" id="check_${p.id}" onchange="tabloyuOlustur()"><label>${p.ad}</label></div>`).join('');
 }
-
 function kapasiteCiz() {
     const kTab = document.getElementById("kapasiteTable");
     if(!kTab) return;
@@ -158,7 +155,6 @@ function kapasiteCiz() {
     });
     kTab.innerHTML = html;
 }
-
 function capSave(k, t, v) { if(!state.kapasite[k]) state.kapasite[k] = {h:0, hs:0}; state.kapasite[k][t] = parseInt(v) || 0; save(); }
 function sil(k, i) { state[k].splice(i, 1); save(); refreshUI(); tabloyuOlustur(); }
 function personelEkle() { let ad = document.getElementById("yeniPersInp").value.toUpperCase(); let birim = document.getElementById("yeniPersBirimSec").value; if(ad) { state.personeller.push({ad, birim, id: Date.now()}); save(); refreshUI(); tabloyuOlustur(); } }
@@ -168,5 +164,4 @@ function toggleAdminPanel() { document.getElementById("adminPanel").classList.to
 function tabDegistir(n) { document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden')); document.getElementById('tab-'+n).classList.remove('hidden'); }
 function haftaDegistir(v) { currentMonday.setDate(currentMonday.getDate() + v); tabloyuOlustur(); }
 function sifirla() { localStorage.clear(); location.reload(); }
-
 window.onload = () => { refreshUI(); tabloyuOlustur(); };
