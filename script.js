@@ -1,11 +1,7 @@
-// --- 1. VERİ HAVUZU ---
+// --- 1. VERİ HAVUZU VE DURUM ---
 const DEFAULT_UNITS = ["TEKNİK YÖNETMEN", "SES OPERATÖRÜ", "PLAYOUT OPERATÖRÜ", "KJ OPERATÖRÜ", "INGEST OPERATÖRÜ", "BİLGİ İŞLEM", "YAYIN SİSTEMLERİ", "24TV MCR OPERATÖRÜ", "360TV MCR OPERATÖRÜ"];
 const DEFAULT_SHIFTS = ["06:30–16:00", "09:00–18:00", "12:00–22:00", "16:00–00:00", "00:00–07:00", "DIŞ YAYIN"];
-const UNIT_COLORS = {
-    "TEKNİK YÖNETMEN": "#e74c3c", "SES OPERATÖRÜ": "#3498db", "PLAYOUT OPERATÖRÜ": "#2ecc71",
-    "KJ OPERATÖRÜ": "#f1c40f", "INGEST OPERATÖRÜ": "#9b59b6", "BİLGİ İŞLEM": "#34495e",
-    "YAYIN SİSTEMLERİ": "#1abc9c", "24TV MCR OPERATÖRÜ": "#e67e22", "360TV MCR OPERATÖRÜ": "#d35400"
-};
+const UNIT_COLORS = { "TEKNİK YÖNETMEN": "#e74c3c", "SES OPERATÖRÜ": "#3498db", "PLAYOUT OPERATÖRÜ": "#2ecc71", "KJ OPERATÖRÜ": "#f1c40f", "INGEST OPERATÖRÜ": "#9b59b6", "BİLGİ İŞLEM": "#34495e", "YAYIN SİSTEMLERİ": "#1abc9c", "24TV MCR OPERATÖRÜ": "#e67e22", "360TV MCR OPERATÖRÜ": "#d35400" };
 
 const DEFAULT_STAFF = [
     {ad: "CAN ŞENTUNALI", birim: "TEKNİK YÖNETMEN"}, {ad: "M.BERKMAN", birim: "TEKNİK YÖNETMEN"}, {ad: "EKREM FİDAN", birim: "TEKNİK YÖNETMEN"},
@@ -26,38 +22,35 @@ const DEFAULT_STAFF = [
     {ad: "EMRULLAH AHLATÇI", birim: "360TV MCR OPERATÖRÜ"}, {ad: "EREN KAZAN", birim: "360TV MCR OPERATÖRÜ"}, {ad: "MUSAB YAKUP DEMİRBAŞ", birim: "360TV MCR OPERATÖRÜ"}
 ];
 
-// --- 2. DURUM YÖNETİMİ ---
 let state = {
-    birimler: JSON.parse(localStorage.getItem("v35_birimler")) || DEFAULT_UNITS,
-    saatler: JSON.parse(localStorage.getItem("v35_saatler")) || DEFAULT_SHIFTS,
-    personeller: JSON.parse(localStorage.getItem("v35_personeller")) || DEFAULT_STAFF.map((p,i) => ({...p, id: 200+i})),
-    sabitAtamalar: JSON.parse(localStorage.getItem("v35_sabitAtamalar")) || [],
-    kapasite: JSON.parse(localStorage.getItem("v35_kapasite")) || {},
-    manuelAtamalar: JSON.parse(localStorage.getItem("v35_manuelAtamalar")) || {}
+    birimler: JSON.parse(localStorage.getItem("v36_birimler")) || DEFAULT_UNITS,
+    saatler: JSON.parse(localStorage.getItem("v36_saatler")) || DEFAULT_SHIFTS,
+    personeller: JSON.parse(localStorage.getItem("v36_personeller")) || DEFAULT_STAFF.map((p,i) => ({...p, id: 300+i})),
+    sabitAtamalar: JSON.parse(localStorage.getItem("v36_sabitAtamalar")) || [],
+    kapasite: JSON.parse(localStorage.getItem("v36_kapasite")) || {},
+    manuelAtamalar: JSON.parse(localStorage.getItem("v36_manuelAtamalar")) || {}
 };
 
 let currentMonday = getMonday(new Date());
 function getMonday(d) { d = new Date(d); let day = d.getDay(), diff = d.getDate() - day + (day == 0 ? -6 : 1); return new Date(d.setDate(diff)); }
-
 function save() { 
-    localStorage.setItem("v35_birimler", JSON.stringify(state.birimler)); 
-    localStorage.setItem("v35_saatler", JSON.stringify(state.saatler)); 
-    localStorage.setItem("v35_personeller", JSON.stringify(state.personeller)); 
-    localStorage.setItem("v35_sabitAtamalar", JSON.stringify(state.sabitAtamalar)); 
-    localStorage.setItem("v35_kapasite", JSON.stringify(state.kapasite));
-    localStorage.setItem("v35_manuelAtamalar", JSON.stringify(state.manuelAtamalar));
+    localStorage.setItem("v36_birimler", JSON.stringify(state.birimler)); 
+    localStorage.setItem("v36_saatler", JSON.stringify(state.saatler)); 
+    localStorage.setItem("v36_personeller", JSON.stringify(state.personeller)); 
+    localStorage.setItem("v36_sabitAtamalar", JSON.stringify(state.sabitAtamalar)); 
+    localStorage.setItem("v36_kapasite", JSON.stringify(state.kapasite));
+    localStorage.setItem("v36_manuelAtamalar", JSON.stringify(state.manuelAtamalar));
 }
 
-// --- 3. AKILLI DAĞITIM MOTORU ---
+// --- 2. ANA MOTOR ---
 function tabloyuOlustur() {
     const haftaKey = currentMonday.toISOString().split('T')[0];
-    const headerTarih = document.getElementById("tarihAraligi");
-    if(headerTarih) headerTarih.innerText = `${currentMonday.toLocaleDateString('tr-TR')} Haftası`;
+    const header = document.getElementById("tarihAraligi");
+    if(header) header.innerText = `${currentMonday.toLocaleDateString('tr-TR')} Haftası`;
     
     let program = {};
     let calismaSayisi = {};
     let uyarilar = [];
-    const haftaSeed = currentMonday.getTime();
 
     state.personeller.forEach(p => {
         program[p.ad] = Array(7).fill(null);
@@ -65,38 +58,24 @@ function tabloyuOlustur() {
         if(document.getElementById(`check_${p.id}`)?.checked) program[p.ad].fill("İZİNLİ");
     });
 
-    // 1. Manuel Değişiklikler (En Yüksek Öncelik)
+    // Manuel Atamalar
     state.personeller.forEach(p => {
         for(let i=0; i<7; i++) {
             let mKey = `${haftaKey}_${p.ad}_${i}`;
             if(state.manuelAtamalar[mKey]) {
                 program[p.ad][i] = state.manuelAtamalar[mKey];
-                if(program[p.ad][i] !== "BOŞALT" && program[p.ad][i] !== "İZİNLİ") calismaSayisi[p.ad]++;
+                if(!["İZİNLİ", "BOŞALT"].includes(state.manuelAtamalar[mKey])) calismaSayisi[p.ad]++;
             }
         }
     });
 
-    // 2. Teknik Yönetmen Gece Vardiyası Kuralları
+    // Teknik Yönetmen Gece Rotasyonu
     for(let i=0; i<7; i++) {
         let gececi = (i < 2) ? "BARIŞ İNCE" : "EKREM FİDAN";
-        if(program[gececi] && program[gececi][i] === null) { 
-            program[gececi][i] = "00:00–07:00"; 
-            calismaSayisi[gececi]++; 
-        }
+        if(program[gececi] && program[gececi][i] === null) { program[gececi][i] = "00:00–07:00"; calismaSayisi[gececi]++; }
     }
 
-    // 3. Sabit Atamalar
-    state.sabitAtamalar.forEach(a => {
-        if(program[a.p]) {
-            if(a.g === "pzt_cum") {
-                for(let i=0; i<5; i++) if(program[a.p][i] === null) { program[a.p][i] = a.s; calismaSayisi[a.p]++; }
-            } else {
-                let g = parseInt(a.g); if(program[a.p][g] === null) { program[a.p][g] = a.s; calismaSayisi[a.p]++; }
-            }
-        }
-    });
-
-    // 4. Dinamik Dağıtım
+    // Dinamik Dağıtım
     for(let i=0; i<7; i++) {
         state.birimler.forEach(birim => {
             state.saatler.forEach(saat => {
@@ -105,104 +84,63 @@ function tabloyuOlustur() {
                 let mevcut = state.personeller.filter(p => p.birim === birim && program[p.ad][i] === saat).length;
                 
                 if(mevcut < hedef) {
-                    let adaylar = state.personeller.filter(p => {
-                        if(p.birim !== birim || program[p.ad][i] !== null) return false;
-                        if(calismaSayisi[p.ad] >= 5) return false; // Haftalık limit
-                        if(i > 0 && program[p.ad][i-1] === "00:00–07:00" && saat.startsWith("06:30")) return false; // Dinlenme
-                        return true;
-                    }).sort((a,b) => calismaSayisi[a.ad] - calismaSayisi[b.ad]);
-
+                    let adaylar = state.personeller.filter(p => p.birim === birim && program[p.ad][i] === null && calismaSayisi[p.ad] < 5);
                     for(let j=0; j < (hedef - mevcut) && adaylar[j]; j++) {
                         program[adaylar[j].ad][i] = saat;
                         calismaSayisi[adaylar[j].ad]++;
                     }
                 }
-                
-                // Kapasite Kontrolü (Smart Alert)
-                let sonDurum = state.personeller.filter(p => p.birim === birim && program[p.ad][i] === saat).length;
-                if(sonDurum < hedef) uyarilar.push(`${birim} | ${i+1}. Gün | ${saat} vardiyası EKSİK!`);
             });
         });
     }
-
-    uyariPaneliniGuncelle(uyarilar);
     render(program, calismaSayisi);
 }
 
-// --- 4. GÖRSELLEŞTİRME ---
+// --- 3. ARAYÜZ VE REFRESH (EKSİK OLAN KISIM) ---
+function refreshUI() {
+    const list = document.getElementById("persListesiAdmin");
+    if(list) list.innerHTML = state.personeller.map((p,i) => `<div class="admin-list-item">${p.ad} (${p.birim}) <button onclick="sil('personeller',${i})">SİL</button></div>`).join('');
+    
+    const birimSec = document.getElementById("yeniPersBirimSec");
+    if(birimSec) birimSec.innerHTML = state.birimler.map(b => `<option value="${b}">${b}</option>`).join('');
+    
+    checklistOlustur();
+}
+
+function checklistOlustur() {
+    const box = document.getElementById("personelChecklist");
+    if(box) box.innerHTML = state.personeller.map(p => `<div class="check-item"><input type="checkbox" id="check_${p.id}" onchange="tabloyuOlustur()"><label for="check_${p.id}">${p.ad}</label></div>`).join('');
+}
+
 function render(program, calismaSayisi) {
     const body = document.getElementById("tableBody");
     if(!body) return;
-    let html = "";
-    state.saatler.forEach(s => {
-        html += `<tr><td><strong>${s}</strong></td>`;
-        for(let i=0; i<7; i++) {
-            let list = state.personeller.filter(p => program[p.ad][i] === s).map(p => {
-                let color = UNIT_COLORS[p.birim] || "#666";
-                return `<div class="birim-card" onclick="vardiyaDegistir('${p.ad}', ${i})" style="border-left: 5px solid ${color}; cursor:pointer">
-                            <span class="birim-tag" style="background:${color}">${p.birim}</span>${p.ad}
-                        </div>`;
-            }).join('');
-            html += `<td>${list}</td>`;
-        }
-        html += `</tr>`;
-    });
-    body.innerHTML = html;
+    body.innerHTML = state.saatler.map(s => `<tr><td><strong>${s}</strong></td>${[0,1,2,3,4,5,6].map(i => {
+        const pList = state.personeller.filter(p => program[p.ad][i] === s).map(p => `<div class="birim-card" onclick="vardiyaDegistir('${p.ad}',${i})" style="border-left:5px solid ${UNIT_COLORS[p.birim]}"><span class="birim-tag" style="background:${UNIT_COLORS[p.birim]}">${p.birim}</span>${p.ad}</div>`).join('');
+        return `<td>${pList}</td>`;
+    }).join('')}</tr>`).join('');
 
-    // Yedek ve İstatistik Satırları
-    let footHtml = `<tr><td><strong>İZİNLİ / YEDEK</strong></td>`;
-    for(let i=0; i<7; i++) {
-        let iz = state.personeller.filter(p => program[p.ad][i] === "İZİNLİ" || program[p.ad][i] === null)
-            .map(p => `<div class="birim-card izinli-kart"><span class="birim-tag" style="background:#7f8c8d">${p.birim}</span>${p.ad}</div>`).join('');
-        footHtml += `<td>${iz}</td>`;
-    }
-    
-    let statHtml = `<tr><td style="background:#f2f2f2"><strong>HAFTALIK ÖZET</strong></td>`;
-    for(let i=0; i<7; i++) {
-        let dailyStats = state.personeller.filter(p => program[p.ad][i] !== "İZİNLİ" && program[p.ad][i] !== null)
-            .map(p => {
-                let izinCount = 0;
-                for(let g=0; g<7; g++) { if(program[p.ad][g] === "İZİNLİ" || program[p.ad][g] === null) izinCount++; }
-                return `<div style="font-size:10px; border-bottom:1px solid #eee">${p.ad}: <b>${calismaSayisi[p.ad]}G</b> | İz: ${izinCount}</div>`;
-            }).join('');
-        statHtml += `<td style="background:#f9f9f9">${dailyStats}</td>`;
-    }
-    document.getElementById("tableFooter").innerHTML = footHtml + "</tr>" + statHtml + "</tr>";
+    // Footer: İzinli ve Özet
+    const foot = document.getElementById("tableFooter");
+    if(!foot) return;
+    let izHtml = `<tr><td><strong>İZİNLİ / YEDEK</strong></td>${[0,1,2,3,4,5,6].map(i => `<td>${state.personeller.filter(p => ["İZİNLİ", null].includes(program[p.ad][i])).map(p => `<div class="birim-card izinli-kart">${p.ad}</div>`).join('')}</td>`).join('')}</tr>`;
+    let ozetHtml = `<tr><td><strong>ÖZET</strong></td>${[0,1,2,3,4,5,6].map(i => `<td>${state.personeller.filter(p => !["İZİNLİ", null].includes(program[p.ad][i])).map(p => {
+        let izS = 0; for(let g=0; g<7; g++) if(["İZİNLİ", null].includes(program[p.ad][g])) izS++;
+        return `<div style="font-size:9px">${p.ad}: ${calismaSayisi[p.ad]}G | İz: ${izS}</div>`;
+    }).join('')}</td>`).join('')}</tr>`;
+    foot.innerHTML = izHtml + ozetHtml;
 }
 
-// --- 5. EK ÖZELLİKLER ---
-function vardiyaDegistir(personelAd, gunIndis) {
-    const haftaKey = currentMonday.toISOString().split('T')[0];
-    const key = `${haftaKey}_${personelAd}_${gunIndis}`;
-    let yeniSaat = prompt(`${personelAd} için yeni vardiya (Veya 'BOŞALT' / 'İZİNLİ' yazın):`, state.saatler[0]);
-    if (yeniSaat !== null) {
-        state.manuelAtamalar[key] = yeniSaat.toUpperCase();
-        save(); tabloyuOlustur();
-    }
+// --- 4. YARDIMCI FONKSİYONLAR ---
+function vardiyaDegistir(pAd, gI) {
+    const hK = currentMonday.toISOString().split('T')[0];
+    const v = prompt(`${pAd} için vardiya (Veya 'İZİNLİ' / 'BOŞALT'):`, state.saatler[0]);
+    if(v) { state.manuelAtamalar[`${hK}_${pAd}_${gI}`] = v.toUpperCase(); save(); tabloyuOlustur(); }
 }
 
-function uyariPaneliniGuncelle(uyarilar) {
-    const panel = document.getElementById("alertPanel");
-    if(!panel) return;
-    panel.innerHTML = uyarilar.length === 0 ? "✅ Kapasite Tamam" : `⚠️ <strong>Eksikler:</strong> ${uyarilar.length} vardiya boş.`;
-    panel.className = uyarilar.length === 0 ? "alert-success" : "alert-danger";
-}
+function haftaDegistir(v) { currentMonday.setDate(currentMonday.getDate() + (v * 7)); tabloyuOlustur(); }
+function toggleAdminPanel() { document.getElementById("adminPanel").classList.toggle("hidden"); refreshUI(); }
+function sil(k, i) { state[k].splice(i, 1); save(); refreshUI(); tabloyuOlustur(); }
+function sifirla() { if(confirm("Sıfırlansın mı?")) { localStorage.clear(); location.reload(); } }
 
-function pdfIndir() {
-    const element = document.getElementById('mainTableContainer');
-    if(!element) return;
-    html2pdf().from(element).save(`Vardiya_${currentMonday.toLocaleDateString()}.pdf`);
-}
-
-// --- 6. SAYFA BAŞLANGICI ---
-window.onload = () => {
-    // Eğer bir buton eksikse veya sayfa yüklenmiyorsa konsolda hata vermemesi için kontrol
-    try {
-        refreshUI(); 
-        tabloyuOlustur();
-    } catch(e) {
-        console.error("Yükleme hatası:", e);
-    }
-};
-
-// Diğer yönetim fonksiyonları (birimEkle, kapasiteCiz vb.) aynen devam eder...
+window.onload = () => { refreshUI(); tabloyuOlustur(); };
