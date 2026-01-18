@@ -123,7 +123,4 @@ function generateShifts() {
 
 function assignEmployees(day, capacity, shiftIndex) {
   let assigned = [];
-  let counter = 0;
-  let startIndex = (day + shiftIndex) % employees.length;
-
-  for (let i = 0; i < employees.length && counter < capacity; i++)
+  let counter
