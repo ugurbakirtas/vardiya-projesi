@@ -8,15 +8,13 @@ const rotationCycle = [
   "İzin","İzin"
 ];
 
-// Şifresiz giriş
-document.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("loginBtn").addEventListener("click", () => {
-    document.getElementById("loginSection").style.display = "none";
-    document.getElementById("adminSection").style.display = "block";
-    document.getElementById("shiftSection").style.display = "block";
-    document.getElementById("hourSection").style.display = "block";
-  });
-});
+// Şifresiz giriş fonksiyonu
+function openPanel() {
+  document.getElementById("loginSection").style.display = "none";
+  document.getElementById("adminSection").style.display = "block";
+  document.getElementById("shiftSection").style.display = "block";
+  document.getElementById("hourSection").style.display = "block";
+}
 
 // Çalışan Yönetimi
 function addEmployee() {
@@ -128,6 +126,4 @@ function assignEmployees(day, capacity, shiftIndex) {
   let counter = 0;
   let startIndex = (day + shiftIndex) % employees.length;
 
-  for (let i = 0; i < employees.length && counter < capacity; i++) {
-    let emp = employees[(startIndex + i) % employees.length];
-    if (emp.rotationActive)
+  for (let i = 0; i < employees.length && counter < capacity; i++)
