@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PRO-Vardiya v27.2</title>
+  <title>PRO-Vardiya v27.5 | Pzt-Cum Modu</title>
   <link rel="stylesheet" href="style.css">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -26,7 +26,7 @@
     <div id="adminPanel" class="admin-panel hidden no-print">
       <div class="admin-content">
         <div class="admin-tabs">
-          <button class="tab-btn active" onclick="tabDegistir('sabit')">SABİT ATAMA</button>
+          <button class="tab-btn" onclick="tabDegistir('sabit')">SABİT ATAMA</button>
           <button class="tab-btn" onclick="tabDegistir('personel')">PERSONEL/BİRİM</button>
           <button class="tab-btn" onclick="tabDegistir('kapasite')">KAPASİTE</button>
           <button class="tab-btn" onclick="tabDegistir('saatler')">SAATLER</button>
@@ -38,9 +38,11 @@
             <div class="admin-input-group">
               <select id="sabitPersSec"></select>
               <select id="sabitGunSec">
-                <option value="all">TÜM HAFTA</option>
-                <option value="0">Pazartesi</option><option value="1">Salı</option><option value="2">Çarşamba</option>
-                <option value="3">Perşembe</option><option value="4">Cuma</option><option value="5">Cumartesi</option><option value="6">Pazar</option>
+                <option value="pzt_cum">PZT-CUM (H.SONU İZİN)</option>
+                <option value="0">Pazartesi</option><option value="1">Salı</option>
+                <option value="2">Çarşamba</option><option value="3">Perşembe</option>
+                <option value="4">Cuma</option><option value="5">Cumartesi</option>
+                <option value="6">Pazar</option>
               </select>
               <select id="sabitSaatSec"></select>
               <button onclick="sabitAtamaEkle()" class="btn-add">EKLE</button>
@@ -50,7 +52,7 @@
 
           <div id="tab-personel" class="tab-content hidden">
             <div class="admin-section">
-              <h3>Birim Ekle</h3>
+              <h3>Birim Yönetimi</h3>
               <div class="admin-input-group">
                 <input type="text" id="yeniBirimInput" placeholder="Birim Adı">
                 <button onclick="birimEkle()" class="btn-add">EKLE</button>
@@ -58,7 +60,7 @@
               <div id="birimYonetimListesi" class="admin-list"></div>
             </div>
             <div class="admin-section">
-              <h3>Personel Ekle</h3>
+              <h3>Personel Yönetimi</h3>
               <div class="admin-input-group">
                 <input type="text" id="yeniPersonelAd" placeholder="Ad Soyad">
                 <select id="yeniPersonelBirim"></select>
