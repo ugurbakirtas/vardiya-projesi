@@ -1,102 +1,90 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PRO-Vardiya v2026 | Personel Onarıldı</title>
-  <link rel="stylesheet" href="style.css">
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PRO-Vardiya v2026 | Onarılmış Versiyon</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <div class="app-wrapper">
-    <header class="main-header no-print">
-      <div class="logo-area">
-        <h1>TEKNİK <span>VARDİYA</span></h1>
-        <p id="tarihAraligi" class="date-display">Yükleniyor...</p>
-      </div>
-      <div class="nav-controls">
-        <button onclick="haftaDegistir(-7)" class="btn-step">« GERİ</button>
-        <button onclick="tabloyuOlustur()" class="btn-main-action">VARDİYA OLUŞTUR</button>
-        <button onclick="haftaDegistir(7)" class="btn-step">İLERİ »</button>
-        <button onclick="toggleAdminPanel()" class="btn-admin">⚙ YÖNETİM</button>
-      </div>
-    </header>
+    <div class="app-wrapper">
+        <header class="main-header no-print">
+            <div class="logo-area">
+                <h1>TEKNİK <span>VARDİYA</span></h1>
+                <p id="tarihAraligi" class="date-display">Yükleniyor...</p>
+            </div>
+            <div class="nav-controls">
+                <button onclick="haftaDegistir(-7)" class="btn-step">« GERİ</button>
+                <button onclick="tabloyuOlustur()" class="btn-main-action">VARDİYA OLUŞTUR</button>
+                <button onclick="haftaDegistir(7)" class="btn-step">İLERİ »</button>
+                <button onclick="toggleAdminPanel()" class="btn-admin">⚙ YÖNETİM</button>
+            </div>
+        </header>
 
-    <div id="adminPanel" class="admin-panel hidden no-print">
-      <div class="admin-content">
-        <div class="admin-tabs">
-          <button class="tab-btn active" onclick="tabDegistir('personel')">PERSONEL/BİRİM</button>
-          <button class="tab-btn" onclick="tabDegistir('kapasite')">SAAT/KAPASİTE</button>
-          <button class="tab-btn" onclick="tabDegistir('sabit')">SABİT ATAMA</button>
-          <button class="tab-btn" onclick="tabDegistir('sistem')">SİSTEM</button>
+        <div id="adminPanel" class="admin-panel hidden no-print">
+            <div class="admin-content">
+                <div class="admin-tabs">
+                    <button class="tab-btn" onclick="tabDegistir('personel')">PERSONEL/BİRİM</button>
+                    <button class="tab-btn" onclick="tabDegistir('kapasite')">SAAT/KAPASİTE</button>
+                    <button class="tab-btn" onclick="tabDegistir('sabit')">SABİT ATAMA</button>
+                    <button class="tab-btn" onclick="tabDegistir('sistem')">SİSTEM</button>
+                </div>
+
+                <div class="tab-container">
+                    <div id="tab-personel" class="tab-content">
+                        <div class="admin-grid">
+                            <div class="admin-section">
+                                <h3>Birimler</h3>
+                                <div id="birimListesiAdmin" class="admin-list"></div>
+                            </div>
+                            <div class="admin-section">
+                                <h3>Personeller</h3>
+                                <div class="admin-input-group">
+                                    <input type="text" id="yeniPersInp" placeholder="Ad Soyad">
+                                    <select id="yeniPersBirimSec"></select>
+                                    <button onclick="personelEkle()" class="btn-add">EKLE</button>
+                                </div>
+                                <div id="persListesiAdmin" class="admin-list"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="tab-kapasite" class="tab-content hidden">
+                        <div id="kapasiteTable" class="cap-grid-container"></div>
+                    </div>
+                    <div id="tab-sabit" class="tab-content hidden">
+                        <div class="admin-input-group">
+                            <select id="sabitPersSec"></select>
+                            <select id="sabitGunSec">
+                                <option value="pzt_cum">HAFTA İÇİ (Pzt-Cum)</option>
+                                <option value="0">Pazartesi</option><option value="1">Salı</option>
+                                <option value="2">Çarşamba</option><option value="3">Perşembe</option>
+                                <option value="4">Cuma</option><option value="5">Cumartesi</option>
+                                <option value="6">Pazar</option>
+                            </select>
+                            <select id="sabitSaatSec"></select>
+                            <button onclick="sabitAtamaEkle()" class="btn-add">EKLE</button>
+                        </div>
+                        <div id="sabitAtamaListesi" class="admin-list"></div>
+                    </div>
+                    <div id="tab-sistem" class="tab-content hidden">
+                        <button onclick="sifirla()" class="btn-reset">VERİLERİ SIFIRLA VE ONAR</button>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div class="tab-container">
-          <div id="tab-personel" class="tab-content">
-            <div class="admin-grid">
-              <div class="admin-section">
-                <h3>Birimler</h3>
-                <div class="admin-input-group">
-                  <input type="text" id="yeniBirimInp" placeholder="Birim Adı">
-                  <button onclick="birimEkle()" class="btn-add">EKLE</button>
-                </div>
-                <div id="birimListesiAdmin" class="admin-list"></div>
-              </div>
-              <div class="admin-section">
-                <h3>Personeller</h3>
-                <div class="admin-input-group">
-                  <input type="text" id="yeniPersInp" placeholder="Ad Soyad">
-                  <select id="yeniPersBirimSec"></select>
-                  <button onclick="personelEkle()" class="btn-add">EKLE</button>
-                </div>
-                <div id="persListesiAdmin" class="admin-list"></div>
-              </div>
+        <main class="content-area">
+            <div id="personelChecklist" class="checklist-horizontal-grid no-print"></div>
+            <div class="table-card">
+                <table id="vardiyaTablosu">
+                    <thead id="tableHeader"></thead>
+                    <tbody id="tableBody"></tbody>
+                    <tfoot id="tableFooter"></tfoot>
+                </table>
             </div>
-          </div>
-
-          <div id="tab-kapasite" class="tab-content hidden">
-            <div class="admin-input-group">
-              <input type="text" id="yeniSaatInp" placeholder="06:30–16:00">
-              <button onclick="saatEkle()" class="btn-add">EKLE</button>
-            </div>
-            <div id="saatListesiAdmin" class="admin-list"></div>
-            <div id="kapasiteTable" class="cap-grid-container"></div>
-          </div>
-
-          <div id="tab-sabit" class="tab-content hidden">
-            <div class="admin-input-group">
-              <select id="sabitPersSec"></select>
-              <select id="sabitGunSec">
-                <option value="pzt_cum">PAZARTESİ-CUMA (H.Sonu İzin)</option>
-                <option value="0">Pazartesi</option><option value="1">Salı</option>
-                <option value="2">Çarşamba</option><option value="3">Perşembe</option>
-                <option value="4">Cuma</option><option value="5">Cumartesi</option>
-                <option value="6">Pazar</option>
-              </select>
-              <select id="sabitSaatSec"></select>
-              <button onclick="sabitAtamaEkle()" class="btn-add">EKLE</button>
-            </div>
-            <div id="sabitAtamaListesi" class="admin-list"></div>
-          </div>
-
-          <div id="tab-sistem" class="tab-content hidden">
-            <button onclick="sifirla()" class="btn-reset">VERİLERİ SIFIRLA VE ONAR</button>
-          </div>
-        </div>
-      </div>
+        </main>
     </div>
-
-    <main class="content-area">
-      <div id="personelChecklist" class="checklist-horizontal-grid no-print"></div>
-      <div class="table-card">
-        <table id="vardiyaTablosu">
-          <thead id="tableHeader"></thead>
-          <tbody id="tableBody"></tbody>
-          <tfoot id="tableFooter"></tfoot>
-        </table>
-      </div>
-    </main>
-  </div>
-  <script src="script.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
