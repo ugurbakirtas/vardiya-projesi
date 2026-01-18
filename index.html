@@ -1,87 +1,118 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PRO-Vardiya v2026 | Onarılmış</title>
-  <link rel="stylesheet" href="style.css">
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teknik Vardiya Planlama v100</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg: #f0f2f5; --panel: #ffffff; --text: #2d3436; --primary: #0984e3; --accent: #6c5ce7; }
+        body { font-family: 'Poppins', sans-serif; background: var(--bg); color: var(--text); margin: 0; font-size: 11px; }
+        .header { background: #1e272e; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 10px rgba(0,0,0,0.3); }
+        .btn { padding: 8px 15px; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; font-size: 11px; transition: 0.2s; }
+        .btn-main { background: var(--primary); color: white; }
+        .btn-sec { background: #636e72; color: white; }
+        
+        /* Tablo Yapısı */
+        .container { padding: 15px; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        th { background: #f8f9fa; padding: 12px; border-bottom: 2px solid #eee; text-align: center; }
+        td { border: 1px solid #eee; padding: 5px; vertical-align: top; width: 13%; height: 100px; }
+        .shift-col { background: #2d3436; color: white; font-weight: bold; width: 100px; text-align: center; }
+        .weekend { background: #fff9db !important; }
+
+        /* Kartlar */
+        .birim-card { padding: 6px; margin: 4px; border-radius: 4px; background: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); cursor: grab; border-left: 5px solid #ccc; position: relative; }
+        .birim-card b { display: block; font-size: 9px; opacity: 0.8; margin-bottom: 2px; }
+        
+        /* Yönetim Paneli */
+        #adminPanel { position: fixed; top: 0; right: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; justify-content: center; align-items: center; }
+        .panel-content { background: white; width: 90%; max-width: 900px; height: 80vh; border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; }
+        .panel-tabs { display: flex; background: #eee; }
+        .tab-btn { flex: 1; padding: 12px; border: none; cursor: pointer; font-weight: bold; }
+        .tab-btn.active { background: white; border-bottom: 3px solid var(--primary); }
+        .tab-content { padding: 20px; overflow-y: auto; flex: 1; }
+        .hidden { display: none !important; }
+
+        /* Kapasite Izgarası */
+        .cap-grid { display: grid; gap: 5px; }
+        .cap-row { display: grid; grid-template-columns: 150px repeat(6, 1fr); gap: 5px; align-items: center; border-bottom: 1px solid #eee; padding: 5px; }
+        .cap-input { width: 35px; border: 1px solid #ccc; border-radius: 3px; padding: 2px; }
+    </style>
 </head>
 <body>
-  <div class="app-wrapper">
-    <header class="main-header no-print">
-      <div class="logo-area">
-        <h1>TEKNİK <span>VARDİYA</span></h1>
-        <p id="tarihAraligi" class="date-display">Yükleniyor...</p>
-      </div>
-      <div class="nav-controls">
-        <button onclick="haftaDegistir(-7)" class="btn-step">« GERİ</button>
-        <button onclick="tabloyuOlustur()" class="btn-main-action">VARDİYA OLUŞTUR</button>
-        <button onclick="haftaDegistir(7)" class="btn-step">İLERİ »</button>
-        <button onclick="toggleAdminPanel()" class="btn-admin">⚙ YÖNETİM</button>
-      </div>
-    </header>
 
-    <div id="adminPanel" class="admin-panel hidden no-print">
-      <div class="admin-content">
-        <div class="admin-tabs">
-          <button class="tab-btn active" onclick="tabDegistir('personel')">PERSONEL/BİRİM</button>
-          <button class="tab-btn" onclick="tabDegistir('kapasite')">SAAT/KAPASİTE</button>
-          <button class="tab-btn" onclick="tabDegistir('sabit')">SABİT ATAMA</button>
-          <button class="tab-btn" onclick="tabDegistir('sistem')">SİSTEM</button>
-        </div>
-
-        <div class="tab-container">
-          <div id="tab-personel" class="tab-content">
-            <div class="admin-section">
-              <h3>Personel Listesi</h3>
-              <div class="admin-input-group">
-                <input type="text" id="yeniPersInp" placeholder="Ad Soyad">
-                <select id="yeniPersBirimSec"></select>
-                <button onclick="personelEkle()" class="btn-add">EKLE</button>
-              </div>
-              <div id="persListesiAdmin" class="admin-list"></div>
-            </div>
-          </div>
-
-          <div id="tab-kapasite" class="tab-content hidden">
-            <div id="kapasiteTable" class="cap-grid-container"></div>
-          </div>
-
-          <div id="tab-sabit" class="tab-content hidden">
-            <div class="admin-input-group">
-              <select id="sabitPersSec"></select>
-              <select id="sabitGunSec">
-                <option value="pzt_cum">HAFTA İÇİ (Pzt-Cum)</option>
-                <option value="0">Pazartesi</option><option value="1">Salı</option>
-                <option value="2">Çarşamba</option><option value="3">Perşembe</option>
-                <option value="4">Cuma</option><option value="5">Cumartesi</option>
-                <option value="6">Pazar</option>
-              </select>
-              <select id="sabitSaatSec"></select>
-              <button onclick="sabitAtamaEkle()" class="btn-add">EKLE</button>
-            </div>
-            <div id="sabitAtamaListesi" class="admin-list"></div>
-          </div>
-
-          <div id="tab-sistem" class="tab-content hidden">
-            <button onclick="sifirla()" class="btn-reset">SİSTEMİ SIFIRLA VE ONAR</button>
-          </div>
-        </div>
-      </div>
+<div class="header">
+    <div>
+        <h2 style="margin:0">TEKNİK VARDİYA</h2>
+        <span id="tarihAraligi">Yükleniyor...</span>
     </div>
+    <div style="display:flex; gap:10px;">
+        <button class="btn btn-sec" onclick="haftaDegistir(-1)">« GERİ</button>
+        <button class="btn btn-main" onclick="toggleAdminPanel()">⚙ YÖNETİM</button>
+        <button class="btn btn-sec" onclick="haftaDegistir(1)">İLERİ »</button>
+    </div>
+</div>
 
-    <main class="content-area">
-      <div id="personelChecklist" class="checklist-horizontal-grid no-print"></div>
-      <div class="table-card">
-        <table id="vardiyaTablosu">
-          <thead id="tableHeader"></thead>
-          <tbody id="tableBody"></tbody>
-          <tfoot id="tableFooter"></tfoot>
-        </table>
-      </div>
-    </main>
-  </div>
-  <script src="script.js"></script>
-</body>
-</html>
+<div class="container">
+    <table>
+        <thead>
+            <tr>
+                <th>Saat / Birim</th>
+                <th>Pazartesi</th><th>Salı</th><th>Çarşamba</th><th>Perşembe</th><th>Cuma</th><th class="weekend">Cumartesi</th><th class="weekend">Pazar</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+            </tbody>
+    </table>
+</div>
+
+<div id="adminPanel" class="hidden">
+    <div class="panel-content">
+        <div class="panel-tabs">
+            <button class="tab-btn active" onclick="tabDegistir('kapasite')">SAAT/KAPASİTE</button>
+            <button class="tab-btn" onclick="tabDegistir('personel')">PERSONEL LİSTESİ</button>
+            <button class="tab-btn" onclick="tabDegistir('sistem')">SİSTEM/OLUŞTUR</button>
+            <button class="tab-btn" style="background:#ff7675; color:white" onclick="toggleAdminPanel()">KAPAT</button>
+        </div>
+
+        <div id="tab-kapasite" class="tab-content">
+            <h3>Birim Kapasite Ayarları</h3>
+            <p>Her vardiya saatine her birimden kaç kişi geleceğini girin:</p>
+            <div id="kapasiteTable" class="cap-grid"></div>
+        </div>
+
+        <div id="tab-personel" class="tab-content hidden">
+            <h3>Personel Listesi ve İzin Durumu</h3>
+            <div id="personelChecklist" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;"></div>
+        </div>
+
+        <div id="tab-sistem" class="tab-content hidden">
+            <div style="text-align:center; padding:20px;">
+                <button onclick="vardiyaOlustur()" style="background:#e67e22; color:white; padding:20px 40px; font-size:18px; border:none; border-radius:10px; cursor:pointer; font-weight:bold; box-shadow:0 4px 15px rgba(230,126,34,0.4)">⚡ VARDİYAYI OTOMATİK OLUŞTUR</button>
+                <div style="margin-top:30px; display:flex; gap:10px; justify-content:center;">
+                    <button class="btn btn-sec" onclick="whatsappKopyala()">🟢 WP KOPYALA</button>
+                    <button class="btn btn-sec" onclick="sifirla()" style="background:#d63031">🔄 SIFIRLA</button>
+                    <button class="btn btn-sec" onclick="verileriYedekle()">💾 YEDEK AL</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// --- JAVASCRIPT MOTORU ---
+
+const INITIAL_STAFF = [
+    {ad: "CAN ŞENTUNALI", birim: "TEKNİK YÖNETMEN", id: 101}, {ad: "M.BERKMAN", birim: "TEKNİK YÖNETMEN", id: 102}, {ad: "EKREM FİDAN", birim: "TEKNİK YÖNETMEN", id: 103},
+    {ad: "YUNUS EMRE YAYLA", birim: "TEKNİK YÖNETMEN", id: 104}, {ad: "H.CAN SAĞLAM", birim: "TEKNİK YÖNETMEN", id: 105}, {ad: "BARIŞ İNCE", birim: "TEKNİK YÖNETMEN", id: 106},
+    {ad: "ANIL RİŞVAN", birim: "SES OPERATÖRÜ", id: 107}, {ad: "ULVİ MUTLUBAŞ", birim: "SES OPERATÖRÜ", id: 108}, {ad: "ZAFER AKAR", birim: "SES OPERATÖRÜ", id: 109},
+    {ad: "ERDOĞAN KÜÇÜKKAYA", birim: "SES OPERATÖRÜ", id: 110}, {ad: "OSMAN DİNÇER", birim: "SES OPERATÖRÜ", id: 111}, {ad: "DOĞUŞ MALGIL", birim: "SES OPERATÖRÜ", id: 112},
+    {ad: "ENES KALE", birim: "SES OPERATÖRÜ", id: 113}, {ad: "ERSAN TİLBE", birim: "SES OPERATÖRÜ", id: 114}, {ad: "NEHİR KAYGUSUZ", birim: "PLAYOUT OPERATÖRÜ", id: 115},
+    {ad: "KADİR ÇAÇAN", birim: "PLAYOUT OPERATÖRÜ", id: 116}, {ad: "M.ERCÜMENT KILIÇ", birim: "PLAYOUT OPERATÖRÜ", id: 117}, {ad: "İBRAHİM SERİNSÖZ", birim: "PLAYOUT OPERATÖRÜ", id: 118},
+    {ad: "YUSUF ALPKILIÇ", birim: "PLAYOUT OPERATÖRÜ", id: 119}, {ad: "SENA MİNARECİ", birim: "PLAYOUT OPERATÖRÜ", id: 120}, {ad: "MEHMET TUNÇ", birim: "PLAYOUT OPERATÖRÜ", id: 121},
+    {ad: "YUSUF İSLAM TORUN", birim: "KJ OPERATÖRÜ", id: 122}, {ad: "CEMREHAN SUBAŞI", birim: "KJ OPERATÖRÜ", id: 123}, {ad: "DEMET CENGİZ", birim: "KJ OPERATÖRÜ", id: 124},
+    {ad: "SENA BAYDAR", birim: "KJ OPERATÖRÜ", id: 125}, {ad: "OĞUZHAN YALAZAN", birim: "KJ OPERATÖRÜ", id: 126}, {ad: "YEŞİM KİREÇ", birim: "KJ OPERATÖRÜ", id: 127},
+    {ad: "PINAR ÖZENÇ", birim: "KJ OPERATÖRÜ", id: 128}, {ad: "ERCAN PALABIYIK", birim: "INGEST OPERATÖRÜ", id: 129}, {ad: "RAMAZAN KOÇAK", birim: "INGEST OPERATÖRÜ", id: 130},
+    {ad: "UĞUR AKBABA", birim: "INGEST OPERATÖRÜ", id: 131}, {ad: "ÖZKAN KAYA", birim: "BİLGİ İŞLEM", id: 132}, {ad: "HAKAN ELİPEK", birim: "BİLGİ İŞLEM", id: 133},
+    {ad: "VOLKAN DEMİRBAŞ",
