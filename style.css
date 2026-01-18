@@ -17,8 +17,11 @@ header {
   border: 1px solid #ddd;
   border-radius: 8px;
 }
+input, button {
+  padding: 8px;
+  margin: 5px 0;
+}
 button {
-  padding: 8px 12px;
   background: #007acc;
   color: white;
   border: none;
@@ -27,17 +30,23 @@ button {
 button:hover {
   background: #005fa3;
 }
+ul {
+  list-style: none;
+  padding: 0;
+}
+li {
+  background: #eee;
+  margin: 5px 0;
+  padding: 8px;
+  border-radius: 5px;
+}
 table {
   border-collapse: collapse;
-  margin-bottom: 30px;
+  margin-top: 20px;
   width: 100%;
 }
 th, td {
   border: 1px solid #333;
   padding: 8px;
   text-align: center;
-}
-h2 {
-  margin-top: 40px;
-  color: #007acc;
 }
