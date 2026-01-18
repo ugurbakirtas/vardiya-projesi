@@ -1,12 +1,13 @@
 /**
- * PRO-Vardiya v24.0 Core | Sabit Atama Motoru
+ * PRO-Vardiya v24.5 Core | Hybrid Engine
  */
 
 let birimSiralamasi = JSON.parse(localStorage.getItem("birimSiralamasi")) || ["TEKNİK YÖNETMEN", "SES OPERATÖRÜ", "PLAYOUT OPERATÖRÜ", "KJ OPERATÖRÜ", "INGEST OPERATÖRÜ", "BİLGİ İŞLEM", "YAYIN SİSTEMLERİ", "24TV MCR OPERATÖRÜ", "360TV MCR OPERATÖRÜ"];
 let sabitPersoneller = JSON.parse(localStorage.getItem("sabitPersoneller")) || [];
 let oncedenIzinliler = JSON.parse(localStorage.getItem("oncedenIzinliler")) || [];
-let sabitAtamalar = JSON.parse(localStorage.getItem("sabitAtamalar")) || []; // YENİ: Belirli saate sabitlenenler
+let sabitAtamalar = JSON.parse(localStorage.getItem("sabitAtamalar")) || [];
 let kapasiteAyarlari = JSON.parse(localStorage.getItem("kapasiteAyarlari")) || {};
+let taslakProgram = JSON.parse(localStorage.getItem("taslakProgram")) || null;
 
 const gunler = ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"];
 const saatler = ["06:30–16:00", "09:00–18:00", "12:00–22:00", "16:00–00:00", "00:00–07:00", "DIŞ YAYIN"];
@@ -23,60 +24,45 @@ function baslat() {
             saatler.forEach(s => { kapasiteAyarlari[b][s] = { haftaici: 0, haftasonu: 0 }; });
         }
     });
-    if (localStorage.getItem("theme") === "dark") document.body.classList.add("dark-mode");
     checklistOlustur();
     tabloyuOlustur();
 }
 
-// --- SABİT ATAMA YÖNETİMİ ---
-function sabitAtamaEkle() {
-    const isim = document.getElementById("sabitPersSec").value;
-    const gun = parseInt(document.getElementById("sabitGunSec").value);
-    const saat = document.getElementById("sabitSaatSec").value;
-    
-    // Aynı gün aynı saate başkası var mı kontrolü gerekebilir ama manuel yönetimde esneklik bırakıyoruz
-    sabitAtamalar.push({ isim, gun, saat });
-    localStorage.setItem("sabitAtamalar", JSON.stringify(sabitAtamalar));
-    sabitAtamaListesiCiz();
-    tabloyuOlustur();
-}
-
-function sabitAtamaSil(idx) {
-    sabitAtamalar.splice(idx, 1);
-    localStorage.setItem("sabitAtamalar", JSON.stringify(sabitAtamalar));
-    sabitAtamaListesiCiz();
-    tabloyuOlustur();
-}
-
-function sabitAtamaListesiCiz() {
-    document.getElementById("sabitPersSec").innerHTML = sabitPersoneller.map(p => `<option value="${p.isim}">${p.isim}</option>`).join('');
-    document.getElementById("sabitSaatSec").innerHTML = saatler.map(s => `<option value="${s}">${s}</option>`).join('');
-    document.getElementById("sabitListesi").innerHTML = sabitAtamalar.map((s, idx) => `
-        <div class="admin-list-item">
-            <span><strong>${s.isim}</strong> → ${gunler[s.gun]} (${s.saat})</span>
-            <button onclick="sabitAtamaSil(${idx})" class="btn-sm-danger">Kaldır</button>
-        </div>`).join('');
+// --- VERİ AKTARMA MANTIĞI ---
+function veriIceriAktar() {
+    try {
+        const json = document.getElementById("importJsonText").value;
+        const data = JSON.parse(json);
+        taslakProgram = data;
+        localStorage.setItem("taslakProgram", JSON.stringify(data));
+        alert("Taslak başarıyla yüklendi! Algoritma bu veriler üzerine kurulacak.");
+        tabloyuOlustur();
+    } catch (e) {
+        alert("Hatalı veri formatı! Lütfen geçerli bir JSON yapıştırın.");
+    }
 }
 
 // --- ALGORİTMA ---
 function tabloyuOlustur() {
     document.getElementById("tarihAraligi").innerText = `${mevcutPazartesi.toLocaleDateString('tr-TR')} Haftası`;
-    haftalikProgram = {};
+    
+    // Eğer dışarıdan yüklenen bir taslak varsa onu temel al, yoksa boşalt
+    haftalikProgram = taslakProgram ? JSON.parse(JSON.stringify(taslakProgram)) : {};
 
     sabitPersoneller.forEach(p => {
-        haftalikProgram[p.isim] = Array(7).fill(null);
-        // Manuel Checkbox İzni
+        if (!haftalikProgram[p.isim]) haftalikProgram[p.isim] = Array(7).fill(null);
+        
+        // Checklist İzni
         if (document.getElementById(`check_${p.id}`)?.checked) haftalikProgram[p.isim].fill("İZİN");
-        // Ön İzinler
-        oncedenIzinliler.forEach(iz => { if (iz.isim === p.isim) haftalikProgram[p.isim][iz.gun] = "İZİN"; });
-        // KRİTİK: SABİT ATAMALARI YERLEŞTİR (Algoritmadan önce)
+        
+        // Sabit Atamalar (Mühürlenmişler)
         sabitAtamalar.forEach(s => { if (s.isim === p.isim) haftalikProgram[p.isim][s.gun] = s.saat; });
     });
 
-    // Teknik Yönetmen Rotasyonu
+    // Teknik Yönetmen Gece Rotasyonu (Barış & Ekrem)
     const weekNum = Math.floor(mevcutPazartesi.getTime() / (7 * 24 * 60 * 60 * 1000));
     const sorumlu = (weekNum % 2 === 0) ? "BARIŞ İNCE" : "EKREM FİDAN";
-    if (haftalikProgram[sorumlu] && haftalikProgram[sorumlu][0] === null) { // Eğer boşsa ata
+    if (haftalikProgram[sorumlu] && haftalikProgram[sorumlu][0] === null) {
         haftalikProgram[sorumlu][0] = "00:00–07:00";
         haftalikProgram[sorumlu][1] = "00:00–07:00";
     }
@@ -92,7 +78,7 @@ function hucreDoldur(gun, saat) {
         let adaylar = sabitPersoneller.filter(p => {
             if (p.birim !== birim || haftalikProgram[p.isim][gun] !== null) return false;
             if (haftalikProgram[p.isim].filter(v => v && v !== "İZİN").length >= 6) return false;
-            // Teknik Yönetmen Gece Yasağı
+            // KURAL: Teknik Yönetmen Gece Vardiyası Yasağı
             if (birim === "TEKNİK YÖNETMEN" && saat === "00:00–07:00" && p.isim !== "BARIŞ İNCE" && p.isim !== "EKREM FİDAN") return false;
             return true;
         });
@@ -111,7 +97,7 @@ function hucreDoldur(gun, saat) {
         .map(p => `<div class="birim-card"><span class="birim-tag">${p.birim}</span>${p.isim}</div>`).join('');
 }
 
-// --- DİĞER FONKSİYONLAR (UI) ---
+// --- UI / RENDER ---
 function renderTable() {
     const head = document.getElementById("tableHeader");
     head.innerHTML = `<th>SAATLER</th>` + gunler.map((g, i) => {
@@ -136,7 +122,7 @@ function checklistOlustur() {
 function toggleAdminPanel() { 
     const p = document.getElementById("adminPanel"); 
     p.classList.toggle("hidden"); 
-    if(!p.classList.contains("hidden")) { kapasitePaneliniCiz(); birimYonetimiCiz(); personelYonetimiCiz(); izinListesiCiz(); sabitAtamaListesiCiz(); } 
+    if(!p.classList.contains("hidden")) { kapasitePaneliniCiz(); birimYonetimiCiz(); personelYonetimiCiz(); sabitAtamaListesiCiz(); } 
 }
 
 function tabDegistir(name) {
@@ -146,7 +132,29 @@ function tabDegistir(name) {
     event.currentTarget.classList.add('active');
 }
 
-function guncelleK(b, s, t, v) { kapasiteAyarlari[b][s][t] = parseInt(v) || 0; localStorage.setItem("kapasiteAyarlari", JSON.stringify(kapasiteAyarlari)); }
+function sabitAtamaEkle() {
+    const isim = document.getElementById("sabitPersSec").value;
+    const gun = parseInt(document.getElementById("sabitGunSec").value);
+    const saat = document.getElementById("sabitSaatSec").value;
+    sabitAtamalar.push({ isim, gun, saat });
+    localStorage.setItem("sabitAtamalar", JSON.stringify(sabitAtamalar));
+    sabitAtamaListesiCiz();
+    tabloyuOlustur();
+}
+
+function sabitAtamaSil(idx) {
+    sabitAtamalar.splice(idx, 1);
+    localStorage.setItem("sabitAtamalar", JSON.stringify(sabitAtamalar));
+    sabitAtamaListesiCiz();
+}
+
+function sabitAtamaListesiCiz() {
+    document.getElementById("sabitPersSec").innerHTML = sabitPersoneller.map(p => `<option value="${p.isim}">${p.isim}</option>`).join('');
+    document.getElementById("sabitSaatSec").innerHTML = saatler.map(s => `<option value="${s}">${s}</option>`).join('');
+    document.getElementById("sabitListesi").innerHTML = sabitAtamalar.map((s, idx) => `
+        <div class="admin-list-item"><span>${s.isim} (${gunler[s.gun]} - ${s.saat})</span><button onclick="sabitAtamaSil(${idx})" class="btn-sm-danger">Kaldır</button></div>`).join('');
+}
+
 function kapasitePaneliniCiz() {
     const cont = document.getElementById("kapasiteListesi");
     let html = `<div class="cap-table-header"><div>Birimler</div>${saatler.map(s => `<div>${s.split('–')[0]}</div>`).join('')}</div>`;
@@ -160,17 +168,14 @@ function kapasitePaneliniCiz() {
     cont.innerHTML = html;
 }
 
-function birimEkle() { const ad = document.getElementById("yeniBirimAd").value.trim().toUpperCase(); if(ad) { birimSiralamasi.push(ad); localStorage.setItem("birimSiralamasi", JSON.stringify(birimSiralamasi)); baslat(); birimYonetimiCiz(); } }
-function birimYonetimiCiz() { document.getElementById("birimYonetimListesi").innerHTML = birimSiralamasi.map(b => `<div class="admin-list-item"><span>${b}</span><button onclick="birimSil('${b}')" class="btn-sm-danger">Sil</button></div>`).join(''); }
-function birimSil(b) { birimSiralamasi = birimSiralamasi.filter(x => x !== b); localStorage.setItem("birimSiralamasi", JSON.stringify(birimSiralamasi)); baslat(); birimYonetimiCiz(); }
+function guncelleK(b, s, t, v) { kapasiteAyarlari[b][s][t] = parseInt(v) || 0; localStorage.setItem("kapasiteAyarlari", JSON.stringify(kapasiteAyarlari)); }
+function birimYonetimiCiz() { document.getElementById("yeniPersBirim").innerHTML = birimSiralamasi.map(b => `<option value="${b}">${b}</option>`).join(''); }
 function personelEkle() { const isim = document.getElementById("yeniPersIsim").value.trim().toUpperCase(); const birim = document.getElementById("yeniPersBirim").value; if(isim) { sabitPersoneller.push({ id: Date.now(), isim, birim }); localStorage.setItem("sabitPersoneller", JSON.stringify(sabitPersoneller)); checklistOlustur(); personelYonetimiCiz(); } }
-function personelYonetimiCiz() { document.getElementById("yeniPersBirim").innerHTML = birimSiralamasi.map(b => `<option value="${b}">${b}</option>`).join(''); document.getElementById("personelYonetimListesi").innerHTML = sabitPersoneller.map(p => `<div class="admin-list-item"><span>${p.isim} (${p.birim})</span><button onclick="personelSil(${p.id})" class="btn-sm-danger">Sil</button></div>`).join(''); }
+function personelYonetimiCiz() { document.getElementById("personelYonetimListesi").innerHTML = sabitPersoneller.map(p => `<div class="admin-list-item"><span>${p.isim} (${p.birim})</span><button onclick="personelSil(${p.id})" class="btn-sm-danger">Sil</button></div>`).join(''); }
 function personelSil(id) { sabitPersoneller = sabitPersoneller.filter(p => p.id !== id); localStorage.setItem("sabitPersoneller", JSON.stringify(sabitPersoneller)); checklistOlustur(); personelYonetimiCiz(); }
-function izinEkle() { const isim = document.getElementById("izinPersSec").value; const gun = parseInt(document.getElementById("izinGunSec").value); oncedenIzinliler.push({ isim, gun }); localStorage.setItem("oncedenIzinliler", JSON.stringify(oncedenIzinliler)); izinListesiCiz(); }
-function izinSil(idx) { oncedenIzinliler.splice(idx, 1); localStorage.setItem("oncedenIzinliler", JSON.stringify(oncedenIzinliler)); izinListesiCiz(); }
-function izinListesiCiz() { document.getElementById("izinPersSec").innerHTML = sabitPersoneller.map(p => `<option value="${p.isim}">${p.isim}</option>`).join(''); document.getElementById("izinListesi").innerHTML = oncedenIzinliler.map((iz, idx) => `<div class="admin-list-item"><span>${iz.isim} - ${gunler[iz.gun]}</span><button onclick="izinSil(${idx})" class="btn-sm-danger">Sil</button></div>`).join(''); }
 function haftaDegistir(g) { mevcutPazartesi.setDate(mevcutPazartesi.getDate() + g); tabloyuOlustur(); }
-function toggleTheme() { document.body.classList.toggle("dark-mode"); localStorage.setItem("theme", document.body.classList.contains("dark-mode") ? "dark" : "light"); }
-function sifirla() { if(confirm("Tüm veriler silinsin mi?")) { localStorage.clear(); location.reload(); } }
+function toggleTheme() { document.body.classList.toggle("dark-mode"); }
+function sifirla() { if(confirm("Sıfırlansın mı?")) { localStorage.clear(); location.reload(); } }
+function exportExcel() { XLSX.writeFile(XLSX.utils.table_to_book(document.getElementById("vardiyaTablosu")), "Vardiya.xlsx"); }
 
 window.onload = baslat;
