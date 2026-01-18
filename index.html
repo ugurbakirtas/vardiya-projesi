@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PRO-Vardiya v26.5 | Çakışma Önleme</title>
+  <title>PRO-Vardiya v26.7 | MCR 2 Gün Üst Üste İzin</title>
   <link rel="stylesheet" href="style.css">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -12,7 +12,7 @@
   <div class="app-wrapper">
     <header class="main-header no-print">
       <div class="logo-area">
-        <div class="badge">V26.5 ÇAKIŞMA DÜZELTME</div>
+        <div class="badge">V26.7</div>
         <h1>TEKNİK <span>VARDİYA</span></h1>
         <p id="tarihAraligi" class="date-display">Yükleniyor...</p>
       </div>
@@ -40,13 +40,8 @@
             <div class="admin-input-group">
               <select id="sabitPersSec"></select>
               <select id="sabitGunSec">
-                <option value="0">Pazartesi</option>
-                <option value="1">Salı</option>
-                <option value="2">Çarşamba</option>
-                <option value="3">Perşembe</option>
-                <option value="4">Cuma</option>
-                <option value="5">Cumartesi</option>
-                <option value="6">Pazar</option>
+                <option value="0">Pazartesi</option><option value="1">Salı</option><option value="2">Çarşamba</option>
+                <option value="3">Perşembe</option><option value="4">Cuma</option><option value="5">Cumartesi</option><option value="6">Pazar</option>
               </select>
               <select id="sabitSaatSec"></select>
               <button onclick="sabitAtamaEkle()" class="btn-add">Ekle</button>
@@ -69,8 +64,8 @@
           </div>
 
           <div id="tab-sistem" class="tab-content hidden">
-            <button onclick="exportExcel()" class="btn-add" style="background:#16a34a; width:100%; margin-bottom:10px;">EXCEL İNDİR</button>
-            <button onclick="sifirla()" class="btn-reset">VERİLERİ SIFIRLA</button>
+             <button onclick="exportExcel()" class="btn-add" style="background:#16a34a; width:100%; margin-bottom:10px;">EXCEL İNDİR</button>
+             <button onclick="sifirla()" class="btn-reset">VERİLERİ SIFIRLA</button>
           </div>
         </div>
       </div>
