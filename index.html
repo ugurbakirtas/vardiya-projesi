@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PRO-Vardiya v27.0 | Gelişmiş Yönetim</title>
+  <title>PRO-Vardiya v27.1</title>
   <link rel="stylesheet" href="style.css">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -12,7 +12,7 @@
   <div class="app-wrapper">
     <header class="main-header no-print">
       <div class="logo-area">
-        <div class="badge">V27.0</div>
+        <div class="badge">V27.1</div>
         <h1>TEKNİK <span>VARDİYA</span></h1>
         <p id="tarihAraligi" class="date-display">Yükleniyor...</p>
       </div>
@@ -33,7 +33,7 @@
         </div>
         
         <div class="admin-tabs">
-          <button class="tab-btn" onclick="tabDegistir('sabit')">SABİT ATAMA</button>
+          <button class="tab-btn active" onclick="tabDegistir('sabit')">SABİT ATAMA</button>
           <button class="tab-btn" onclick="tabDegistir('personel')">PERSONEL / BİRİM</button>
           <button class="tab-btn" onclick="tabDegistir('kapasite')">KAPASİTE</button>
           <button class="tab-btn" onclick="tabDegistir('saatler')">SAATLER</button>
@@ -61,38 +61,38 @@
           </div>
 
           <div id="tab-personel" class="tab-content hidden">
-            <div class="admin-section-title">Birim Yönetimi</div>
-            <div class="admin-input-group">
-              <input type="text" id="yeniBirimInput" placeholder="Yeni Birim Adı">
-              <button onclick="birimEkle()" class="btn-add">Birim Ekle</button>
+            <div style="margin-bottom:20px; padding-bottom:10px; border-bottom:1px solid #ddd;">
+              <h3>Birim Ekle</h3>
+              <div class="admin-input-group">
+                <input type="text" id="yeniBirimInput" placeholder="Birim Adı (Örn: REJİ)">
+                <button onclick="birimEkle()" class="btn-add">Birim Ekle</button>
+              </div>
+              <div id="birimListesi" class="admin-list" style="max-height:100px;"></div>
             </div>
-            <div id="birimYonetimListesi" class="admin-list" style="max-height: 150px; margin-bottom: 20px;"></div>
-
-            <div class="admin-section-title">Personel Yönetimi</div>
+            <h3>Personel Ekle</h3>
             <div class="admin-input-group">
-              <input type="text" id="yeniPersonelAd" placeholder="Personel Adı">
+              <input type="text" id="yeniPersonelAd" placeholder="Ad Soyad">
               <select id="yeniPersonelBirim"></select>
               <button onclick="manuelPersonelEkle()" class="btn-add">Ekle</button>
             </div>
-            <div id="personelYonetimListesi" class="admin-list"></div>
+            <div id="personelListesi" class="admin-list"></div>
           </div>
 
           <div id="tab-kapasite" class="tab-content hidden">
-            <div class="info-box">Sol: Hafta İçi | Sağ (Kırmızı): Hafta Sonu</div>
             <div id="kapasiteListesi" class="cap-grid-container"></div>
           </div>
 
           <div id="tab-saatler" class="tab-content hidden">
             <div class="admin-input-group">
-              <input type="text" id="yeniSaatInput" placeholder="Örn: 08:30–17:30">
+              <input type="text" id="yeniSaatInput" placeholder="08:00–17:00">
               <button onclick="saatEkle()" class="btn-add">Saat Ekle</button>
             </div>
-            <div id="saatYonetimListesi" class="admin-list"></div>
+            <div id="saatListesiAdmin" class="admin-list"></div>
           </div>
 
           <div id="tab-sistem" class="tab-content hidden">
              <button onclick="exportExcel()" class="btn-add" style="background:#16a34a; width:100%; margin-bottom:10px;">EXCEL İNDİR</button>
-             <button onclick="sifirla()" class="btn-reset">TÜM VERİLERİ SIFIRLA</button>
+             <button onclick="sifirla()" class="btn-reset">VERİLERİ SIFIRLA</button>
           </div>
         </div>
       </div>
@@ -102,7 +102,6 @@
       <section class="checklist-section no-print">
         <div id="personelChecklist" class="checklist-horizontal-grid"></div>
       </section>
-      
       <div class="table-card">
         <table id="vardiyaTablosu">
           <thead><tr id="tableHeader"></tr></thead>
