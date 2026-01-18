@@ -15,7 +15,7 @@
       --border: #e2e8f0;
       --danger: #ef4444;
       --success: #22c55e;
-      --weekend-bg: #fee2e2; /* Hafta sonu için hafif kırmızımsı arka plan */
+      --weekend-bg: #fee2e2;
     }
 
     body {
@@ -79,10 +79,7 @@
       color: #64748b;
     }
 
-    .tab-btn.active {
-      background: var(--blue);
-      color: white;
-    }
+    .tab-btn.active { background: var(--blue); color: white; }
 
     .admin-section-box {
       background: #f1f5f9;
@@ -91,11 +88,7 @@
       margin-bottom: 15px;
     }
 
-    .admin-input-group {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
+    .admin-input-group { display: flex; gap: 10px; flex-wrap: wrap; }
 
     input, select {
       padding: 8px;
@@ -142,13 +135,23 @@
       opacity: 0.8;
     }
 
+    /* Kapasite Grid Ayarları */
+    .cap-grid-container { overflow-x: auto; }
+    
     .cap-row {
       display: grid;
-      grid-template-columns: 180px repeat(6, 1fr);
-      gap: 8px;
+      grid-template-columns: 180px repeat(6, minmax(80px, 1fr));
+      gap: 5px;
       align-items: center;
-      padding: 8px;
+      padding: 5px;
       border-bottom: 1px solid var(--border);
+    }
+
+    .cap-header {
+      background: var(--primary);
+      color: white;
+      font-weight: bold;
+      border-radius: 4px 4px 0 0;
     }
 
     .cap-input-item {
@@ -158,27 +161,11 @@
       gap: 2px;
       padding: 4px;
       border-radius: 4px;
+      border: 1px solid transparent;
     }
 
-    .weekend-input { background-color: var(--weekend-bg); }
-
+    .weekend-input { background-color: var(--weekend-bg); border-color: #fecaca; }
     .cap-input-item input { width: 40px; padding: 2px; text-align: center; font-weight: bold; }
-
-    .pers-list-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 10px;
-    }
-
-    .pers-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 8px;
-      background: white;
-      border-radius: 6px;
-      border: 1px solid var(--border);
-    }
 
     .unit-item {
         display: inline-flex;
@@ -192,6 +179,8 @@
     }
 
     .btn-del { color: var(--danger); border: none; background: none; cursor: pointer; font-weight: bold; margin-left: 10px; }
+    .pers-list-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+    .pers-item { display: flex; justify-content: space-between; align-items: center; padding: 8px; background: white; border-radius: 6px; border: 1px solid var(--border); }
 
     .hidden { display: none !important; }
     @media print { .no-print { display: none; } }
@@ -241,9 +230,9 @@
       </div>
 
       <div id="tab-kapasite" class="tab-content hidden">
-        <div style="margin-bottom:10px;">
+        <div style="margin-bottom:15px; padding:10px; background:#e2e8f0; border-radius:6px;">
             <span style="font-weight:600;">H: Hafta İçi</span> | 
-            <span style="background:var(--weekend-bg); padding:2px 5px; border-radius:3px; font-weight:600;">S: Hafta Sonu</span>
+            <span style="background:var(--weekend-bg); padding:2px 5px; border-radius:3px; font-weight:600; border:1px solid #fecaca;">S: Hafta Sonu Kapasitesi</span>
         </div>
         <div id="kapasiteTable" class="cap-grid-container"></div>
       </div>
@@ -251,7 +240,7 @@
       <div id="tab-sistem" class="tab-content hidden">
         <div style="background:#fee2e2; padding:20px; border-radius:8px; border:1px solid var(--danger);">
             <h3>Sistemi Sıfırla</h3>
-            <p>Tüm veriler (personeller, birimler ve kapasiteler) silinecektir.</p>
+            <p>Tüm veriler silinecektir. Bu işlem geri alınamaz.</p>
             <button onclick="sifirla()" class="btn-main-action" style="background:var(--danger)">VERİLERİ TEMİZLE</button>
         </div>
       </div>
@@ -259,7 +248,6 @@
 
     <main>
       <div id="personelChecklist" class="no-print" style="margin-bottom:15px; background:white; padding:10px; border-radius:8px; display:flex; flex-wrap:wrap; gap:10px;"></div>
-      
       <table id="vardiyaTablosu">
         <thead id="tableHeader"></thead>
         <tbody id="tableBody"></tbody>
@@ -274,11 +262,11 @@
     const UNIT_COLORS = { "TEKNİK YÖNETMEN": "#e74c3c", "SES OPERATÖRÜ": "#3498db", "PLAYOUT OPERATÖRÜ": "#2ecc71", "KJ OPERATÖRÜ": "#f1c40f", "24TV MCR OPERATÖRÜ": "#e67e22", "360TV MCR OPERATÖRÜ": "#d35400" };
 
     let state = {
-        birimler: JSON.parse(localStorage.getItem("v48_birimler")) || DEFAULT_UNITS,
-        saatler: JSON.parse(localStorage.getItem("v48_saatler")) || DEFAULT_SHIFTS,
-        personeller: JSON.parse(localStorage.getItem("v48_personeller")) || [],
-        kapasite: JSON.parse(localStorage.getItem("v48_kapasite")) || {},
-        manuelAtamalar: JSON.parse(localStorage.getItem("v48_manuelAtamalar")) || {}
+        birimler: JSON.parse(localStorage.getItem("v49_birimler")) || DEFAULT_UNITS,
+        saatler: JSON.parse(localStorage.getItem("v49_saatler")) || DEFAULT_SHIFTS,
+        personeller: JSON.parse(localStorage.getItem("v49_personeller")) || [],
+        kapasite: JSON.parse(localStorage.getItem("v49_kapasite")) || {},
+        manuelAtamalar: JSON.parse(localStorage.getItem("v49_manuelAtamalar")) || {}
     };
 
     let currentMonday = getMonday(new Date());
@@ -291,7 +279,7 @@
     }
 
     function save() {
-        Object.keys(state).forEach(k => localStorage.setItem(`v48_${k}`, JSON.stringify(state[k])));
+        Object.keys(state).forEach(k => localStorage.setItem(`v49_${k}`, JSON.stringify(state[k])));
     }
 
     function tabloyuOlustur() {
@@ -320,7 +308,7 @@
             }
         });
 
-        // 2. Teknik Yönetmen Gece Rotasyonu
+        // 2. Teknik Yönetmen ve Gece Vardiyası Kuralları
         for (let i = 0; i < 7; i++) {
             let geceSorumlusu = (i < 2) ? "BARIŞ İNCE" : "EKREM FİDAN";
             if (program[geceSorumlusu] && program[geceSorumlusu][i] === null) {
@@ -340,9 +328,12 @@
                     
                     if (mevcut < hedef) {
                         let adaylar = state.personeller.filter(p => p.birim === birim && program[p.ad][gun] === null && calismaSayisi[p.ad] < 6);
+                        
+                        // Teknik Yönetmen Gece Filtresi
                         if (birim === "TEKNİK YÖNETMEN" && saat === "00:00–07:00") {
                             adaylar = adaylar.filter(a => ["BARIŞ İNCE", "EKREM FİDAN"].includes(a.ad));
                         }
+
                         adaylar.sort((a, b) => calismaSayisi[a.ad] - calismaSayisi[b.ad]);
                         for (let j = 0; j < (hedef - mevcut) && adaylar[j]; j++) {
                             program[adaylar[j].ad][gun] = saat;
@@ -382,9 +373,35 @@
             </td>`).join('')}</tr>`;
     }
 
+    function kapasiteCiz() {
+        const box = document.getElementById("kapasiteTable");
+        
+        // Header Row (Saatler)
+        let header = `<div class="cap-row cap-header">
+            <div>Birimler / Saatler</div>
+            ${state.saatler.map(s => `<div>${s.split('–')[0]}</div>`).join('')}
+        </div>`;
+        
+        // Data Rows
+        let rows = state.birimler.map(b => `
+            <div class="cap-row">
+                <div style="font-weight:700; color:var(--primary);">${b}</div>
+                ${state.saatler.map(s => {
+                    const v = state.kapasite[`${b}_${s}`] || {h:0, hs:0};
+                    return `<div class="cap-input-item">
+                                <span>H: <input type="number" value="${v.h}" onchange="capUp('${b}_${s}','h',this.value)"></span>
+                                <span class="weekend-input">S: <input type="number" value="${v.hs}" onchange="capUp('${b}_${s}','hs',this.value)"></span>
+                            </div>`;
+                }).join('')}
+            </div>`).join('');
+            
+        box.innerHTML = header + rows;
+    }
+
+    function capUp(k, t, v) { state.kapasite[k] = state.kapasite[k] || {h:0, hs:0}; state.kapasite[k][t] = parseInt(v) || 0; save(); }
     function vardiyaDegistir(pAd, gunIndex) {
         let list = state.saatler.map((s,i) => `${i+1}- ${s}`).join('\n');
-        const secim = prompt(`${pAd} için vardiya:\n${list}\n\nİZİNLİ veya BOŞ yazın.`);
+        const secim = prompt(`${pAd} için vardiya:\n${list}\n\nİZİNLİ veya BOŞALT yazabilirsiniz.`);
         if (!secim) return;
         let sonuc = secim.toUpperCase();
         if (!isNaN(secim)) sonuc = state.saatler[parseInt(secim)-1];
@@ -394,11 +411,7 @@
         tabloyuOlustur();
     }
 
-    function toggleAdminPanel() { 
-        document.getElementById("adminPanel").classList.toggle("hidden"); 
-        refreshUI(); 
-    }
-
+    function toggleAdminPanel() { document.getElementById("adminPanel").classList.toggle("hidden"); refreshUI(); }
     function tabDegistir(t) { 
         document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -409,42 +422,14 @@
     function refreshUI() {
         const bSec = document.getElementById("yeniPersBirimSec");
         bSec.innerHTML = state.birimler.map(b => `<option value="${b}">${b}</option>`).join('');
-        
         const bList = document.getElementById("birimListesiAdmin");
-        bList.innerHTML = state.birimler.map((b, i) => `
-            <span class="unit-item">${b} <button onclick="birimSil(${i})" class="btn-del" style="color:white">×</button></span>
-        `).join('');
-
+        bList.innerHTML = state.birimler.map((b, i) => `<span class="unit-item">${b} <button onclick="birimSil(${i})" class="btn-del" style="color:white">×</button></span>`).join('');
         const pList = document.getElementById("persListesiAdmin");
-        pList.innerHTML = state.personeller.map((p, i) => `
-            <div class="pers-item">
-                <span>${p.ad} <small>(${p.birim})</small></span>
-                <button onclick="persSil(${i})" class="btn-del">SİL</button>
-            </div>
-        `).join('');
-        
+        pList.innerHTML = state.personeller.map((p, i) => `<div class="pers-item"><span>${p.ad} <small>(${p.birim})</small></span><button onclick="persSil(${i})" class="btn-del">SİL</button></div>`).join('');
         checklistOlustur();
         kapasiteCiz();
     }
 
-    function kapasiteCiz() {
-        const box = document.getElementById("kapasiteTable");
-        let rows = state.birimler.map(b => `
-            <div class="cap-row">
-                <div style="font-weight:600">${b}</div>
-                ${state.saatler.map(s => {
-                    const v = state.kapasite[`${b}_${s}`] || {h:0, hs:0};
-                    return `<div class="cap-input-item">
-                                <span>H: <input type="number" value="${v.h}" onchange="capUp('${b}_${s}','h',this.value)"></span>
-                                <span class="weekend-input">S: <input type="number" value="${v.hs}" onchange="capUp('${b}_${s}','hs',this.value)"></span>
-                            </div>`;
-                }).join('')}
-            </div>`).join('');
-        box.innerHTML = rows;
-    }
-
-    function capUp(k, t, v) { state.kapasite[k] = state.kapasite[k] || {h:0, hs:0}; state.kapasite[k][t] = parseInt(v) || 0; save(); }
-    
     function checklistOlustur() {
         document.getElementById("personelChecklist").innerHTML = state.personeller.map(p => `
             <label style="cursor:pointer; background:#f1f5f9; padding:5px 10px; border-radius:4px; font-size:10px;">
@@ -454,23 +439,18 @@
     }
 
     function haftaDegistir(v) { currentMonday.setDate(currentMonday.getDate() + v); tabloyuOlustur(); }
-    
     function birimEkle() {
         const b = document.getElementById("yeniBirimInp").value.toUpperCase().trim();
         if(b && !state.birimler.includes(b)) { state.birimler.push(b); save(); refreshUI(); }
     }
-
-    function birimSil(i) { if(confirm("Birimi silerseniz bu birimdeki kapasite ayarları da kaybolur. Emin misiniz?")) { state.birimler.splice(i, 1); save(); refreshUI(); } }
-
+    function birimSil(i) { if(confirm("Birim silinsin mi?")) { state.birimler.splice(i, 1); save(); refreshUI(); } }
     function personelEkle() {
         const ad = document.getElementById("yeniPersInp").value.toUpperCase().trim();
         const birim = document.getElementById("yeniPersBirimSec").value;
         if(ad) { state.personeller.push({ad, birim, id: Date.now()}); save(); document.getElementById("yeniPersInp").value = ""; refreshUI(); tabloyuOlustur(); }
     }
-
-    function persSil(i) { if(confirm("Personeli silmek istediğinize emin misiniz?")) { state.personeller.splice(i, 1); save(); refreshUI(); tabloyuOlustur(); } }
-
-    function sifirla() { if(confirm("TÜM VERİLER SİLİNECEK! Emin misiniz?")) { localStorage.clear(); location.reload(); } }
+    function persSil(i) { if(confirm("Personel silinsin mi?")) { state.personeller.splice(i, 1); save(); refreshUI(); tabloyuOlustur(); } }
+    function sifirla() { if(confirm("TÜM VERİLER SİLİNECEK!")) { localStorage.clear(); location.reload(); } }
 
     window.onload = () => { tabloyuOlustur(); refreshUI(); };
   </script>
