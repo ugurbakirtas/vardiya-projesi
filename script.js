@@ -1,6 +1,12 @@
 // --- 1. VERİ HAVUZU ---
 const DEFAULT_UNITS = ["TEKNİK YÖNETMEN", "SES OPERATÖRÜ", "PLAYOUT OPERATÖRÜ", "KJ OPERATÖRÜ", "INGEST OPERATÖRÜ", "BİLGİ İŞLEM", "YAYIN SİSTEMLERİ", "24TV MCR OPERATÖRÜ", "360TV MCR OPERATÖRÜ"];
 const DEFAULT_SHIFTS = ["06:30–16:00", "09:00–18:00", "12:00–22:00", "16:00–00:00", "00:00–07:00", "DIŞ YAYIN"];
+const UNIT_COLORS = {
+    "TEKNİK YÖNETMEN": "#e74c3c", "SES OPERATÖRÜ": "#3498db", "PLAYOUT OPERATÖRÜ": "#2ecc71",
+    "KJ OPERATÖRÜ": "#f1c40f", "INGEST OPERATÖRÜ": "#9b59b6", "BİLGİ İŞLEM": "#34495e",
+    "YAYIN SİSTEMLERİ": "#1abc9c", "24TV MCR OPERATÖRÜ": "#e67e22", "360TV MCR OPERATÖRÜ": "#d35400"
+};
+
 const DEFAULT_STAFF = [
     {ad: "CAN ŞENTUNALI", birim: "TEKNİK YÖNETMEN"}, {ad: "M.BERKMAN", birim: "TEKNİK YÖNETMEN"}, {ad: "EKREM FİDAN", birim: "TEKNİK YÖNETMEN"},
     {ad: "YUNUS EMRE YAYLA", birim: "TEKNİK YÖNETMEN"}, {ad: "H.CAN SAĞLAM", birim: "TEKNİK YÖNETMEN"}, {ad: "BARIŞ İNCE", birim: "TEKNİK YÖNETMEN"},
@@ -22,46 +28,31 @@ const DEFAULT_STAFF = [
 
 // --- 2. DURUM YÖNETİMİ ---
 let state = {
-    birimler: JSON.parse(localStorage.getItem("v28_birimler")) || DEFAULT_UNITS,
-    saatler: JSON.parse(localStorage.getItem("v28_saatler")) || DEFAULT_SHIFTS,
-    personeller: JSON.parse(localStorage.getItem("v28_personeller")) || DEFAULT_STAFF.map((p,i) => ({...p, id: 100+i})),
-    sabitAtamalar: JSON.parse(localStorage.getItem("v28_sabitAtamalar")) || [],
-    kapasite: JSON.parse(localStorage.getItem("v28_kapasite")) || {},
-    manuelIzinler: JSON.parse(localStorage.getItem("v28_manuelIzinler")) || {} // Personel ID -> [gün indisleri]
+    birimler: JSON.parse(localStorage.getItem("v29_birimler")) || DEFAULT_UNITS,
+    saatler: JSON.parse(localStorage.getItem("v29_saatler")) || DEFAULT_SHIFTS,
+    personeller: JSON.parse(localStorage.getItem("v29_personeller")) || DEFAULT_STAFF.map((p,i) => ({...p, id: 100+i})),
+    sabitAtamalar: JSON.parse(localStorage.getItem("v29_sabitAtamalar")) || [],
+    kapasite: JSON.parse(localStorage.getItem("v29_kapasite")) || {}
 };
 
 let currentMonday = getMonday(new Date());
 function getMonday(d) { d = new Date(d); let day = d.getDay(), diff = d.getDate() - day + (day == 0 ? -6 : 1); return new Date(d.setDate(diff)); }
-function save() { 
-    localStorage.setItem("v28_birimler", JSON.stringify(state.birimler)); 
-    localStorage.setItem("v28_saatler", JSON.stringify(state.saatler)); 
-    localStorage.setItem("v28_personeller", JSON.stringify(state.personeller)); 
-    localStorage.setItem("v28_sabitAtamalar", JSON.stringify(state.sabitAtamalar)); 
-    localStorage.setItem("v28_kapasite", JSON.stringify(state.kapasite));
-    localStorage.setItem("v28_manuelIzinler", JSON.stringify(state.manuelIzinler));
-}
+function save() { localStorage.setItem("v29_birimler", JSON.stringify(state.birimler)); localStorage.setItem("v29_saatler", JSON.stringify(state.saatler)); localStorage.setItem("v29_personeller", JSON.stringify(state.personeller)); localStorage.setItem("v29_sabitAtamalar", JSON.stringify(state.sabitAtamalar)); localStorage.setItem("v29_kapasite", JSON.stringify(state.kapasite)); }
 
-// --- 3. ANA MOTOR (KENDİNİ DÜZELTEN ALGORİTMA) ---
+// --- 3. AKILLI DAĞITIM MOTORU ---
 function tabloyuOlustur() {
     if(document.getElementById("tarihAraligi")) document.getElementById("tarihAraligi").innerText = `${currentMonday.toLocaleDateString('tr-TR')} Haftası`;
-    
     let program = {};
     let puanlar = {};
     const haftaSeed = currentMonday.getTime();
 
-    // Personelleri hazırla
     state.personeller.forEach(p => {
         program[p.ad] = Array(7).fill(null);
         puanlar[p.ad] = 0;
-        
-        // Checklist'ten gelen genel izin kontrolü
-        let chk = document.getElementById(`check_${p.id}`);
-        if(chk && chk.checked) {
-            program[p.ad].fill("İZİNLİ");
-        }
+        if(document.getElementById(`check_${p.id}`)?.checked) program[p.ad].fill("İZİNLİ");
     });
 
-    // 1. Sabit Atamalar (Öncelikli)
+    // 1. Sabit Atamalar
     state.sabitAtamalar.forEach(a => {
         if(program[a.p]) {
             if(a.g === "pzt_cum") {
@@ -73,16 +64,13 @@ function tabloyuOlustur() {
         }
     });
 
-    // 2. Teknik Yönetmen Gece Rotasyonu
+    // 2. Teknik Yönetmen Özel Gece Rotasyonu
     for(let i=0; i<7; i++) {
         let gececi = (i < 2) ? "BARIŞ İNCE" : "EKREM FİDAN";
-        if(program[gececi] && program[gececi][i] === null) {
-            program[gececi][i] = "00:00–07:00";
-            puanlar[gececi]++;
-        }
+        if(program[gececi] && program[gececi][i] === null) { program[gececi][i] = "00:00–07:00"; puanlar[gececi]++; }
     }
 
-    // 3. Dinamik Dağıtım (Boşlukları Otomatik Doldurur)
+    // 3. Dinamik Dağıtım (Kısıtlamalı)
     for(let i=0; i<7; i++) {
         let isWeekend = (i >= 5);
         state.birimler.forEach(birim => {
@@ -92,12 +80,20 @@ function tabloyuOlustur() {
                 let mevcut = state.personeller.filter(p => p.birim === birim && program[p.ad][i] === saat).length;
                 
                 if(mevcut < hedef) {
-                    let adaylar = state.personeller
-                        .filter(p => p.birim === birim && program[p.ad][i] === null)
-                        .sort((a, b) => {
-                            if(puanlar[a.ad] !== puanlar[b.ad]) return puanlar[a.ad] - puanlar[b.ad];
-                            return Math.sin(haftaSeed + a.id) - Math.sin(haftaSeed + b.id);
-                        });
+                    let adaylar = state.personeller.filter(p => {
+                        if(p.birim !== birim || program[p.ad][i] !== null) return false;
+                        
+                        // KISITLAMA 1: Haftalık 5 gün sınırı
+                        if(puanlar[p.ad] >= 5) return false;
+
+                        // KISITLAMA 2: Dinlenme süresi (Ertesi gün sabah 06:30 çakışması)
+                        if(i > 0 && program[p.ad][i-1] === "00:00–07:00" && saat.startsWith("06:30")) return false;
+
+                        return true;
+                    }).sort((a, b) => {
+                        if(puanlar[a.ad] !== puanlar[b.ad]) return puanlar[a.ad] - puanlar[b.ad];
+                        return Math.sin(haftaSeed + a.id) - Math.sin(haftaSeed + b.id);
+                    });
 
                     for(let j=0; j < (hedef - mevcut) && adaylar[j]; j++) {
                         program[adaylar[j].ad][i] = saat;
@@ -107,35 +103,45 @@ function tabloyuOlustur() {
             });
         });
     }
-    render(program);
+    render(program, puanlar);
 }
 
-// --- 4. GÖRSELLEŞTİRME VE KAYIT ---
-function render(program) {
-    const body = document.getElementById("tableBody");
-    if(!body) return;
+// --- 4. GÖRSELLEŞTİRME ---
+function render(program, puanlar) {
+    const body = document.getElementById("tableBody"); if(!body) return;
     let html = "";
     state.saatler.forEach(s => {
         html += `<tr><td><strong>${s}</strong></td>`;
         for(let i=0; i<7; i++) {
-            let list = state.personeller.filter(p => program[p.ad][i] === s)
-                .map(p => `<div class="birim-card"><span class="birim-tag">${p.birim}</span>${p.ad}</div>`).join('');
+            let list = state.personeller.filter(p => program[p.ad][i] === s).map(p => {
+                let color = UNIT_COLORS[p.birim] || "#666";
+                return `<div class="birim-card" style="border-left: 5px solid ${color}">
+                            <span class="birim-tag" style="background:${color}">${p.birim}</span>${p.ad}
+                        </div>`;
+            }).join('');
             html += `<td>${list}</td>`;
         }
         html += `</tr>`;
     });
     body.innerHTML = html;
 
+    // Yedek/İzinli Listesi
     let footHtml = `<tr><td><strong>İZİNLİ / YEDEK</strong></td>`;
     for(let i=0; i<7; i++) {
         let iz = state.personeller.filter(p => program[p.ad][i] === "İZİNLİ" || program[p.ad][i] === null)
-            .map(p => `<div class="birim-card izinli-kart"><span class="birim-tag">${p.birim}</span>${p.ad}</div>`).join('');
+            .map(p => `<div class="birim-card izinli-kart" style="opacity:0.7"><span class="birim-tag" style="background:#7f8c8d">${p.birim}</span>${p.ad}</div>`).join('');
         footHtml += `<td>${iz}</td>`;
     }
     document.getElementById("tableFooter").innerHTML = footHtml + "</tr>";
+
+    // İstatistik Güncelleme (Yan Liste)
+    state.personeller.forEach(p => {
+        const lbl = document.querySelector(`label[for="check_${p.id}"]`);
+        if(lbl) lbl.innerHTML = `${p.ad} <small style="color:#666">(${puanlar[p.ad]} Gün)</small>`;
+    });
 }
 
-// --- 5. YÖNETİM VE ETKİLEŞİM ---
+// --- 5. YÖNETİM PANELİ ---
 function refreshUI() {
     if(document.getElementById("persListesiAdmin")) document.getElementById("persListesiAdmin").innerHTML = state.personeller.map((p,i) => `<div class="admin-list-item">${p.ad} (${p.birim}) <button onclick="sil('personeller',${i})">SİL</button></div>`).join('');
     if(document.getElementById("yeniPersBirimSec")) document.getElementById("yeniPersBirimSec").innerHTML = state.birimler.map(b => `<option value="${b}">${b}</option>`).join('');
@@ -144,18 +150,26 @@ function refreshUI() {
 
     const tabSistem = document.getElementById("tab-sistem");
     if(tabSistem) {
-        let bHtml = `<h4>Birimler</h4><div class="admin-input-group"><input type="text" id="yInpB" placeholder="Birim Adı"><button onclick="birimEkle()">EKLE</button></div>`;
-        bHtml += state.birimler.map((b,i) => `<div class="admin-list-item">${b} <button onclick="sil('birimler',${i})">SİL</button></div>`).join('');
-        let sHtml = `<h4>Saatler</h4><div class="admin-input-group"><input type="text" id="yInpS" placeholder="00:00-00:00"><button onclick="saatEkle()">EKLE</button></div>`;
-        sHtml += state.saatler.map((s,i) => `<div class="admin-list-item">${s} <button onclick="sil('saatler',${i})">SİL</button></div>`).join('');
-        tabSistem.innerHTML = bHtml + "<hr>" + sHtml + `<hr><button class="btn-reset" onclick="sifirla()">SIFIRLA</button>`;
+        tabSistem.innerHTML = `
+            <h4>Birim Yönetimi</h4>
+            <div class="admin-input-group"><input type="text" id="yInpB" placeholder="Birim Adı"><button onclick="birimEkle()">EKLE</button></div>
+            ${state.birimler.map((b,i) => `<div class="admin-list-item">${b} <button onclick="sil('birimler',${i})">SİL</button></div>`).join('')}
+            <hr>
+            <h4>Saat Yönetimi</h4>
+            <div class="admin-input-group"><input type="text" id="yInpS" placeholder="00:00-00:00"><button onclick="saatEkle()">EKLE</button></div>
+            ${state.saatler.map((s,i) => `<div class="admin-list-item">${s} <button onclick="sil('saatler',${i})">SİL</button></div>`).join('')}
+            <hr>
+            <button class="btn-reset" onclick="sifirla()">SİSTEMİ SIFIRLA</button>
+        `;
     }
     checklistOlustur(); kapasiteCiz(); sabitAtamaListele();
 }
 
 function checklistOlustur() {
     const box = document.getElementById("personelChecklist");
-    if(box) box.innerHTML = state.personeller.sort((a,b) => state.birimler.indexOf(a.birim) - state.birimler.indexOf(b.birim)).map(p => `<div class="check-item"><input type="checkbox" id="check_${p.id}" onchange="tabloyuOlustur()"><label>${p.ad}</label></div>`).join('');
+    if(box) box.innerHTML = state.personeller.sort((a,b) => state.birimler.indexOf(a.birim) - state.birimler.indexOf(b.birim)).map(p => 
+        `<div class="check-item"><input type="checkbox" id="check_${p.id}" onchange="tabloyuOlustur()"><label for="check_${p.id}">${p.ad}</label></div>`
+    ).join('');
 }
 
 function kapasiteCiz() {
