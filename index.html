@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PRO-Vardiya v26.8 | Dinamik Saat Yönetimi</title>
+  <title>PRO-Vardiya v27.0 | Gelişmiş Yönetim</title>
   <link rel="stylesheet" href="style.css">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -12,7 +12,7 @@
   <div class="app-wrapper">
     <header class="main-header no-print">
       <div class="logo-area">
-        <div class="badge">V26.8</div>
+        <div class="badge">V27.0</div>
         <h1>TEKNİK <span>VARDİYA</span></h1>
         <p id="tarihAraligi" class="date-display">Yükleniyor...</p>
       </div>
@@ -33,8 +33,8 @@
         </div>
         
         <div class="admin-tabs">
-          <button class="tab-btn active" onclick="tabDegistir('sabit')">SABİT ATAMA</button>
-          <button class="tab-btn" onclick="tabDegistir('personel')">PERSONEL</button>
+          <button class="tab-btn" onclick="tabDegistir('sabit')">SABİT ATAMA</button>
+          <button class="tab-btn" onclick="tabDegistir('personel')">PERSONEL / BİRİM</button>
           <button class="tab-btn" onclick="tabDegistir('kapasite')">KAPASİTE</button>
           <button class="tab-btn" onclick="tabDegistir('saatler')">SAATLER</button>
           <button class="tab-btn" onclick="tabDegistir('sistem')">SİSTEM</button>
@@ -45,6 +45,7 @@
             <div class="admin-input-group">
               <select id="sabitPersSec"></select>
               <select id="sabitGunSec">
+                <option value="all">TÜM HAFTA</option>
                 <option value="0">Pazartesi</option>
                 <option value="1">Salı</option>
                 <option value="2">Çarşamba</option>
@@ -60,6 +61,14 @@
           </div>
 
           <div id="tab-personel" class="tab-content hidden">
+            <div class="admin-section-title">Birim Yönetimi</div>
+            <div class="admin-input-group">
+              <input type="text" id="yeniBirimInput" placeholder="Yeni Birim Adı">
+              <button onclick="birimEkle()" class="btn-add">Birim Ekle</button>
+            </div>
+            <div id="birimYonetimListesi" class="admin-list" style="max-height: 150px; margin-bottom: 20px;"></div>
+
+            <div class="admin-section-title">Personel Yönetimi</div>
             <div class="admin-input-group">
               <input type="text" id="yeniPersonelAd" placeholder="Personel Adı">
               <select id="yeniPersonelBirim"></select>

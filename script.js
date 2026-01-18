@@ -1,5 +1,5 @@
-// --- SABİT VERİLER VE BAŞLANGIÇ AYARLARI ---
-const birimSiralamasi = [
+// --- HAFIZA VE AYARLAR ---
+let birimSiralamasi = JSON.parse(localStorage.getItem("birimSiralamasi")) || [
   "TEKNİK YÖNETMEN", "SES OPERATÖRÜ", "PLAYOUT OPERATÖRÜ", "KJ OPERATÖRÜ",
   "INGEST OPERATÖRÜ", "BİLGİ İŞLEM", "YAYIN SİSTEMLERİ",
   "24TV MCR OPERATÖRÜ", "360TV MCR OPERATÖRÜ"
@@ -34,7 +34,6 @@ const asilPersonelListesi = [
   { isim: "EREN KAZAN", birim: "360TV MCR OPERATÖRÜ" }, { isim: "MUSAB YAKUP DEMİRBAŞ", birim: "360TV MCR OPERATÖRÜ" }
 ];
 
-// Hafıza Yönetimi
 let sabitPersoneller = JSON.parse(localStorage.getItem("sabitPersoneller")) || asilPersonelListesi.map((p, i) => ({ ...p, id: Date.now() + i }));
 let kapasiteAyarlari = JSON.parse(localStorage.getItem("kapasiteAyarlari")) || {};
 let sabitAtamalar = JSON.parse(localStorage.getItem("sabitAtamalar")) || [];
@@ -52,29 +51,21 @@ function getMonday(d) {
 
 // --- BAŞLATMA ---
 function baslat() {
-  // Varsayılan kapasite boşsa doldur
-  if (Object.keys(kapasiteAyarlari).length === 0) {
-    birimSiralamasi.forEach(b => {
-      kapasiteAyarlari[b] = {};
-      saatler.forEach(s => {
-        let hici = (b === "TEKNİK YÖNETMEN" && s === "06:30–16:00") ? 2 : 
-                   (b.includes("MCR") && ["06:30–16:00", "16:00–00:00", "00:00–07:00"].includes(s)) ? 1 : 0;
-        kapasiteAyarlari[b][s] = { haftaici: hici, haftasonu: hici };
-      });
-    });
-  }
-
-  const bSel = document.getElementById("yeniPersonelBirim");
-  if(bSel) bSel.innerHTML = birimSiralamasi.map(b => `<option value="${b}">${b}</option>`).join('');
-
+  birimSelectGuncelle();
   checklistOlustur();
   tabloyuOlustur();
 }
 
-// --- YÖNETİM PANELİ ---
+function birimSelectGuncelle() {
+  const pBirimSel = document.getElementById("yeniPersonelBirim");
+  if(pBirimSel) pBirimSel.innerHTML = birimSiralamasi.map(b => `<option value="${b}">${b}</option>`).join('');
+}
+
+// --- YÖNETİM PANELİ SEKME YÖNETİMİ ---
 function toggleAdminPanel() {
-  document.getElementById("adminPanel").classList.toggle("hidden");
-  if (!document.getElementById("adminPanel").classList.contains("hidden")) tabDegistir('sabit');
+  const panel = document.getElementById("adminPanel");
+  panel.classList.toggle("hidden");
+  if (!panel.classList.contains("hidden")) tabDegistir('sabit');
 }
 
 function tabDegistir(name) {
@@ -84,53 +75,94 @@ function tabDegistir(name) {
   const target = document.getElementById('tab-' + name);
   if (target) target.classList.remove('hidden');
 
-  const btn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.innerText.toLowerCase().includes(name.substring(0,3)));
-  if(btn) btn.classList.add('active');
+  const buttons = document.querySelectorAll('.tab-btn');
+  buttons.forEach(btn => {
+    if (btn.getAttribute('onclick').includes(`'${name}'`)) btn.classList.add('active');
+  });
 
-  if (name === 'personel') personelYonetimiCiz();
+  if (name === 'personel') { personelYonetimiCiz(); birimYonetimiCiz(); }
   if (name === 'kapasite') kapasitePaneliniCiz();
   if (name === 'sabit') sabitAtamaListesiCiz();
   if (name === 'saatler') saatYonetimiCiz();
 }
 
-// --- YENİ: SAAT YÖNETİMİ ---
-function saatYonetimiCiz() {
-  const cont = document.getElementById("tab-saatler") || document.createElement('div');
-  // Eğer HTML'de tab-saatler yoksa dinamik oluştur (Sizin index.html'e göre manuel ekleme de yapabilirsiniz)
-  cont.innerHTML = `
-    <div class="admin-input-group">
-      <input type="text" id="yeniSaatInput" placeholder="Örn: 08:00–17:00">
-      <button onclick="saatEkle()" class="btn-add">Ekle</button>
+// --- BİRİM YÖNETİMİ (YENİ) ---
+function birimYonetimiCiz() {
+  const cont = document.getElementById("birimYonetimListesi");
+  if(!cont) return;
+  cont.innerHTML = birimSiralamasi.map((b, idx) => `
+    <div class="admin-list-item">
+      <span>${b}</span>
+      <button onclick="birimSil(${idx})" class="btn-reset" style="width:auto; padding:2px 8px;">SİL</button>
     </div>
-    <div class="admin-list" id="saatListesiContainer">
-      ${saatler.map((s, idx) => `
-        <div class="admin-list-item">
-          <span>${s}</span>
-          <button onclick="saatSil(${idx})" class="btn-reset" style="width:auto; padding:2px 8px;">SİL</button>
-        </div>
-      `).join('')}
-    </div>
-  `;
+  `).join('');
 }
 
-function saatEkle() {
-  const s = document.getElementById("yeniSaatInput").value.trim();
-  if(!s) return;
-  saatler.push(s);
-  localStorage.setItem("saatler", JSON.stringify(saatler));
-  document.getElementById("yeniSaatInput").value = "";
-  saatYonetimiCiz();
+function birimEkle() {
+  const input = document.getElementById("yeniBirimInput");
+  const yeniBirim = input.value.trim().toUpperCase();
+  if(!yeniBirim) return;
+  if(birimSiralamasi.includes(yeniBirim)) return alert("Bu birim zaten var.");
+  
+  birimSiralamasi.push(yeniBirim);
+  localStorage.setItem("birimSiralamasi", JSON.stringify(birimSiralamasi));
+  input.value = "";
+  birimYonetimiCiz();
+  birimSelectGuncelle();
+}
+
+function birimSil(idx) {
+  if(confirm("Birimi silmek bu birimdeki personellerin görünümünü etkileyebilir. Emin misiniz?")) {
+    birimSiralamasi.splice(idx, 1);
+    localStorage.setItem("birimSiralamasi", JSON.stringify(birimSiralamasi));
+    birimYonetimiCiz();
+    birimSelectGuncelle();
+  }
+}
+
+// --- SABİT ATAMALAR (TÜM HAFTA ÖZELLİĞİ EKLENDİ) ---
+function sabitAtamaEkle() {
+  const isim = document.getElementById("sabitPersSec").value;
+  const gunVal = document.getElementById("sabitGunSec").value;
+  const saat = document.getElementById("sabitSaatSec").value;
+
+  if (gunVal === "all") {
+    // 0'dan 6'ya tüm günleri ekle
+    for (let i = 0; i < 7; i++) {
+      // Mükerrer kaydı önlemek için önce temizle (isteğe bağlı)
+      sabitAtamalar = sabitAtamalar.filter(a => !(a.isim === isim && a.gun === i));
+      sabitAtamalar.push({ isim, gun: i, saat });
+    }
+  } else {
+    const gun = parseInt(gunVal);
+    sabitAtamalar = sabitAtamalar.filter(a => !(a.isim === isim && a.gun === gun));
+    sabitAtamalar.push({ isim, gun, saat });
+  }
+
+  localStorage.setItem("sabitAtamalar", JSON.stringify(sabitAtamalar));
+  sabitAtamaListesiCiz();
   tabloyuOlustur();
 }
 
-function saatSil(idx) {
-  saatler.splice(idx, 1);
-  localStorage.setItem("saatler", JSON.stringify(saatler));
-  saatYonetimiCiz();
+function sabitAtamaListesiCiz() {
+  document.getElementById("sabitPersSec").innerHTML = sabitPersoneller.map(p => `<option value="${p.isim}">${p.isim}</option>`).join('');
+  document.getElementById("sabitSaatSec").innerHTML = saatler.map(s => `<option value="${s}">${s}</option>`).join('');
+  document.getElementById("sabitListesi").innerHTML = sabitAtamalar.sort((a,b) => a.gun - b.gun).map((s, idx) => `
+    <div class="admin-list-item">
+      <span>${s.isim} | ${gunler[s.gun]} | ${s.saat}</span>
+      <button onclick="sabitAtamaSil(${idx})" class="btn-reset" style="width:auto; padding:2px 8px;">SİL</button>
+    </div>
+  `).join('');
+}
+
+function sabitAtamaSil(idx) {
+  sabitAtamalar.splice(idx, 1);
+  localStorage.setItem("sabitAtamalar", JSON.stringify(sabitAtamalar));
+  sabitAtamaListesiCiz();
   tabloyuOlustur();
 }
 
-// --- PERSONEL VE KAPASİTE (MEVCUT FONKSİYONLAR) ---
+// --- DİĞER YÖNETİM FONKSİYONLARI ---
 function personelYonetimiCiz() {
   document.getElementById("personelYonetimListesi").innerHTML = sabitPersoneller.map(p => `
     <div class="admin-list-item">
@@ -143,9 +175,10 @@ function personelYonetimiCiz() {
 function manuelPersonelEkle() {
   const ad = document.getElementById("yeniPersonelAd").value.trim().toUpperCase();
   const birim = document.getElementById("yeniPersonelBirim").value;
-  if (!ad) return alert("İsim?");
+  if (!ad) return;
   sabitPersoneller.push({ isim: ad, birim: birim, id: Date.now() });
   localStorage.setItem("sabitPersoneller", JSON.stringify(sabitPersoneller));
+  document.getElementById("yeniPersonelAd").value = "";
   personelYonetimiCiz();
   checklistOlustur();
   tabloyuOlustur();
@@ -159,6 +192,32 @@ function personelSil(id) {
   tabloyuOlustur();
 }
 
+function saatYonetimiCiz() {
+  document.getElementById("saatYonetimListesi").innerHTML = saatler.map((s, idx) => `
+    <div class="admin-list-item">
+      <span>${s}</span>
+      <button onclick="saatSil(${idx})" class="btn-reset" style="width:auto; padding:2px 8px;">SİL</button>
+    </div>
+  `).join('');
+}
+
+function saatEkle() {
+  const input = document.getElementById("yeniSaatInput");
+  if(!input.value) return;
+  saatler.push(input.value);
+  localStorage.setItem("saatler", JSON.stringify(saatler));
+  input.value = "";
+  saatYonetimiCiz();
+  tabloyuOlustur();
+}
+
+function saatSil(idx) {
+  saatler.splice(idx, 1);
+  localStorage.setItem("saatler", JSON.stringify(saatler));
+  saatYonetimiCiz();
+  tabloyuOlustur();
+}
+
 function kapasitePaneliniCiz() {
   const cont = document.getElementById("kapasiteListesi");
   if(!cont) return;
@@ -166,10 +225,11 @@ function kapasitePaneliniCiz() {
   birimSiralamasi.forEach(b => {
     html += `<div class="cap-row"><strong>${b}</strong>`;
     saatler.forEach(s => {
-      html += `<div class="cap-input-group">
-        <input type="number" value="${kapasiteAyarlari[b]?.[s]?.haftaici || 0}" onchange="gK('${b}','${s}','haftaici',this.value)">
-        <input type="number" class="input-hs" value="${kapasiteAyarlari[b]?.[s]?.haftasonu || 0}" onchange="gK('${b}','${s}','haftasonu',this.value)">
-      </div>`;
+      html += `
+        <div class="cap-input-group">
+          <input type="number" value="${kapasiteAyarlari[b]?.[s]?.haftaici || 0}" onchange="gK('${b}','${s}','haftaici',this.value)">
+          <input type="number" class="input-hs" value="${kapasiteAyarlari[b]?.[s]?.haftasonu || 0}" onchange="gK('${b}','${s}','haftasonu',this.value)">
+        </div>`;
     });
     html += `</div>`;
   });
@@ -177,42 +237,14 @@ function kapasitePaneliniCiz() {
 }
 
 function gK(b, s, t, v) {
-  if(!kapasiteAyarlari[b]) kapasiteAyarlari[b] = {};
-  if(!kapasiteAyarlari[b][s]) kapasiteAyarlari[b][s] = {};
+  if (!kapasiteAyarlari[b]) kapasiteAyarlari[b] = {};
+  if (!kapasiteAyarlari[b][s]) kapasiteAyarlari[b][s] = {};
   kapasiteAyarlari[b][s][t] = parseInt(v) || 0;
   localStorage.setItem("kapasiteAyarlari", JSON.stringify(kapasiteAyarlari));
   tabloyuOlustur();
 }
 
-function sabitAtamaListesiCiz() {
-  document.getElementById("sabitPersSec").innerHTML = sabitPersoneller.map(p => `<option value="${p.isim}">${p.isim}</option>`).join('');
-  document.getElementById("sabitSaatSec").innerHTML = saatler.map(s => `<option value="${s}">${s}</option>`).join('');
-  document.getElementById("sabitListesi").innerHTML = sabitAtamalar.map((s, idx) => `
-    <div class="admin-list-item">
-      <span>${s.isim} | ${gunler[s.gun]} | ${s.saat}</span>
-      <button onclick="sabitAtamaSil(${idx})" class="btn-reset" style="width:auto; padding:2px 8px;">SİL</button>
-    </div>
-  `).join('');
-}
-
-function sabitAtamaEkle() {
-  const isim = document.getElementById("sabitPersSec").value;
-  const gun = parseInt(document.getElementById("sabitGunSec").value);
-  const saat = document.getElementById("sabitSaatSec").value;
-  sabitAtamalar.push({ isim, gun, saat });
-  localStorage.setItem("sabitAtamalar", JSON.stringify(sabitAtamalar));
-  sabitAtamaListesiCiz();
-  tabloyuOlustur();
-}
-
-function sabitAtamaSil(idx) {
-  sabitAtamalar.splice(idx, 1);
-  localStorage.setItem("sabitAtamalar", JSON.stringify(sabitAtamalar));
-  sabitAtamaListesiCiz();
-  tabloyuOlustur();
-}
-
-// --- VARDİYA MOTORU (BARIŞ/EKREM VE MCR KORUNDU) ---
+// --- VARDİYA MOTORU ---
 function tabloyuOlustur() {
   document.getElementById("tarihAraligi").innerText = `${mevcutPazartesi.toLocaleDateString('tr-TR')} Haftası`;
   haftalikProgram = {};
@@ -264,6 +296,7 @@ function adilAtamaYap() {
         let kap = isHS ? (kapasiteAyarlari[birim]?.[s]?.haftasonu || 0) : (kapasiteAyarlari[birim]?.[s]?.haftaici || 0);
         let suan = sabitPersoneller.filter(p => p.birim === birim && haftalikProgram[p.isim][gun] === s).length;
         let adaylar = sabitPersoneller.filter(p => p.birim === birim && haftalikProgram[p.isim][gun] === null);
+        
         if (birim === "TEKNİK YÖNETMEN" && s === "00:00–07:00") return;
 
         adaylar.sort((a, b) => counts[a.isim] - counts[b.isim]);
@@ -310,12 +343,7 @@ function checklistOlustur() {
     .map(p => `<div class="check-item"><input type="checkbox" id="check_${p.id}" onchange="tabloyuOlustur()"><label for="check_${p.id}">${p.isim}</label></div>`).join('');
 }
 
+// --- YARDIMCI ARAÇLAR ---
 function haftaDegistir(g) { mevcutPazartesi.setDate(mevcutPazartesi.getDate() + g); tabloyuOlustur(); }
 function toggleTheme() { document.body.classList.toggle("dark-mode"); }
-function sifirla() { if(confirm("Sıfırlansın mı?")) { localStorage.clear(); location.reload(); } }
-function exportExcel() {
-  const wb = XLSX.utils.table_to_book(document.getElementById("vardiyaTablosu"), { sheet: "Vardiya" });
-  XLSX.writeFile(wb, `Vardiya_${mevcutPazartesi.toLocaleDateString('tr-TR')}.xlsx`);
-}
-
-window.onload = baslat;
+function sifirla() { if(confirm("DİKKAT! Tüm ay
