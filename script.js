@@ -28,62 +28,46 @@ const DEFAULT_STAFF = [
 
 // --- 2. DURUM YÖNETİMİ ---
 let state = {
-    birimler: JSON.parse(localStorage.getItem("v30_birimler")) || DEFAULT_UNITS,
-    saatler: JSON.parse(localStorage.getItem("v30_saatler")) || DEFAULT_SHIFTS,
-    personeller: JSON.parse(localStorage.getItem("v30_personeller")) || DEFAULT_STAFF.map((p,i) => ({...p, id: 100+i})),
-    sabitAtamalar: JSON.parse(localStorage.getItem("v30_sabitAtamalar")) || [],
-    kapasite: JSON.parse(localStorage.getItem("v30_kapasite")) || {}
+    birimler: JSON.parse(localStorage.getItem("v32_birimler")) || DEFAULT_UNITS,
+    saatler: JSON.parse(localStorage.getItem("v32_saatler")) || DEFAULT_SHIFTS,
+    personeller: JSON.parse(localStorage.getItem("v32_personeller")) || DEFAULT_STAFF.map((p,i) => ({...p, id: 100+i})),
+    sabitAtamalar: JSON.parse(localStorage.getItem("v32_sabitAtamalar")) || [],
+    kapasite: JSON.parse(localStorage.getItem("v32_kapasite")) || {}
 };
 
 let currentMonday = getMonday(new Date());
 function getMonday(d) { d = new Date(d); let day = d.getDay(), diff = d.getDate() - day + (day == 0 ? -6 : 1); return new Date(d.setDate(diff)); }
-function save() { localStorage.setItem("v30_birimler", JSON.stringify(state.birimler)); localStorage.setItem("v30_saatler", JSON.stringify(state.saatler)); localStorage.setItem("v30_personeller", JSON.stringify(state.personeller)); localStorage.setItem("v30_sabitAtamalar", JSON.stringify(state.sabitAtamalar)); localStorage.setItem("v30_kapasite", JSON.stringify(state.kapasite)); }
+function save() { localStorage.setItem("v32_birimler", JSON.stringify(state.birimler)); localStorage.setItem("v32_saatler", JSON.stringify(state.saatler)); localStorage.setItem("v32_personeller", JSON.stringify(state.personeller)); localStorage.setItem("v32_sabitAtamalar", JSON.stringify(state.sabitAtamalar)); localStorage.setItem("v32_kapasite", JSON.stringify(state.kapasite)); }
 
 // --- 3. ANA MOTOR ---
 function tabloyuOlustur() {
     if(document.getElementById("tarihAraligi")) document.getElementById("tarihAraligi").innerText = `${currentMonday.toLocaleDateString('tr-TR')} Haftası`;
     let program = {};
-    let istatistik = {}; // {ad: {toplam: 0, gece: 0}}
+    let calismaSayisi = {}; 
     const haftaSeed = currentMonday.getTime();
 
     state.personeller.forEach(p => {
         program[p.ad] = Array(7).fill(null);
-        istatistik[p.ad] = { toplam: 0, gece: 0 };
+        calismaSayisi[p.ad] = 0;
         if(document.getElementById(`check_${p.id}`)?.checked) program[p.ad].fill("İZİNLİ");
     });
 
-    // 1. Sabit Atamalar
     state.sabitAtamalar.forEach(a => {
         if(program[a.p]) {
             if(a.g === "pzt_cum") {
-                for(let i=0; i<5; i++) if(program[a.p][i] !== "İZİNLİ") { 
-                    program[a.p][i] = a.s; 
-                    istatistik[a.p].toplam++;
-                    if(a.s.includes("00:00")) istatistik[a.p].gece++;
-                }
+                for(let i=0; i<5; i++) if(program[a.p][i] !== "İZİNLİ") { program[a.p][i] = a.s; calismaSayisi[a.p]++; }
                 program[a.p][5] = program[a.p][6] = "İZİNLİ";
             } else {
-                let g = parseInt(a.g); 
-                if(program[a.p][g] !== "İZİNLİ") { 
-                    program[a.p][g] = a.s; 
-                    istatistik[a.p].toplam++;
-                    if(a.s.includes("00:00")) istatistik[a.p].gece++;
-                }
+                let g = parseInt(a.g); if(program[a.p][g] !== "İZİNLİ") { program[a.p][g] = a.s; calismaSayisi[a.p]++; }
             }
         }
     });
 
-    // 2. Teknik Yönetmen Gece Rotasyonu
     for(let i=0; i<7; i++) {
         let gececi = (i < 2) ? "BARIŞ İNCE" : "EKREM FİDAN";
-        if(program[gececi] && program[gececi][i] === null) { 
-            program[gececi][i] = "00:00–07:00"; 
-            istatistik[gececi].toplam++; 
-            istatistik[gececi].gece++;
-        }
+        if(program[gececi] && program[gececi][i] === null) { program[gececi][i] = "00:00–07:00"; calismaSayisi[gececi]++; }
     }
 
-    // 3. Dinamik Dağıtım
     for(let i=0; i<7; i++) {
         let isWeekend = (i >= 5);
         state.birimler.forEach(birim => {
@@ -95,28 +79,27 @@ function tabloyuOlustur() {
                 if(mevcut < hedef) {
                     let adaylar = state.personeller.filter(p => {
                         if(p.birim !== birim || program[p.ad][i] !== null) return false;
-                        if(istatistik[p.ad].toplam >= 5) return false; // Haftalık limit
-                        if(i > 0 && program[p.ad][i-1] === "00:00–07:00" && saat.startsWith("06:30")) return false; // Dinlenme
+                        if(calismaSayisi[p.ad] >= 5) return false; 
+                        if(i > 0 && program[p.ad][i-1] === "00:00–07:00" && saat.startsWith("06:30")) return false;
                         return true;
                     }).sort((a, b) => {
-                        if(istatistik[a.ad].toplam !== istatistik[b.ad].toplam) return istatistik[a.ad].toplam - istatistik[b.ad].toplam;
+                        if(calismaSayisi[a.ad] !== calismaSayisi[b.ad]) return calismaSayisi[a.ad] - calismaSayisi[b.ad];
                         return Math.sin(haftaSeed + a.id) - Math.sin(haftaSeed + b.id);
                     });
 
                     for(let j=0; j < (hedef - mevcut) && adaylar[j]; j++) {
                         program[adaylar[j].ad][i] = saat;
-                        istatistik[adaylar[j].ad].toplam++;
-                        if(saat.includes("00:00")) istatistik[adaylar[j].ad].gece++;
+                        calismaSayisi[adaylar[j].ad]++;
                     }
                 }
             });
         });
     }
-    render(program, istatistik);
+    render(program, calismaSayisi);
 }
 
 // --- 4. GÖRSELLEŞTİRME ---
-function render(program, istatistik) {
+function render(program, calismaSayisi) {
     const body = document.getElementById("tableBody"); if(!body) return;
     let html = "";
     state.saatler.forEach(s => {
@@ -134,73 +117,46 @@ function render(program, istatistik) {
     });
     body.innerHTML = html;
 
-    // Yedek/İzinli Satırı
     let footHtml = `<tr><td><strong>İZİNLİ / YEDEK</strong></td>`;
     for(let i=0; i<7; i++) {
         let iz = state.personeller.filter(p => program[p.ad][i] === "İZİNLİ" || program[p.ad][i] === null)
-            .map(p => `<div class="birim-card izinli-kart"><span class="birim-tag" style="background:#7f8c8d">${p.birim}</span>${p.ad}</div>`).join('');
+            .map(p => `<div class="birim-card izinli-kart" style="opacity:0.7"><span class="birim-tag" style="background:#7f8c8d">${p.birim}</span>${p.ad}</div>`).join('');
         footHtml += `<td>${iz}</td>`;
     }
     document.getElementById("tableFooter").innerHTML = footHtml + "</tr>";
 
-    // --- YENİ: İSTATİSTİK ÖZET SATIRI ---
-    let statHtml = `<tr><td style="background:#f9f9f9"><strong>HAFTALIK ÖZET</strong></td>`;
+    // --- ÖZET SATIRI: SADECE SAYILAR ---
+    let statHtml = `<tr><td style="background:#f2f2f2"><strong>HAFTALIK ÖZET</strong></td>`;
     for(let i=0; i<7; i++) {
-        // Her gün için o gün çalışanların listesi ve haftalık toplamları
         let dailyStats = state.personeller.filter(p => program[p.ad][i] !== "İZİNLİ" && program[p.ad][i] !== null)
-            .map(p => `<div style="font-size:11px; margin-bottom:2px; border-bottom:1px dashed #eee">
-                        ${p.ad}: <strong>${istatistik[p.ad].toplam}G</strong> / ${istatistik[p.ad].gece}N
-                      </div>`).join('');
-        statHtml += `<td style="vertical-align:top; background:#fdfdfd">${dailyStats}</td>`;
+            .map(p => {
+                let izinSayisi = 0;
+                for(let g=0; g<7; g++) { if(program[p.ad][g] === "İZİNLİ" || program[p.ad][g] === null) izinSayisi++; }
+                
+                return `<div style="font-size:11px; margin-bottom:4px; border-bottom:1px solid #eee; padding-bottom:2px">
+                            ${p.ad}<br>
+                            <span style="color:#27ae60"><strong>${calismaSayisi[p.ad]}G</strong></span> | 
+                            <span style="color:#c0392b">İzin: ${izinSayisi}</span>
+                        </div>`;
+            }).join('');
+        statHtml += `<td style="vertical-align:top; background:#f9f9f9">${dailyStats}</td>`;
     }
     document.getElementById("tableFooter").innerHTML += statHtml + "</tr>";
 }
 
-// --- 5. DİĞER FONKSİYONLAR ---
 function refreshUI() {
     if(document.getElementById("persListesiAdmin")) document.getElementById("persListesiAdmin").innerHTML = state.personeller.map((p,i) => `<div class="admin-list-item">${p.ad} (${p.birim}) <button onclick="sil('personeller',${i})">SİL</button></div>`).join('');
     if(document.getElementById("yeniPersBirimSec")) document.getElementById("yeniPersBirimSec").innerHTML = state.birimler.map(b => `<option value="${b}">${b}</option>`).join('');
     if(document.getElementById("sabitPersSec")) document.getElementById("sabitPersSec").innerHTML = state.personeller.map(p => `<option value="${p.ad}">${p.ad}</option>`).join('');
     if(document.getElementById("sabitSaatSec")) document.getElementById("sabitSaatSec").innerHTML = state.saatler.map(s => `<option value="${s}">${s}</option>`).join('');
-
     const tabSistem = document.getElementById("tab-sistem");
     if(tabSistem) {
-        tabSistem.innerHTML = `
-            <h4>Birim Yönetimi</h4>
-            <div class="admin-input-group"><input type="text" id="yInpB" placeholder="Birim Adı"><button onclick="birimEkle()">EKLE</button></div>
-            ${state.birimler.map((b,i) => `<div class="admin-list-item">${b} <button onclick="sil('birimler',${i})">SİL</button></div>`).join('')}
-            <hr>
-            <h4>Saat Yönetimi</h4>
-            <div class="admin-input-group"><input type="text" id="yInpS" placeholder="00:00-00:00"><button onclick="saatEkle()">EKLE</button></div>
-            ${state.saatler.map((s,i) => `<div class="admin-list-item">${s} <button onclick="sil('saatler',${i})">SİL</button></div>`).join('')}
-            <hr>
-            <button class="btn-reset" onclick="sifirla()">SİSTEMİ SIFIRLA</button>
-        `;
+        tabSistem.innerHTML = `<h4>Birim Yönetimi</h4><div class="admin-input-group"><input type="text" id="yInpB" placeholder="Birim Adı"><button onclick="birimEkle()">EKLE</button></div>${state.birimler.map((b,i) => `<div class="admin-list-item">${b} <button onclick="sil('birimler',i)">SİL</button></div>`).join('')}<hr><h4>Saat Yönetimi</h4><div class="admin-input-group"><input type="text" id="yInpS" placeholder="00:00-00:00"><button onclick="saatEkle()">EKLE</button></div>${state.saatler.map((s,i) => `<div class="admin-list-item">${s} <button onclick="sil('saatler',i)">SİL</button></div>`).join('')}<hr><button class="btn-reset" onclick="sifirla()">SİSTEMİ SIFIRLA</button>`;
     }
     checklistOlustur(); kapasiteCiz(); sabitAtamaListele();
 }
-
-function checklistOlustur() {
-    const box = document.getElementById("personelChecklist");
-    if(box) box.innerHTML = state.personeller.sort((a,b) => state.birimler.indexOf(a.birim) - state.birimler.indexOf(b.birim)).map(p => 
-        `<div class="check-item"><input type="checkbox" id="check_${p.id}" onchange="tabloyuOlustur()"><label for="check_${p.id}">${p.ad}</label></div>`
-    ).join('');
-}
-
-function kapasiteCiz() {
-    const kTab = document.getElementById("kapasiteTable"); if(!kTab) return;
-    let h = `<div class="cap-table-header"><div>Birimler</div>${state.saatler.map(s => `<div>${s.split('–')[0]}</div>`).join('')}</div>`;
-    state.birimler.forEach(b => {
-        h += `<div class="cap-row"><strong>${b}</strong>`;
-        state.saatler.forEach(s => {
-            let k = `${b}_${s}`; let v = state.kapasite[k] || {h:0, hs:0};
-            h += `<div class="cap-input-group"><input type="number" value="${v.h}" onchange="capSave('${k}','h',this.value)"><input type="number" class="input-hs" value="${v.hs}" onchange="capSave('${k}','hs',this.value)"></div>`;
-        });
-        h += `</div>`;
-    });
-    kTab.innerHTML = h;
-}
-
+function checklistOlustur() { const box = document.getElementById("personelChecklist"); if(box) box.innerHTML = state.personeller.sort((a,b) => state.birimler.indexOf(a.birim) - state.birimler.indexOf(b.birim)).map(p => `<div class="check-item"><input type="checkbox" id="check_${p.id}" onchange="tabloyuOlustur()"><label for="check_${p.id}">${p.ad}</label></div>`).join(''); }
+function kapasiteCiz() { const kTab = document.getElementById("kapasiteTable"); if(!kTab) return; let h = `<div class="cap-table-header"><div>Birimler</div>${state.saatler.map(s => `<div>${s.split('–')[0]}</div>`).join('')}</div>`; state.birimler.forEach(b => { h += `<div class="cap-row"><strong>${b}</strong>`; state.saatler.forEach(s => { let k = `${b}_${s}`; let v = state.kapasite[k] || {h:0, hs:0}; h += `<div class="cap-input-group"><input type="number" value="${v.h}" onchange="capSave('${k}','h',this.value)"><input type="number" class="input-hs" value="${v.hs}" onchange="capSave('${k}','hs',this.value)"></div>`; }); h += `</div>`; }); kTab.innerHTML = h; }
 function capSave(k, t, v) { if(!state.kapasite[k]) state.kapasite[k] = {h:0, hs:0}; state.kapasite[k][t] = parseInt(v) || 0; save(); tabloyuOlustur(); }
 function birimEkle() { let v = document.getElementById("yInpB").value.toUpperCase(); if(v){ state.birimler.push(v); save(); refreshUI(); } }
 function saatEkle() { let v = document.getElementById("yInpS").value; if(v){ state.saatler.push(v); save(); refreshUI(); tabloyuOlustur(); } }
@@ -211,6 +167,5 @@ function toggleAdminPanel() { document.getElementById("adminPanel").classList.to
 function haftaDegistir(v) { currentMonday.setDate(currentMonday.getDate() + (v * 7)); tabloyuOlustur(); }
 function sifirla() { if(confirm("Tüm veriler silinecek!")) { localStorage.clear(); location.reload(); } }
 function sabitAtamaEkle() { state.sabitAtamalar.push({p: document.getElementById("sabitPersSec").value, g: document.getElementById("sabitGunSec").value, s: document.getElementById("sabitSaatSec").value}); save(); refreshUI(); tabloyuOlustur(); }
-function sabitAtamaListele() { if(document.getElementById("sabitAtamaListesi")) document.getElementById("sabitAtamaListesi").innerHTML = state.sabitAtamalar.map((a,i) => `<div class="admin-list-item">${a.p} | ${a.g} | ${a.s} <button onclick="sil('sabitAtamalar',${i})">SİL</button></div>`).join(''); }
-
+function sabitAtamaListele() { if(document.getElementById("sabitAtamaListesi")) document.getElementById("sabitAtamaListesi").innerHTML = state.sabitAtamalar.map((a,i) => `<div class="admin-list-item">${a.p} | ${a.g} | ${a.s} <button onclick="sil('sabitAtamalar',i)">SİL</button></div>`).join(''); }
 window.onload = () => { refreshUI(); tabloyuOlustur(); };
