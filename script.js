@@ -34,7 +34,7 @@ const UNIT_COLORS = {
     "360TV MCR OPERATÖRÜ": "#d35400"
 };
 
-// Daha kapsamlı başlangıç kapasitesi
+// Başlangıç kapasite değerleri (gerçekçi başlangıç için ayarlandı)
 const DEFAULT_KAPASITE = {
     "TEKNİK YÖNETMEN_06:30–16:00":   {h:1, hs:1},
     "TEKNİK YÖNETMEN_09:00–18:00":   {h:1, hs:1},
@@ -42,29 +42,20 @@ const DEFAULT_KAPASITE = {
     "TEKNİK YÖNETMEN_16:00–00:00":   {h:1, hs:1},
     "TEKNİK YÖNETMEN_00:00–07:00":   {h:1, hs:1},
 
-    "SES OPERATÖRÜ_06:30–16:00":     {h:3, hs:2},
-    "SES OPERATÖRÜ_09:00–18:00":     {h:3, hs:2},
+    "SES OPERATÖRÜ_06:30–16:00":     {h:4, hs:3},
+    "SES OPERATÖRÜ_09:00–18:00":     {h:2, hs:2},
     "SES OPERATÖRÜ_12:00–22:00":     {h:2, hs:2},
-    "SES OPERATÖRÜ_16:00–00:00":     {h:2, hs:2},
+    "SES OPERATÖRÜ_16:00–00:00":     {h:3, hs:2},
     "SES OPERATÖRÜ_00:00–07:00":     {h:1, hs:1},
 
-    "PLAYOUT OPERATÖRÜ_06:30–16:00": {h:2, hs:1},
+    "PLAYOUT OPERATÖRÜ_06:30–16:00": {h:3, hs:2},
     "PLAYOUT OPERATÖRÜ_09:00–18:00": {h:2, hs:1},
     "PLAYOUT OPERATÖRÜ_12:00–22:00": {h:2, hs:1},
-    "PLAYOUT OPERATÖRÜ_16:00–00:00": {h:2, hs:1},
+    "PLAYOUT OPERATÖRÜ_16:00–00:00": {h:3, hs:2},
 
-    "KJ OPERATÖRÜ_06:30–16:00":      {h:1, hs:1},
-    "KJ OPERATÖRÜ_16:00–00:00":      {h:1, hs:1},
+    "KJ OPERATÖRÜ_06:30–16:00":      {h:3, hs:2},
+    "KJ OPERATÖRÜ_16:00–00:00":      {h:2, hs:2},
     "KJ OPERATÖRÜ_00:00–07:00":      {h:1, hs:1},
-
-    "INGEST OPERATÖRÜ_09:00–18:00":  {h:2, hs:1},
-    "INGEST OPERATÖRÜ_12:00–22:00":  {h:1, hs:1},
-
-    "24TV MCR OPERATÖRÜ_00:00–07:00":{h:1, hs:1},
-    "24TV MCR OPERATÖRÜ_16:00–00:00":{h:1, hs:1},
-
-    "360TV MCR OPERATÖRÜ_00:00–07:00":{h:1, hs:1},
-    "360TV MCR OPERATÖRÜ_16:00–00:00":{h:1, hs:1},
 };
 
 let state = {
@@ -90,7 +81,6 @@ function save() {
     });
 }
 
-// --- 2. ANA FONKSİYONLAR ---
 function tabloyuOlustur() {
     const haftaKey = currentMonday.toISOString().split('T')[0];
     document.getElementById("tarihAraligi").innerText = `${currentMonday.toLocaleDateString('tr-TR')} Haftası`;
@@ -150,18 +140,16 @@ function tabloyuOlustur() {
                         .filter(p => 
                             p.birim === birim &&
                             program[p.ad][gun] === null &&
-                            calismaSayisi[p.ad] < 5
+                            calismaSayisi[p.ad] < 6  // Haftalık max 6 gün
                         )
                         .sort((a,b) => calismaSayisi[a.ad] - calismaSayisi[b.ad]);
 
                     let eklenecek = hedef - mevcut;
                     for (let j = 0; j < eklenecek && adaylar[j]; j++) {
-                        // Gece kısıtı biraz yumuşatıldı - sadece rotasyon dışı için
                         if (birim === "TEKNİK YÖNETMEN" && saat === "00:00–07:00" && 
                             !["BARIŞ İNCE", "EKREM FİDAN"].includes(adaylar[j].ad)) {
                             continue;
                         }
-
                         program[adaylar[j].ad][gun] = saat;
                         calismaSayisi[adaylar[j].ad]++;
                     }
@@ -169,11 +157,6 @@ function tabloyuOlustur() {
             });
         });
     }
-
-    // Hata ayıklama için console'a bilgi yaz
-    console.log("=== VARDİYA OLUŞTURMA SONUÇLARI ===");
-    console.log("Program:", program);
-    console.log("Çalışma sayıları:", calismaSayisi);
 
     render(program);
 }
@@ -206,7 +189,7 @@ function render(program) {
             ${[0,1,2,3,4,5,6].map(gun => `
                 <td>
                     ${state.personeller
-                        .filter(p => !program[p.ad][gun] || program[p.ad][gun] === "İZİNLİ")
+                        .filter(p => program[p.ad][gun] === null || program[p.ad][gun] === "İZİNLİ")
                         .map(p => `
                             <div class="birim-card izinli-kart" onclick="vardiyaDegistir('${p.ad}',${gun})">
                                 ${p.ad}${program[p.ad][gun] === "İZİNLİ" ? " (İzinli)" : ""}
@@ -217,7 +200,8 @@ function render(program) {
         </tr>`;
 }
 
-// --- 3. YÖNETİM VE ETKİLEŞİM FONKSİYONLARI ---
+// Diğer fonksiyonlar (vardiyaDegistir, personelEkle, refreshUI, kapasiteCiz, capSave, checklistOlustur, toggleAdminPanel, tabDegistir, haftaDegistir, sil, sifirla, whatsappKopyala) aynı kalıyor
+
 function vardiyaDegistir(pAd, gunIndex) {
     const sirali = [...state.saatler];
     let mesaj = `${pAd} için vardiya seç:\n` +
@@ -357,18 +341,45 @@ function whatsappKopyala() {
     alert("Henüz tam çalışmıyor.\nŞimdilik tabloyu ekran görüntüsü alarak paylaşabilirsiniz.");
 }
 
-// Başlangıç - Daha fazla örnek personel
+// BAŞLANGIÇ - SADECE senin verdiğin 28 kişi
 window.onload = () => {
     if (state.personeller.length === 0) {
         state.personeller = [
-            {ad: "CAN ŞENTUNALI",   birim: "TEKNİK YÖNETMEN", id: 1001},
-            {ad: "EKREM FİDAN",     birim: "TEKNİK YÖNETMEN", id: 1002},
-            {ad: "BARIŞ İNCE",      birim: "TEKNİK YÖNETMEN", id: 1003},
-            {ad: "ANIL RİŞVAN",     birim: "SES OPERATÖRÜ",   id: 1004},
-            {ad: "MEHMET YILMAZ",   birim: "SES OPERATÖRÜ",   id: 1005},
-            {ad: "FATİH KAYA",      birim: "SES OPERATÖRÜ",   id: 1006},
-            {ad: "AYŞE DEMİR",      birim: "PLAYOUT OPERATÖRÜ", id: 1007},
-            {ad: "BURAK ÖZDEMİR",   birim: "PLAYOUT OPERATÖRÜ", id: 1008},
+            // TEKNİK YÖNETMEN
+            {ad: "CAN ŞENTUNALI",     birim: "TEKNİK YÖNETMEN", id: Date.now() + 1},
+            {ad: "M. BERKMAN",        birim: "TEKNİK YÖNETMEN", id: Date.now() + 2},
+            {ad: "YUNUS EMRE YAYLA",  birim: "TEKNİK YÖNETMEN", id: Date.now() + 3},
+            {ad: "H. CAN SAĞLAM",     birim: "TEKNİK YÖNETMEN", id: Date.now() + 4},
+            {ad: "BARIŞ İNCE",        birim: "TEKNİK YÖNETMEN", id: Date.now() + 5},
+            {ad: "EKREM FİDAN",       birim: "TEKNİK YÖNETMEN", id: Date.now() + 6},
+
+            // SES OPERATÖRÜ
+            {ad: "ANIL RİŞVAN",       birim: "SES OPERATÖRÜ", id: Date.now() + 7},
+            {ad: "ULVİ MUTLUBAŞ",     birim: "SES OPERATÖRÜ", id: Date.now() + 8},
+            {ad: "ZAFER AKAR",        birim: "SES OPERATÖRÜ", id: Date.now() + 9},
+            {ad: "ERDOĞAN KÜÇÜKKAYA", birim: "SES OPERATÖRÜ", id: Date.now() + 10},
+            {ad: "OSMAN DİNÇER",      birim: "SES OPERATÖRÜ", id: Date.now() + 11},
+            {ad: "DOĞUŞ MALGIL",      birim: "SES OPERATÖRÜ", id: Date.now() + 12},
+            {ad: "ENES KALE",         birim: "SES OPERATÖRÜ", id: Date.now() + 13},
+            {ad: "ERSAN TİLBE",       birim: "SES OPERATÖRÜ", id: Date.now() + 14},
+
+            // PLAYOUT OPERATÖRÜ
+            {ad: "NEHİR KAYGUSUZ",         birim: "PLAYOUT OPERATÖRÜ", id: Date.now() + 15},
+            {ad: "KADİR ÇAÇAN",            birim: "PLAYOUT OPERATÖRÜ", id: Date.now() + 16},
+            {ad: "MUSTAFA ERCÜMENT KILIÇ", birim: "PLAYOUT OPERATÖRÜ", id: Date.now() + 17},
+            {ad: "İBRAHİM SERİNSÖZ",       birim: "PLAYOUT OPERATÖRÜ", id: Date.now() + 18},
+            {ad: "YUSUF ALPKILIÇ",         birim: "PLAYOUT OPERATÖRÜ", id: Date.now() + 19},
+            {ad: "SENA MİNARECİ",          birim: "PLAYOUT OPERATÖRÜ", id: Date.now() + 20},
+            {ad: "MEHMET TUNÇ",            birim: "PLAYOUT OPERATÖRÜ", id: Date.now() + 21},
+
+            // KJ OPERATÖRÜ
+            {ad: "YUSUF İSLAM TORUN", birim: "KJ OPERATÖRÜ", id: Date.now() + 22},
+            {ad: "CEMREHAN SUBAŞI",   birim: "KJ OPERATÖRÜ", id: Date.now() + 23},
+            {ad: "UĞUR AKBABA",       birim: "KJ OPERATÖRÜ", id: Date.now() + 24},
+            {ad: "SENA BAYDAR",       birim: "KJ OPERATÖRÜ", id: Date.now() + 25},
+            {ad: "OĞUZHAN YALAZAN",   birim: "KJ OPERATÖRÜ", id: Date.now() + 26},
+            {ad: "YEŞİM KİREÇ",       birim: "KJ OPERATÖRÜ", id: Date.now() + 27},
+            {ad: "PINAR ÖZENÇ",       birim: "KJ OPERATÖRÜ", id: Date.now() + 28},
         ];
         save();
     }
