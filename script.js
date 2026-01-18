@@ -47,44 +47,8 @@ function getMonday(d) {
   return new Date(d.setDate(diff));
 }
 
-// --- BAŞLATMA VE PANEL YÖNETİMİ ---
-
-window.onload = function() {
-  baslat();
-  setupPanelEvents();
-};
-
-function baslat() {
-  const defaultKapasite = {
-    "TEKNİK YÖNETMEN": {
-      "06:30–16:00": { haftaici: 2, haftasonu: 1 },
-      "09:00–18:00": { haftaici: 0, haftasonu: 1 },
-      "16:00–00:00": { haftaici: 1, haftasonu: 1 },
-      "00:00–07:00": { haftaici: 1, haftasonu: 1 }
-    }
-  };
-
-  birimSiralamasi.forEach(birim => {
-    if (!defaultKapasite[birim]) defaultKapasite[birim] = {};
-    saatler.forEach(s => {
-      if (!defaultKapasite[birim][s]) {
-        let hici = birim.includes("MCR") && ["06:30–16:00", "16:00–00:00", "00:00–07:00"].includes(s) ? 1 : 0;
-        defaultKapasite[birim][s] = { haftaici: hici, haftasonu: hici };
-      }
-    });
-  });
-
-  kapasiteAyarlari = { ...defaultKapasite, ...JSON.parse(localStorage.getItem("kapasiteAyarlari") || "{}") };
-  
-  birimSelectDoldur();
-  kapasitePaneliniCiz();
-  personelListesiniCiz();
-  checklistOlustur();
-  tabloyuOlustur();
-}
-
+// --- PANEL VE SEKME YÖNETİMİ ---
 function setupPanelEvents() {
-  // Sekme Geçişleri
   document.querySelectorAll('.tab-btn').forEach(btn => {
     btn.onclick = () => {
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -95,8 +59,6 @@ function setupPanelEvents() {
   });
 }
 
-// --- YÖNETİM FONKSİYONLARI ---
-
 function birimSelectDoldur() {
   const sel = document.getElementById("yeniPersonelBirim");
   if(sel) sel.innerHTML = birimSiralamasi.map(b => `<option value="${b}">${b}</option>`).join('');
@@ -106,7 +68,6 @@ function manuelPersonelEkle() {
   const ad = document.getElementById("yeniPersonelAd").value.trim().toUpperCase();
   const birim = document.getElementById("yeniPersonelBirim").value;
   if(!ad) return alert("İsim giriniz!");
-  
   sabitPersoneller.push({ isim: ad, birim: birim, id: Date.now() });
   localStorage.setItem("sabitPersoneller", JSON.stringify(sabitPersoneller));
   document.getElementById("yeniPersonelAd").value = "";
@@ -125,8 +86,7 @@ function personelSil(id) {
 
 function personelListesiniCiz() {
   const cont = document.getElementById("personelYonetimListesi");
-  if(!cont) return;
-  cont.innerHTML = sabitPersoneller.map(p => `
+  if(cont) cont.innerHTML = sabitPersoneller.map(p => `
     <div class="admin-list-item">
       <span><strong>${p.birim}</strong>: ${p.isim}</span>
       <button onclick="personelSil(${p.id})" class="btn-reset" style="padding:2px 8px; margin:0;">SİL</button>
@@ -143,10 +103,8 @@ function kapasitePaneliniCiz() {
       ${saatler.map(s => `
         <div class="cap-input-group">
           <small>${s}</small>
-          <input type="number" value="${kapasiteAyarlari[birim][s]?.haftaici || 0}" 
-            onchange="kapasiteGuncelle('${birim}','${s}','haftaici',this.value)">
-          <input type="number" class="input-hs" value="${kapasiteAyarlari[birim][s]?.haftasonu || 0}" 
-            onchange="kapasiteGuncelle('${birim}','${s}','haftasonu',this.value)">
+          <input type="number" value="${kapasiteAyarlari[birim][s]?.haftaici || 0}" onchange="kapasiteGuncelle('${birim}','${s}','haftaici',this.value)">
+          <input type="number" class="input-hs" value="${kapasiteAyarlari[birim][s]?.haftasonu || 0}" onchange="kapasiteGuncelle('${birim}','${s}','haftasonu',this.value)">
         </div>
       `).join('')}
     </div>
@@ -162,17 +120,18 @@ function kapasiteGuncelle(birim, saat, tip, deger) {
 }
 
 // --- VARDİYA MOTORU ---
-
 function tabloyuOlustur() {
   document.getElementById("tarihAraligi").innerText = `${mevcutPazartesi.toLocaleDateString('tr-TR')} Haftası`;
   haftalikProgram = {};
   
   sabitPersoneller.forEach(p => {
     haftalikProgram[p.isim] = Array(7).fill(null);
-    if (document.getElementById(`check_${p.id}`)?.checked) haftalikProgram[p.isim].fill("İZİNLİ");
+    if (document.getElementById(`check_${p.id}`)?.checked) {
+        haftalikProgram[p.isim].fill("İZİNLİ");
+    }
   });
 
-  // 1. MCR Döngüsü
+  // 1. MCR Döngüsü (2-2-2-2)
   const refDate = new Date("2026-01-19");
   const diff = Math.floor((mevcutPazartesi - refDate) / (1000 * 60 * 60 * 24));
   ["24TV MCR OPERATÖRÜ", "360TV MCR OPERATÖRÜ"].forEach(birim => {
@@ -188,7 +147,7 @@ function tabloyuOlustur() {
     });
   });
 
-  // 2. Teknik Yönetmen Gece (Pzt-Sal: Barış, Diğer: Ekrem)
+  // 2. Teknik Yönetmen Gece Rotasyonu
   for (let i = 0; i < 7; i++) {
     let sorumlu = (i < 2) ? "BARIŞ İNCE" : "EKREM FİDAN";
     if (haftalikProgram[sorumlu] && haftalikProgram[sorumlu][i] !== "İZİNLİ") {
@@ -214,7 +173,7 @@ function adilAtamaYap() {
         let suan = sabitPersoneller.filter(p => p.birim === birim && haftalikProgram[p.isim][gun] === s).length;
         
         let adaylar = sabitPersoneller.filter(p => p.birim === birim && haftalikProgram[p.isim][gun] === null);
-        if (birim === "TEKNİK YÖNETMEN" && s === "00:00–07:00") return;
+        if (birim === "TEKNİK YÖNETMEN" && s === "00:00–07:00") return; // Sadece Barış/Ekrem geceye girebilir
 
         adaylar.sort((a, b) => counts[a.isim] - counts[b.isim]);
         for (let k = 0; k < (kap - suan) && adaylar.length > 0; k++) {
@@ -240,21 +199,16 @@ function renderTable() {
     body += `<tr><td><strong>${s}</strong></td>`;
     for (let i = 0; i < 7; i++) {
       let html = sabitPersoneller.filter(p => haftalikProgram[p.isim][i] === s)
+        .sort((a,b) => birimSiralamasi.indexOf(a.birim) - birimSiralamasi.indexOf(b.birim))
         .map(p => `<div class="birim-card"><span class="birim-tag">${p.birim}</span>${p.isim}</div>`).join('');
       body += `<td>${html}</td>`;
     }
     body += `</tr>`;
   });
   document.getElementById("tableBody").innerHTML = body;
-}
 
-function checklistOlustur() {
-  const cont = document.getElementById("personelChecklist");
-  if(cont) cont.innerHTML = sabitPersoneller.sort((a,b) => birimSiralamasi.indexOf(a.birim) - birimSiralamasi.indexOf(b.birim))
-    .map(p => `<div class="check-item"><input type="checkbox" id="check_${p.id}" onchange="tabloyuOlustur()"><label for="check_${p.id}">${p.isim}</label></div>`).join('');
-}
-
-function haftaDegistir(g) { mevcutPazartesi.setDate(mevcutPazartesi.getDate() + g); tabloyuOlustur(); }
-function toggleAdminPanel() { document.getElementById("adminPanel").classList.toggle("hidden"); }
-function toggleTheme() { document.body.classList.toggle("dark-mode"); }
-function sifirla() { if(confirm("Tüm veriler silinecek?")) { localStorage.clear(); location.reload(); } }
+  // İzinli Satırı Geri Geldi
+  let footerHtml = `<tr><td style="background:#f1f5f9"><strong>İZİNLİ</strong></td>`;
+  for (let i = 0; i < 7; i++) {
+    let izinliler = sabitPersoneller.filter(p => haftalikProgram[p.isim][i] === "İZİNLİ")
+      .map(p => `<div class="birim-card izinli-kart"><span class="birim-tag">${p.birim}</span>
