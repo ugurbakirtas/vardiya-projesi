@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PRO-Vardiya v26.0 | Kurumsal Yönetim</title>
+  <title>PRO-Vardiya v26.0 | Alt İzin Satırı & Manuel Kontrol</title>
   <link rel="stylesheet" href="style.css">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -35,16 +35,15 @@
           <button class="tab-btn active" onclick="tabDegistir('atama')">Sabit Atamalar</button>
           <button class="tab-btn" onclick="tabDegistir('personel')">Personel/Birim Ekle</button>
           <button class="tab-btn" onclick="tabDegistir('kapasite')">Kapasite</button>
-          <button class="tab-btn" onclick="tabDegistir('sistem')">Sistem / Excel</button>
+          <button class="tab-btn" onclick="tabDegistir('sistem')">Sistem</button>
         </div>
         
         <div class="tab-body">
           <div id="tab-atama" class="tab-content">
-            <div class="info-box">Belirli bir günü veya <b>tüm haftayı</b> sabitleyebilirsiniz.</div>
             <div class="admin-form">
               <select id="sabitPersSec"></select>
               <select id="sabitGunSec">
-                <option value="all">TÜM HAFTA (SABİT)</option>
+                <option value="all">TÜM HAFTA</option>
                 <option value="0">Pazartesi</option><option value="1">Salı</option>
                 <option value="2">Çarşamba</option><option value="3">Perşembe</option>
                 <option value="4">Cuma</option><option value="5">Cumartesi</option>
@@ -70,7 +69,6 @@
           </div>
 
           <div id="tab-sistem" class="tab-content hidden">
-            <input type="file" id="excelInput" accept=".xlsx, .xls" onchange="excelYukle(event)" class="btn-add" style="background:#2563eb; width:100%; margin-bottom:10px; padding:10px;">
             <button onclick="exportExcel()" class="btn-add" style="background:#16a34a; width:100%; margin-bottom:10px;">VARDİYAYI EXCEL İNDİR</button>
             <button onclick="sifirla()" class="btn-reset">TÜM VERİLERİ SIFIRLA</button>
           </div>
@@ -80,16 +78,15 @@
 
     <main class="content-area">
       <section class="checklist-section no-print">
-        <h3>İzinli Personel Seçimi (Vardiyaya Dahil Edilmezler)</h3>
+        <h3>Haftalık İzinli Personel Seçimi</h3>
         <div id="personelChecklist" class="checklist-horizontal-grid"></div>
       </section>
 
       <div class="table-card" id="print-area">
         <table id="vardiyaTablosu">
-          <thead>
-            <tr id="tableHeader"></tr>
-          </thead>
+          <thead><tr id="tableHeader"></tr></thead>
           <tbody id="tableBody"></tbody>
+          <tfoot id="tableFooter"></tfoot>
         </table>
       </div>
     </main>
