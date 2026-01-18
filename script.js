@@ -1,5 +1,5 @@
 // --- 1. AYARLAR VE VERİ DURUMU ---
-const ADMIN_PASSWORD = "admin123"; // Buradan şifreyi değiştirebilirsin
+const ADMIN_PASSWORD = "admin123"; 
 const DEFAULT_UNITS = ["TEKNİK YÖNETMEN", "SES OPERATÖRÜ", "PLAYOUT OPERATÖRÜ", "KJ OPERATÖRÜ", "INGEST OPERATÖRÜ", "BİLGİ İŞLEM", "YAYIN SİSTEMLERİ", "24TV MCR OPERATÖRÜ", "360TV MCR OPERATÖRÜ"];
 const DEFAULT_SHIFTS = ["06:30–16:00", "09:00–18:00", "12:00–22:00", "16:00–00:00", "00:00–07:00", "DIŞ YAYIN"];
 const UNIT_COLORS = { "TEKNİK YÖNETMEN": "#e74c3c", "SES OPERATÖRÜ": "#3498db", "PLAYOUT OPERATÖRÜ": "#2ecc71", "KJ OPERATÖRÜ": "#f1c40f", "INGEST OPERATÖRÜ": "#9b59b6", "BİLGİ İŞLEM": "#34495e", "YAYIN SİSTEMLERİ": "#1abc9c", "24TV MCR OPERATÖRÜ": "#e67e22", "360TV MCR OPERATÖRÜ": "#d35400" };
@@ -24,32 +24,25 @@ const DEFAULT_STAFF = [
 ];
 
 let state = {
-    birimler: JSON.parse(localStorage.getItem("v41_birimler")) || DEFAULT_UNITS,
-    saatler: JSON.parse(localStorage.getItem("v41_saatler")) || DEFAULT_SHIFTS,
-    personeller: JSON.parse(localStorage.getItem("v41_personeller")) || DEFAULT_STAFF.map((p,i) => ({...p, id: 800+i})),
-    sabitAtamalar: JSON.parse(localStorage.getItem("v41_sabitAtamalar")) || [],
-    kapasite: JSON.parse(localStorage.getItem("v41_kapasite")) || {},
-    manuelAtamalar: JSON.parse(localStorage.getItem("v41_manuelAtamalar")) || {}
+    birimler: JSON.parse(localStorage.getItem("v42_birimler")) || DEFAULT_UNITS,
+    saatler: JSON.parse(localStorage.getItem("v42_saatler")) || DEFAULT_SHIFTS,
+    personeller: JSON.parse(localStorage.getItem("v42_personeller")) || DEFAULT_STAFF.map((p,i) => ({...p, id: 900+i})),
+    kapasite: JSON.parse(localStorage.getItem("v42_kapasite")) || {},
+    manuelAtamalar: JSON.parse(localStorage.getItem("v42_manuelAtamalar")) || {}
 };
 
 let currentMonday = getMonday(new Date());
 function getMonday(d) { d = new Date(d); let day = d.getDay(), diff = d.getDate() - day + (day == 0 ? -6 : 1); return new Date(d.setDate(diff)); }
-function save() { Object.keys(state).forEach(k => localStorage.setItem(`v41_${k}`, JSON.stringify(state[k]))); }
+function save() { Object.keys(state).forEach(k => localStorage.setItem(`v42_${k}`, JSON.stringify(state[k]))); }
 
 // --- 2. GÜVENLİK ---
 function toggleAdminPanel() {
     const panel = document.getElementById("adminPanel");
     if (panel.classList.contains("hidden")) {
         const pass = prompt("Yönetici Şifresini Girin:");
-        if (pass === ADMIN_PASSWORD) {
-            panel.classList.remove("hidden");
-            refreshUI();
-        } else {
-            alert("Hatalı Şifre!");
-        }
-    } else {
-        panel.classList.add("hidden");
-    }
+        if (pass === ADMIN_PASSWORD) { panel.classList.remove("hidden"); refreshUI(); } 
+        else { alert("Hatalı Şifre!"); }
+    } else { panel.classList.add("hidden"); }
 }
 
 // --- 3. ANA MOTOR ---
@@ -67,7 +60,7 @@ function tabloyuOlustur() {
         if(document.getElementById(`check_${p.id}`)?.checked) program[p.ad].fill("İZİNLİ"); 
     });
 
-    // Manuel Değişimler ve Teknik Yönetmen Gece Rotasyonu
+    // Manuel Değişimler ve Teknik Yönetmen Rotasyonu
     state.personeller.forEach(p => { 
         for(let i=0; i<7; i++) { 
             let mK = `${haftaKey}_${p.ad}_${i}`; 
@@ -105,7 +98,7 @@ function tabloyuOlustur() {
     render(program, calismaSayisi);
 }
 
-// --- 4. YÖNETİM PANELİ ---
+// --- 4. YÖNETİM VE REFRESH ---
 function refreshUI() {
     const pList = document.getElementById("persListesiAdmin");
     if(pList) pList.innerHTML = state.personeller.map((p,i) => `<div class="admin-list-item">${p.ad} (${p.birim}) <button onclick="sil('personeller',${i})">SİL</button></div>`).join('');
@@ -117,18 +110,20 @@ function refreshUI() {
     if(tabSistem) {
         tabSistem.innerHTML = `
             <div class="system-tools">
-                <h4>Sistem Araçları</h4>
+                <div style="background:#fff3cd; padding:10px; border-radius:5px; margin-bottom:15px; border:1px solid #ffeeba;">
+                    <strong>Bilgi:</strong> "Sıfırla" butonu sadece vardiya planını temizler. Personel ve Kapasite ayarlarınız <u>korunur</u>.
+                </div>
                 <div style="display:flex; gap:10px; margin-bottom:15px;">
+                    <button onclick="sifirla()" class="btn-warning">🔄 TABLOYU SIFIRLA (Ayarları Korur)</button>
                     <button onclick="pdfIndir()" class="btn-pdf">📄 PDF ÇIKTISI</button>
-                    <button onclick="manuelTemizle()" class="btn-warning">🧹 MANUEL TEMİZLE</button>
-                    <button onclick="sifirla()" class="btn-danger">⚠️ TÜMÜNÜ SIFIRLA</button>
+                    <button onclick="fabrikaAyari()" class="btn-danger" style="background:#000">⚠️ HER ŞEYİ SİL (Fabrika Ayarı)</button>
                 </div>
                 <hr>
                 <h4>Birim ve Saat Tanımları</h4>
                 <div class="admin-input-group"><input id="yInpB" placeholder="Yeni Birim..."><button onclick="birimEkle()">EKLE</button></div>
                 <div class="list-container">${state.birimler.map((b,i) => `<div class="admin-list-item">${b} <button onclick="sil('birimler',${i})">SİL</button></div>`).join('')}</div>
                 <hr>
-                <div class="admin-input-group"><input id="yInpS" placeholder="00:00–00:00"><button onclick="saatEkle()">EKLE</button></div>
+                <div class="admin-input-group"><input id="yInpS" placeholder="06:30–16:00"><button onclick="saatEkle()">EKLE</button></div>
                 <div class="list-container">${state.saatler.map((s,i) => `<div class="admin-list-item">${s} <button onclick="sil('saatler',${i})">SİL</button></div>`).join('')}</div>
             </div>`;
     }
@@ -147,6 +142,28 @@ function vardiyaDegistir(p, i) {
     } 
 }
 
+// --- 5. ÖZEL SIFIRLAMA FONKSİYONLARI ---
+function sifirla() { 
+    if(confirm("Bu haftaki tüm manuel vardiya seçimleri ve izinler temizlenecek. Personel listeniz ve kapasite ayarlarınız DEĞİŞMEYECEK. Emin misiniz?")) { 
+        state.manuelAtamalar = {}; 
+        // İzin checkboxlarını temizle
+        state.personeller.forEach(p => {
+            let el = document.getElementById(`check_${p.id}`);
+            if(el) el.checked = false;
+        });
+        save(); 
+        tabloyuOlustur(); 
+        alert("Tablo sıfırlandı. Ayarlarınız korundu.");
+    } 
+}
+
+function fabrikaAyari() {
+    if(confirm("DİKKAT! Tüm personeller, tüm birimler ve tüm kapasite ayarları kalıcı olarak silinecek. Uygulama ilk günkü haline dönecek. Emin misiniz?")) {
+        localStorage.clear();
+        location.reload();
+    }
+}
+
 function uyariPaneliniGuncelle(uyarilar) {
     const p = document.getElementById("alertPanel"); if(!p) return;
     p.innerHTML = uyarilar.length > 0 ? `⚠️ <b>Kapasite Eksik:</b> ${[...new Set(uyarilar)].slice(0,2).join(", ")}...` : "✅ Planlama Tamam";
@@ -161,10 +178,7 @@ function render(program, calismaSayisi) {
     foot.innerHTML = `<tr><td><strong>İZİNLİ/YEDEK</strong></td>${[0,1,2,3,4,5,6].map(i => `<td>${state.personeller.filter(p => ["İZİNLİ",null].includes(program[p.ad][i])).map(p => `<div class="birim-card izinli-kart" onclick="vardiyaDegistir('${p.ad}',${i})">${p.ad}</div>`).join('')}</td>`).join('')}</tr>`;
 }
 
-// --- 5. YARDIMCI ARAÇLAR ---
 function pdfIndir() { const el = document.getElementById('mainTableContainer'); if(el) html2pdf().from(el).set({margin:1, filename:'vardiya_plani.pdf', jsPDF:{orientation:'landscape'}}).save(); }
-function sifirla() { if(confirm("Tüm sistem sıfırlanacak. Emin misiniz?")) { localStorage.clear(); location.reload(); } }
-function manuelTemizle() { if(confirm("Tüm manuel müdahaleler silinecek?")) { state.manuelAtamalar = {}; save(); tabloyuOlustur(); } }
 function checklistOlustur() { const box = document.getElementById("personelChecklist"); if(box) box.innerHTML = state.personeller.map(p => `<div class="check-item"><input type="checkbox" id="check_${p.id}" onchange="tabloyuOlustur()"><label>${p.ad}</label></div>`).join(''); }
 function kapasiteCiz() {
     const kTab = document.getElementById("kapasiteTable"); if(!kTab) return;
